@@ -1,4 +1,5 @@
 # A custom node that extends Path2D so it can be drawn as a Line2D
+# Original adapted code: https://www.hedberggames.com/blog/rendering-curves-in-godot
 @tool
 extends Path2D
 class_name  DrawablePath2D
