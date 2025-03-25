@@ -30,8 +30,8 @@ func _enter_tree():
 	if Engine.is_editor_hint():
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
-		if not line_changed.is_connected(curve_changed):
-			line_changed.connect(curve_changed)
+		if not line_changed.is_connected(_on_line_changed):
+			line_changed.connect(_on_line_changed)
 
 
 # Clean up signals (ie. when closing scene) to prevent error messages in the editor
@@ -39,6 +39,11 @@ func _exit_tree():
 	if curve.changed.is_connected(curve_changed):
 		curve.changed.disconnect(curve_changed)
 
+
+func _on_line_changed():
+	if is_instance_valid(line):
+		line.set_meta("_edit_lock_", true)
+		curve_changed()
 
 
 # Redraw the line based on the new curve, using its tesselate method
