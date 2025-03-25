@@ -26,14 +26,13 @@ Adding and manipulating points the normal way you would for a `Path2D`.
 
 Creating curves using the `Select Control Points` mode:
 
- ![Select Control Points button](./addons/curved_lines_2d/screenshots/image-4.png).
-
-![Editing the DrawablePath2D](./addons/curved_lines_2d/screenshots/changing-curve.gif)
+![Select Control Points button](./addons/curved_lines_2d/screenshots/image-4.png).
 
 ### 5. You can change the properties of the `Line2D` in the inspector
 
 Your new line will update every time you change the `Curve2D` of your `Path2D`
 
+![Editing the DrawablePath2D](./addons/curved_lines_2d/screenshots/changing-curve.gif)
 
 ## Attributions
 
