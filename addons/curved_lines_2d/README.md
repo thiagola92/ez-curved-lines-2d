@@ -35,6 +35,12 @@ Your new line will update every time you change the `Curve2D` of your `Path2D`
 
 ![Editing the DrawablePath2D](./screenshots/changing-curve.gif)
 
+
+## Explainer on Youtube
+
+[![Explainer on yourtube](./screenshots/yt_thumb.png)](https://youtu.be/mM9W5FzvLiQ?feature=shared)
+
+
 ## Attributions
 
 This plugin was fully inspired by [Mark Hedberg's blog on rendering curves in Godot](https://www.hedberggames.com/blog/rendering-curves-in-godot).
