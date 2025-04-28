@@ -34,6 +34,18 @@ Your new line will update every time you change the `Curve2D` of your `Path2D`
 
 ![Editing the DrawablePath2D](./addons/curved_lines_2d/screenshots/changing-curve.gif)
 
+## Examples
+
+Version 1.1.1 adds a couple of examples.
+
+### A simple animated line
+
+[![simple line](./addons/curved_lines_2d/screenshots/simple_line.png)](./addons/curved_lines_2d/examples/)
+
+### A butterfly net
+
+[![butterfly net](./addons/curved_lines_2d/screenshots/butterfly_net.png)](./addons/curved_lines_2d/examples/butterfly_net/)
+
 ## Explainer on Youtube
 
 [![Explainer on youtube](./addons/curved_lines_2d/screenshots/yt_thumb.png)](https://youtu.be/mM9W5FzvLiQ?feature=shared)

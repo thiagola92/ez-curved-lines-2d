@@ -35,6 +35,17 @@ Your new line will update every time you change the `Curve2D` of your `Path2D`
 
 ![Editing the DrawablePath2D](./screenshots/changing-curve.gif)
 
+## Examples
+
+Version 1.1.1 adds a couple of examples.
+
+### A simple animated line
+
+[![simple line](./screenshots/simple_line.png)](./examples/)
+
+### A butterfly net
+
+[![butterfly net](./screenshots/butterfly_net.png)](./examples/butterfly_net/)
 
 ## Explainer on Youtube
 
