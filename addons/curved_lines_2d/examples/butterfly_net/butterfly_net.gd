@@ -1,4 +1,3 @@
-class_name CatchingNet
 extends Node2D
 
 @onready var net := $Stick/NetRing/Net
