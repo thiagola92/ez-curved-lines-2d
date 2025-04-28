@@ -36,7 +36,7 @@ Your new line will update every time you change the `Curve2D` of your `Path2D`
 
 ## Explainer on Youtube
 
-[![Explainer on yourtube](./addons/curved_lines_2d/screenshots/yt_thumb.png)](https://youtu.be/mM9W5FzvLiQ?feature=shared)
+[![Explainer on youtube](./addons/curved_lines_2d/screenshots/yt_thumb.png)](https://youtu.be/mM9W5FzvLiQ?feature=shared)
 
 
 ## Attributions
