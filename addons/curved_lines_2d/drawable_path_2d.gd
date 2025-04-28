@@ -48,6 +48,10 @@ func _enter_tree():
 			curve.changed.connect(curve_changed)
 		if not line_changed.is_connected(_on_line_changed):
 			line_changed.connect(_on_line_changed)
+	# handles update when reparenting
+	if update_curve_at_runtime:
+		if not curve.changed.is_connected(curve_changed):
+			curve.changed.connect(curve_changed)
 
 
 # Clean up signals (ie. when closing scene) to prevent error messages in the editor
