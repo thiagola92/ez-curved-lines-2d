@@ -1,0 +1,116 @@
+[gd_scene load_steps=7 format=3 uid="uid://ba10gi41rvq5v"]
+
+[ext_resource type="Script" uid="uid://do08wegnt4gqd" path="res://addons/curved_lines_2d/examples/simple_line.gd" id="1_gh4oe"]
+[ext_resource type="Script" uid="uid://brqrlfnreboqp" path="res://addons/curved_lines_2d/drawable_path_2d.gd" id="1_uuw0s"]
+
+[sub_resource type="Curve2D" id="Curve2D_0e48y"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 64, 70, -55, -49, -61, 11, 69, 166, 0, 0, 0, 0, 17, 240, 0, 0, 0, 0, 20, 376)
+}
+point_count = 4
+
+[sub_resource type="Animation" id="Animation_cmefc"]
+resource_name = "test"
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("DrawablePath2D:curve:point_1/in")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-55, -49), Vector2(60, 7)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("DrawablePath2D:curve:point_1/out")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(55, 49), Vector2(-61, 11)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("DrawablePath2D:curve:point_3/position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(126, 348), Vector2(20, 376)]
+}
+
+[sub_resource type="Animation" id="Animation_akxpj"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("DrawablePath2D:curve:point_1/out")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-61, 11)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("DrawablePath2D:curve:point_1/in")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-55, -49)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("DrawablePath2D:curve:point_3/position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(20, 376)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_bkvtb"]
+_data = {
+&"RESET": SubResource("Animation_akxpj"),
+&"test": SubResource("Animation_cmefc")
+}
+
+[node name="SimpleLine" type="Node2D"]
+script = ExtResource("1_gh4oe")
+
+[node name="DrawablePath2D" type="Path2D" parent="." node_paths=PackedStringArray("line")]
+curve = SubResource("Curve2D_0e48y")
+script = ExtResource("1_uuw0s")
+line = NodePath("Line2D")
+update_curve_at_runtime = true
+max_stages = 4
+metadata/_custom_type_script = "uid://brqrlfnreboqp"
+
+[node name="Line2D" type="Line2D" parent="DrawablePath2D"]
+points = PackedVector2Array(64, 70, 61.959, 72.1152, 57.0469, 78.1094, 51.0801, 87.4551, 48.2688, 93.22, 45.875, 99.625, 44.1257, 106.604, 43.248, 114.092, 43.207, 118.006, 43.469, 122.022, 44.0624, 126.132, 45.0156, 130.328, 46.357, 134.602, 48.115, 138.945, 50.3179, 143.349, 52.9941, 147.807, 56.1721, 152.309, 59.8801, 156.847, 69, 166, 58.3635, 168.644, 53.6244, 170.37, 49.252, 172.338, 45.2318, 174.526, 41.5496, 176.914, 38.1906, 179.48, 35.1406, 182.203, 32.385, 185.063, 29.9094, 188.037, 25.7402, 194.248, 22.5173, 200.667, 20.125, 207.125, 18.4475, 213.454, 17.3691, 219.486, 16.5469, 229.984, 16.7324, 237.271, 17, 240, 20, 376)
+width = 1.0
+metadata/_edit_lock_ = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_bkvtb")
+}
