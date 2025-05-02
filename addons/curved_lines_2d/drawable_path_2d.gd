@@ -4,9 +4,19 @@
 extends Path2D
 class_name  DrawablePath2D
 
+## Emitted when a new set of points was calculated for a connected Line2D, Polygon2D, or CollisionPolygon2D
+signal path_changed(new_points : PackedVector2Array)
+
 ## This signal is used internally in editor-mode to tell the DrawablePath2D tool that
 ## the instance of assigned Line2D, Polygon2D, or CollisionPolygon2D has changed
 signal assigned_node_changed()
+
+
+## The Polygon2D controlled by this Path2D
+@export var polygon: Polygon2D:
+	set(_poly):
+		polygon = _poly
+		assigned_node_changed.emit()
 
 ## The Line2D controlled by this Path2D
 @export var line: Line2D:
@@ -14,6 +24,11 @@ signal assigned_node_changed()
 		line = _line
 		assigned_node_changed.emit()
 
+## The CollisionPolygon2D controlled by this Path2D
+@export var collision_polygon: CollisionPolygon2D:
+	set(_poly):
+		collision_polygon = _poly
+		assigned_node_changed.emit()
 
 ## Controls whether the path is treated as static (only update in editor) or dynamic (can be updated during runtime)
 ## If you set this to true, be alert for potential performance issues
@@ -66,9 +81,27 @@ func _on_assigned_node_changed():
 	if is_instance_valid(line):
 		line.set_meta("_edit_lock_", true)
 		curve_changed()
+	if is_instance_valid(polygon):
+		polygon.set_meta("_edit_lock_", true)
+		curve_changed()
+	if is_instance_valid(collision_polygon):
+		collision_polygon.set_meta("_edit_lock_", true)
+		curve_changed()
 
 
 # Redraw the line based on the new curve, using its tesselate method
 func curve_changed():
+	if (not is_instance_valid(line) and not is_instance_valid(polygon)
+			and not is_instance_valid(collision_polygon) 
+			and not path_changed.has_connections()):
+		# guard against needlessly invoking expensive tesselate operation
+		return
+
+	var new_points := curve.tessellate(max_stages, tolerance_degrees)
 	if is_instance_valid(line):
-		line.points = curve.tessellate(max_stages, tolerance_degrees)
+		line.points = new_points
+	if is_instance_valid(polygon):
+		polygon.polygon = new_points
+	if is_instance_valid(collision_polygon):
+		collision_polygon.polygon = new_points
+	path_changed.emit(new_points)

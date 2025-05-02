@@ -43,13 +43,15 @@ texture_mode = 1
 begin_cap_mode = 2
 end_cap_mode = 2
 
-[node name="NetRing" type="Path2D" parent="Stick" node_paths=PackedStringArray("line")]
+[node name="NetRing" type="Path2D" parent="Stick" node_paths=PackedStringArray("polygon", "line", "collision_polygon")]
 self_modulate = Color(1, 1, 1, 0)
 show_behind_parent = true
 position = Vector2(303, 0)
 curve = SubResource("Curve2D_n7fb3")
 script = ExtResource("6_mih2q")
+polygon = NodePath("")
 line = NodePath("Line2D")
+collision_polygon = NodePath("")
 tolerance_degrees = 3.0
 metadata/_custom_type_script = "uid://brqrlfnreboqp"
 
