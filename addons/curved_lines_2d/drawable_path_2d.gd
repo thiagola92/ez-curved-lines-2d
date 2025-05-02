@@ -4,13 +4,15 @@
 extends Path2D
 class_name  DrawablePath2D
 
-signal line_changed()
+## This signal is used internally in editor-mode to tell the DrawablePath2D tool that
+## the instance of assigned Line2D, Polygon2D, or CollisionPolygon2D has changed
+signal assigned_node_changed()
 
 ## The Line2D controlled by this Path2D
 @export var line: Line2D:
 	set(_line):
 		line = _line
-		line_changed.emit()
+		assigned_node_changed.emit()
 
 
 ## Controls whether the path is treated as static (only update in editor) or dynamic (can be updated during runtime)
@@ -26,13 +28,13 @@ signal line_changed()
 @export_range(1, 10) var max_stages : int = 5:
 	set(_max_stages):
 		max_stages = _max_stages
-		line_changed.emit()
+		assigned_node_changed.emit()
 ## Controls how many degrees the midpoint of a segment may deviate from the real curve, before the 
 ## segment has to be subdivided.
 @export_range(0.0, 180.0) var tolerance_degrees := 4.0:
 	set(_tolerance_degrees):
 		tolerance_degrees = _tolerance_degrees
-		line_changed.emit()
+		assigned_node_changed.emit()
 
 # Wire up signals at runtime
 func _ready():
@@ -46,8 +48,8 @@ func _enter_tree():
 	if Engine.is_editor_hint():
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
-		if not line_changed.is_connected(_on_line_changed):
-			line_changed.connect(_on_line_changed)
+		if not assigned_node_changed.is_connected(_on_assigned_node_changed):
+			assigned_node_changed.connect(_on_assigned_node_changed)
 	# handles update when reparenting
 	if update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
@@ -60,7 +62,7 @@ func _exit_tree():
 		curve.changed.disconnect(curve_changed)
 
 
-func _on_line_changed():
+func _on_assigned_node_changed():
 	if is_instance_valid(line):
 		line.set_meta("_edit_lock_", true)
 		curve_changed()
