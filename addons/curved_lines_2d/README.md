@@ -2,12 +2,10 @@
 
 This plugin helps you draw smooth curved 2D lines, polygons and collision polygons quickly in the 2D editor.
 
-Using godot's `AnimationPlayer` you can even create key frames for the curves lines to animae them.
+Using godot's `AnimationPlayer` you can even create key frames for the curves lines to animate them.
 
 
 - [EZ Curved Lines 2D for Godot 4.4](#ez-curved-lines-2d-for-godot-44)
-  - [Polygon2D and CollisionPolygon2D - new in version 1.2.0](#polygon2d-and-collisionpolygon2d---new-in-version-120)
-    - [Note on assigning CollisinPolygon2D](#note-on-assigning-collisinpolygon2d)
   - [Quick Start](#quick-start)
     - [1. Create a new 2D Scene](#1-create-a-new-2d-scene)
     - [2. Add a `DrawablePath2D` node to you scene tree (Ctrl + A)](#2-add-a-drawablepath2d-node-to-you-scene-tree-ctrl--a)
@@ -17,6 +15,8 @@ Using godot's `AnimationPlayer` you can even create key frames for the curves li
   - [Animating](#animating)
     - [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
     - [Performance impact](#performance-impact)
+  - [Polygon2D and CollisionPolygon2D - new in version 1.2.0](#polygon2d-and-collisionpolygon2d---new-in-version-120)
+    - [Note on assigning CollisinPolygon2D](#note-on-assigning-collisinpolygon2d)
   - [Examples](#examples)
     - [A simple animated polygon](#a-simple-animated-polygon)
     - [Rat's tail](#rats-tail)
@@ -25,25 +25,6 @@ Using godot's `AnimationPlayer` you can even create key frames for the curves li
   - [Explainer on Youtube](#explainer-on-youtube)
   - [Leopard face timelapse on Youtube](#leopard-face-timelapse-on-youtube)
   - [Attributions](#attributions)
-
-
-## Polygon2D and CollisionPolygon2D - new in version 1.2.0
-
-Version 1.2 adds the exciting new ability to create curved Polygon2D and CollisionPolygon2D!
-
-An updated quick start and youtube explainer will follow as soon as I have some more time available
-
-![New features: Polygon2D and CollisionPolygon2D](./screenshots/image-0.png)
-
-They can be assigned to the DrawablePath2D node the same way as a Line2D (explained in the quickstart).
-
-### Note on assigning CollisinPolygon2D
-
-Note, however, that a `CollisionPolygon2D` will at first be generated as a direct child of the `DrawablePath2D` using
-the `Generate CollisionPolygon2D` button, but it _does not_ need to be a child to remain succesfully assigned.
-
-This way you can move it up the hierarchy of your scene to become a direct descendant of a `CollisionObject2D` (like `Area2D`, `StaticBody2D` or `CharacterBody2D`)
-
 
 
 ## Quick Start
@@ -99,6 +80,24 @@ It should be used sparingly.
 
 Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance Degrees` to
 reduce curve smoothness and increase performace.
+
+
+## Polygon2D and CollisionPolygon2D - new in version 1.2.0
+
+Version 1.2 adds the exciting new ability to create curved Polygon2D and CollisionPolygon2D!
+
+An updated quick start and youtube explainer will follow as soon as I have some more time available
+
+![New features: Polygon2D and CollisionPolygon2D](./screenshots/image-0.png)
+
+They can be assigned to the DrawablePath2D node the same way as a Line2D (explained in the quickstart).
+
+### Note on assigning CollisinPolygon2D
+
+Note, however, that a `CollisionPolygon2D` will at first be generated as a direct child of the `DrawablePath2D` using
+the `Generate CollisionPolygon2D` button, but it _does not_ need to be a child to remain succesfully assigned.
+
+This way you can move it up the hierarchy of your scene to become a direct descendant of a `CollisionObject2D` (like `Area2D`, `StaticBody2D` or `CharacterBody2D`)
 
 
 ## Examples
