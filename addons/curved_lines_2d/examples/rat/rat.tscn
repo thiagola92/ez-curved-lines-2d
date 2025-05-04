@@ -1,23 +1,23 @@
-[gd_scene load_steps=28 format=3 uid="uid://kbkwi2nx8ith"]
+[gd_scene load_steps=29 format=3 uid="uid://kbkwi2nx8ith"]
 
-[ext_resource type="Script" uid="uid://xhridu7hgcrc" path="res://rat/rat.gd" id="1_7hgga"]
-[ext_resource type="Texture2D" uid="uid://vce2w4hb3v1p" path="res://rat/svg/body.fill.svg" id="1_narm0"]
-[ext_resource type="Texture2D" uid="uid://em3u4nacqlah" path="res://rat/svg/body.stroke.svg" id="2_jd2et"]
-[ext_resource type="Texture2D" uid="uid://bj6q7gnxbcpi7" path="res://rat/svg/head.fill.svg" id="3_tsy67"]
-[ext_resource type="Texture2D" uid="uid://deg3nei8cli77" path="res://rat/svg/ear.back.svg" id="4_jd2et"]
-[ext_resource type="Texture2D" uid="uid://p4f0h6oslilt" path="res://rat/svg/head.stroke.svg" id="4_n8jrc"]
-[ext_resource type="Texture2D" uid="uid://biac8yv50vy74" path="res://rat/svg/paw.front.near.stroke.svg" id="4_rnyel"]
-[ext_resource type="Texture2D" uid="uid://bnrujbv1ijuo4" path="res://rat/svg/paw.front.near.fill.svg" id="5_7hgga"]
-[ext_resource type="Texture2D" uid="uid://bhvtmg3dknsu5" path="res://rat/svg/ear.front.fill.svg" id="5_ip47b"]
-[ext_resource type="Texture2D" uid="uid://bo8ijahstx015" path="res://rat/svg/ear.front.stroke.svg" id="6_gae61"]
-[ext_resource type="Texture2D" uid="uid://b6jon0qhdtpgt" path="res://rat/svg/leg.front.far.fill.svg" id="11_wcab3"]
-[ext_resource type="Texture2D" uid="uid://c7e01qems6wia" path="res://rat/svg/leg.front.far.stroke.svg" id="12_7min1"]
-[ext_resource type="Texture2D" uid="uid://irwtkot56rdu" path="res://rat/svg/leg.front.near.stroke.svg" id="13_q2urn"]
-[ext_resource type="Texture2D" uid="uid://b1m1g8bq5pjy7" path="res://rat/svg/leg.front.near.fill.svg" id="14_12up7"]
-[ext_resource type="Texture2D" uid="uid://ci1712q6m2gfy" path="res://rat/svg/leg.back.far.fill.svg" id="15_dvhva"]
-[ext_resource type="Texture2D" uid="uid://d1br8vcgolwd4" path="res://rat/svg/leg.back.far.stroke.svg" id="16_axc4l"]
-[ext_resource type="Texture2D" uid="uid://r1ga6ec4ajkw" path="res://rat/svg/leg.back.near.stroke.svg" id="19_ky4m0"]
-[ext_resource type="Texture2D" uid="uid://ct76obup7r763" path="res://rat/svg/leg.back.near.fill.svg" id="20_sy8wl"]
+[ext_resource type="Script" uid="uid://xhridu7hgcrc" path="res://addons/curved_lines_2d/examples/rat/rat.gd" id="1_7hgga"]
+[ext_resource type="Texture2D" uid="uid://vce2w4hb3v1p" path="res://addons/curved_lines_2d/examples/rat/svg/body.fill.svg" id="1_narm0"]
+[ext_resource type="Texture2D" uid="uid://em3u4nacqlah" path="res://addons/curved_lines_2d/examples/rat/svg/body.stroke.svg" id="2_jd2et"]
+[ext_resource type="Texture2D" uid="uid://bj6q7gnxbcpi7" path="res://addons/curved_lines_2d/examples/rat/svg/head.fill.svg" id="3_tsy67"]
+[ext_resource type="Texture2D" uid="uid://deg3nei8cli77" path="res://addons/curved_lines_2d/examples/rat/svg/ear.back.svg" id="4_jd2et"]
+[ext_resource type="Texture2D" uid="uid://p4f0h6oslilt" path="res://addons/curved_lines_2d/examples/rat/svg/head.stroke.svg" id="4_n8jrc"]
+[ext_resource type="Texture2D" uid="uid://biac8yv50vy74" path="res://addons/curved_lines_2d/examples/rat/svg/paw.front.near.stroke.svg" id="4_rnyel"]
+[ext_resource type="Texture2D" uid="uid://bnrujbv1ijuo4" path="res://addons/curved_lines_2d/examples/rat/svg/paw.front.near.fill.svg" id="5_7hgga"]
+[ext_resource type="Texture2D" uid="uid://bhvtmg3dknsu5" path="res://addons/curved_lines_2d/examples/rat/svg/ear.front.fill.svg" id="5_ip47b"]
+[ext_resource type="Texture2D" uid="uid://bo8ijahstx015" path="res://addons/curved_lines_2d/examples/rat/svg/ear.front.stroke.svg" id="6_gae61"]
+[ext_resource type="Texture2D" uid="uid://b6jon0qhdtpgt" path="res://addons/curved_lines_2d/examples/rat/svg/leg.front.far.fill.svg" id="11_wcab3"]
+[ext_resource type="Texture2D" uid="uid://c7e01qems6wia" path="res://addons/curved_lines_2d/examples/rat/svg/leg.front.far.stroke.svg" id="12_7min1"]
+[ext_resource type="Texture2D" uid="uid://irwtkot56rdu" path="res://addons/curved_lines_2d/examples/rat/svg/leg.front.near.stroke.svg" id="13_q2urn"]
+[ext_resource type="Texture2D" uid="uid://b1m1g8bq5pjy7" path="res://addons/curved_lines_2d/examples/rat/svg/leg.front.near.fill.svg" id="14_12up7"]
+[ext_resource type="Texture2D" uid="uid://ci1712q6m2gfy" path="res://addons/curved_lines_2d/examples/rat/svg/leg.back.far.fill.svg" id="15_dvhva"]
+[ext_resource type="Texture2D" uid="uid://d1br8vcgolwd4" path="res://addons/curved_lines_2d/examples/rat/svg/leg.back.far.stroke.svg" id="16_axc4l"]
+[ext_resource type="Texture2D" uid="uid://r1ga6ec4ajkw" path="res://addons/curved_lines_2d/examples/rat/svg/leg.back.near.stroke.svg" id="19_ky4m0"]
+[ext_resource type="Texture2D" uid="uid://ct76obup7r763" path="res://addons/curved_lines_2d/examples/rat/svg/leg.back.near.fill.svg" id="20_sy8wl"]
 [ext_resource type="Script" uid="uid://brqrlfnreboqp" path="res://addons/curved_lines_2d/drawable_path_2d.gd" id="21_bxi6m"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_12up7"]
@@ -725,6 +725,23 @@ tracks/56/keys = {
 "values": [0.080757]
 }
 
+[sub_resource type="Animation" id="Animation_axc4l"]
+resource_name = "disappear"
+length = 0.5
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(0, 0, 0, 0)]
+}
+
 [sub_resource type="Animation" id="Animation_10vlp"]
 resource_name = "run"
 length = 0.4
@@ -1415,29 +1432,14 @@ tracks/56/keys = {
 "values": [-0.727685, 0.795966, -0.255122, -0.628349]
 }
 
-[sub_resource type="Animation" id="Animation_axc4l"]
-resource_name = "disappear"
-length = 0.5
-step = 0.1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Pivot:modulate")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.5),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(0, 0, 0, 0)]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_k146a"]
 _data = {
 &"RESET": SubResource("Animation_c1gwa"),
 &"disappear": SubResource("Animation_axc4l"),
 &"run": SubResource("Animation_10vlp")
 }
+
+[sub_resource type="Curve2D" id="Curve2D_oob8s"]
 
 [node name="Rat" type="CharacterBody2D"]
 script = ExtResource("1_7hgga")
@@ -1655,5 +1657,12 @@ speed_scale = 1.75
 offset = Vector2(10, -50)
 enabled = false
 zoom = Vector2(2, 2)
+
+[node name="DrawablePath2D" type="Path2D" parent="."]
+curve = SubResource("Curve2D_oob8s")
+script = ExtResource("21_bxi6m")
+metadata/_custom_type_script = "uid://brqrlfnreboqp"
+
+[node name="Camera2D2" type="Camera2D" parent="."]
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
