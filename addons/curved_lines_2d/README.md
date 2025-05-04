@@ -1,6 +1,6 @@
 # EZ Curved Lines 2D for Godot 4.4
 
-This plugin helps you draw curved lines quickly in the 2D editor.
+This plugin helps you draw smoothly curved 2D lines. polygons and collision polygons quickly in the 2D editor.
 
 
 - [EZ Curved Lines 2D for Godot 4.4](#ez-curved-lines-2d-for-godot-44)
@@ -14,8 +14,11 @@ This plugin helps you draw curved lines quickly in the 2D editor.
     - [5. You can change the properties of the `Line2D` in the inspector](#5-you-can-change-the-properties-of-the-line2d-in-the-inspector)
   - [Examples](#examples)
     - [A simple animated polygon](#a-simple-animated-polygon)
-    - [A butterfly net](#a-butterfly-net)
+    - [Rat's tail](#rats-tail)
+    - [Rotating butterfly net](#rotating-butterfly-net)
+    - [The start of a leopard face](#the-start-of-a-leopard-face)
   - [Explainer on Youtube](#explainer-on-youtube)
+  - [Leopard face timelapse on Youtube](#leopard-face-timelapse-on-youtube)
   - [Attributions](#attributions)
 
 
@@ -77,14 +80,25 @@ Your new line will update every time you change the `Curve2D` of your `Path2D`
 
 [![simple animated polygon](./screenshots/image-0.png)](./examples/)
 
-### A butterfly net
+### Rat's tail
+
+[![a rat's tail](./screenshots/rat_tail.png)](./examples/rat/)
+
+### Rotating butterfly net
 
 [![butterfly net](./screenshots/butterfly_net.png)](./examples/butterfly_net/)
+
+### The start of a leopard face
+
+[![leopard](./screenshots/leopard.png)](./examples/leopard)
 
 ## Explainer on Youtube
 
 [![Explainer on youtube](./screenshots/yt_thumb.png)](https://youtu.be/mM9W5FzvLiQ?feature=shared)
 
+## Leopard face timelapse on Youtube
+
+[![Leopard face timelapse](./screenshots/yt_thumb-2.png)](https://youtu.be/68Diitynqsk?feature=shared)
 
 ## Attributions
 

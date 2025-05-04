@@ -1,21 +1,24 @@
 # EZ Curved Lines 2D for Godot 4.4
 
-This plugin helps you draw curved lines quickly in the 2D editor.
+This plugin helps you draw smoothly curved 2D lines. polygons and collision polygons quickly in the 2D editor.
 
 - [EZ Curved Lines 2D for Godot 4.4](#ez-curved-lines-2d-for-godot-44)
-  - [Polygon2D and CollisionPolygon2D - new in version 1.2.0](#polygon2d-and-collisionpolygon2d---new-in-version-120)
-	- [Note on assigning CollisinPolygon2D](#note-on-assigning-collisinpolygon2d)
-  - [Quick Start](#quick-start)
-	- [1. Create a new 2D Scene](#1-create-a-new-2d-scene)
-	- [2. Add a `DrawablePath2D` node to you scene tree (Ctrl + A)](#2-add-a-drawablepath2d-node-to-you-scene-tree-ctrl--a)
-	- [3. In the `Inspector` tab click the `Generate New Line2D` button](#3-in-the-inspector-tab-click-the-generate-new-line2d-button)
-	- [4. Start drawing your `DrawablePath2D` like a normal `Path2D`](#4-start-drawing-your-drawablepath2d-like-a-normal-path2d)
-	- [5. You can change the properties of the `Line2D` in the inspector](#5-you-can-change-the-properties-of-the-line2d-in-the-inspector)
-  - [Examples](#examples)
-	- [A simple animated polygon](#a-simple-animated-polygon)
-	- [A butterfly net](#a-butterfly-net)
-  - [Explainer on Youtube](#explainer-on-youtube)
-  - [Attributions](#attributions)
+	- [Polygon2D and CollisionPolygon2D - new in version 1.2.0](#polygon2d-and-collisionpolygon2d---new-in-version-120)
+		- [Note on assigning CollisinPolygon2D](#note-on-assigning-collisinpolygon2d)
+	- [Quick Start](#quick-start)
+		- [1. Create a new 2D Scene](#1-create-a-new-2d-scene)
+		- [2. Add a `DrawablePath2D` node to you scene tree (Ctrl + A)](#2-add-a-drawablepath2d-node-to-you-scene-tree-ctrl--a)
+		- [3. In the `Inspector` tab click the `Generate New Line2D` button](#3-in-the-inspector-tab-click-the-generate-new-line2d-button)
+		- [4. Start drawing your `DrawablePath2D` like a normal `Path2D`](#4-start-drawing-your-drawablepath2d-like-a-normal-path2d)
+		- [5. You can change the properties of the `Line2D` in the inspector](#5-you-can-change-the-properties-of-the-line2d-in-the-inspector)
+	- [Examples](#examples)
+		- [A simple animated polygon](#a-simple-animated-polygon)
+		- [Rat's tail](#rats-tail)
+		- [Rotating butterfly net](#rotating-butterfly-net)
+		- [The start of a leopard face](#the-start-of-a-leopard-face)
+	- [Explainer on Youtube](#explainer-on-youtube)
+	- [Leopard face timelapse on Youtube](#leopard-face-timelapse-on-youtube)
+	- [Attributions](#attributions)
 
 
 ## Polygon2D and CollisionPolygon2D - new in version 1.2.0
@@ -74,14 +77,25 @@ Your new line will update every time you change the `Curve2D` of your `Path2D`
 
 [![simple animated polygon](./addons/curved_lines_2d/screenshots/image-0.png)](./addons/curved_lines_2d/examples/)
 
-### A butterfly net
+### Rat's tail
+
+[![a rat's tail](./addons/curved_lines_2d/screenshots/rat_tail.png)](./addons/curved_lines_2d/examples/rat/)
+
+### Rotating butterfly net
 
 [![butterfly net](./addons/curved_lines_2d/screenshots/butterfly_net.png)](./addons/curved_lines_2d/examples/butterfly_net/)
+
+### The start of a leopard face
+
+[![leopard](./addons/curved_lines_2d/screenshots/leopard.png)](./addons/curved_lines_2d/examples/leopard)
 
 ## Explainer on Youtube
 
 [![Explainer on youtube](./addons/curved_lines_2d/screenshots/yt_thumb.png)](https://youtu.be/mM9W5FzvLiQ?feature=shared)
 
+## Leopard face timelapse on Youtube
+
+[![Leopard face timelapse](./addons/curved_lines_2d/screenshots/yt_thumb-2.png)](https://youtu.be/68Diitynqsk?feature=shared)
 
 ## Attributions
 
