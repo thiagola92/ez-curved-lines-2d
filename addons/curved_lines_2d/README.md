@@ -1,6 +1,8 @@
 # EZ Curved Lines 2D for Godot 4.4
 
-This plugin helps you draw smoothly curved 2D lines. polygons and collision polygons quickly in the 2D editor.
+This plugin helps you draw smooth curved 2D lines, polygons and collision polygons quickly in the 2D editor.
+
+Using godot's `AnimationPlayer` you can even create key frames for the curves lines to animae them.
 
 
 - [EZ Curved Lines 2D for Godot 4.4](#ez-curved-lines-2d-for-godot-44)
@@ -12,6 +14,9 @@ This plugin helps you draw smoothly curved 2D lines. polygons and collision poly
     - [3. In the `Inspector` tab click the `Generate New Line2D` button](#3-in-the-inspector-tab-click-the-generate-new-line2d-button)
     - [4. Start drawing your `DrawablePath2D` like a normal `Path2D`](#4-start-drawing-your-drawablepath2d-like-a-normal-path2d)
     - [5. You can change the properties of the `Line2D` in the inspector](#5-you-can-change-the-properties-of-the-line2d-in-the-inspector)
+  - [Animating](#animating)
+    - [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
+    - [Performance impact](#performance-impact)
   - [Examples](#examples)
     - [A simple animated polygon](#a-simple-animated-polygon)
     - [Rat's tail](#rats-tail)
@@ -73,6 +78,28 @@ Creating curves using the `Select Control Points` mode:
 Your new line will update every time you change the `Curve2D` of your `Path2D`
 
 ![Editing the DrawablePath2D](./screenshots/changing-curve.gif)
+
+
+## Animating
+
+You can use the `Update Curve at Runtime` checkbox to enable dynamic changing of your curved shapes at runtime.
+
+![update curve at runtime](./screenshots/update-runtime.png)
+
+### Add keyframes in an animation player
+
+You can then add an `AnimationPlayer` node to your scene, create a new animation and create keyframes for your `Curve > Points` (in the inspector):
+
+![animating](./screenshots/animating.png)
+
+
+### Performance impact
+This does, however impact performance of your game somewhat, because calculating curves is an expensive operation.
+It should be used sparingly.
+
+Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance Degrees` to
+reduce curve smoothness and increase performace.
+
 
 ## Examples
 
