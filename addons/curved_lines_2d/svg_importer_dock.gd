@@ -199,8 +199,12 @@ func process_svg_path(element:XMLParser, current_node, root_node) -> void:
 						i += 6
 				"C":
 					while string_array.size() > i + 6 and string_array[i+1].is_valid_float():
+						var c_out := Vector2(float(string_array[i+1]), float(string_array[i+2]))
+						var prev_point := curve.get_point_position(curve.get_point_count() - 1)
+						var c_in := Vector2(float(string_array[i+3]), float(string_array[i+4]))
+						curve.set_point_out(curve.get_point_count() - 1, c_out - prev_point)
 						cursor = Vector2(float(string_array[i+5]), float(string_array[i+6]))
-						curve.add_point(cursor)
+						curve.add_point(cursor, c_in - cursor)
 						i += 6
 				"s":
 					while string_array.size() > i + 4 and string_array[i+1].is_valid_float():
@@ -251,20 +255,20 @@ func create_path2d(	name:String,
 	parent.add_child(new_path)
 	new_path.set_owner(root_node)
 	
-	if style.has("stroke"):
+	if style.has("stroke") and style["stroke"] != "none": 
 		var line := Line2D.new()
 		new_path.add_child(line)
 		line.set_owner(root_node)
-		if style["stroke"] != "none" and not style["stroke"].begins_with("url"):
+		if not style["stroke"].begins_with("url"):
 			line.default_color = Color(style["stroke"])
 		if style.has("stroke-width"):
 			line.width = float(style['stroke-width'])
 		new_path.line = line
-	if style.has("fill"):
+	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
 		new_path.add_child(polygon)
 		polygon.set_owner(root_node)
-		if style["fill"] != "none" and not style["fill"].begins_with("url"):
+		if not style["fill"].begins_with("url"):
 			polygon.color = Color(style["fill"])
 		new_path.polygon = polygon
 
