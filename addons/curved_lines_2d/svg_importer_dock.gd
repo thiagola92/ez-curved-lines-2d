@@ -38,8 +38,9 @@ func _load_svg(file_path : String) -> void:
 			continue
 		elif xml_data.get_node_name() == "g":
 			if xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
-				process_group(xml_data, current_node, root_node)
+				current_node = process_group(xml_data, current_node, root_node)
 			elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT_END:
+				print("Closing: " + current_node.name)
 				if current_node == root_node:
 					printerr("Hierarchy error, current not is already scene root")
 					break
@@ -52,15 +53,15 @@ func _load_svg(file_path : String) -> void:
 			process_svg_path(xml_data, current_node, root_node)
 
 
-func process_group(element:XMLParser, current_node, root_node) -> void:
+func process_group(element:XMLParser, current_node, root_node) -> Node2D:
 	var new_group = Node2D.new()
 	new_group.name = element.get_named_attribute_value("id")
 	new_group.transform = get_svg_transform(element)
 	current_node.add_child(new_group)
 	new_group.set_owner(root_node)
 	new_group.set_meta("_edit_group_", true)
-	current_node = new_group
 	print("group " + new_group.name + " created")
+	return new_group
 
 
 func process_svg_rectangle(element:XMLParser, current_node, root_node) -> void:
