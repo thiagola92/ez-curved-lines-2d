@@ -223,8 +223,14 @@ func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
 						i += 6
 				"s":
 					while string_array.size() > i + 4 and string_array[i+1].is_valid_float():
+						var c_out := -curve.get_point_in(curve.get_point_count() - 1)
+						var c_2 :=  Vector2(float(string_array[i+1]), float(string_array[i+2]))
+						var c_in_absolute = cursor + c_2
+						curve.set_point_out(curve.get_point_count() - 1, c_out)
 						cursor += Vector2(float(string_array[i+3]), float(string_array[i+4]))
+						var c_in = c_in_absolute - cursor
 						curve.add_point(cursor)
+						curve.set_point_in(curve.get_point_count() - 1, c_in)
 						i += 4
 				"S":
 					while string_array.size() > i + 4 and string_array[i+1].is_valid_float():
