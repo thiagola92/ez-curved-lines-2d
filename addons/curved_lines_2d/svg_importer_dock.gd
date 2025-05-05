@@ -22,17 +22,19 @@ func _drop_data(at_position: Vector2, data: Variant) -> void:
 func _load_svg(file_path : String) -> void:
 	var xml_data = XMLParser.new()
 	var root_node := EditorInterface.get_edited_scene_root()
-	var current_node := root_node
-	
+
 	if not root_node is Node2D:
 		printerr("Scene root must be Node 2D")
 		return 
-
-	for c in root_node.get_children():
-		c.queue_free()
-
 	if xml_data.open(file_path) != OK:
 		return
+
+	var svg_root := Node2D.new()
+	svg_root.name = "SvgImport"
+	root_node.add_child(svg_root)
+	svg_root.set_owner(root_node)
+	var current_node := svg_root
+	
 	while xml_data.read() == OK:
 		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
 			continue
@@ -41,7 +43,7 @@ func _load_svg(file_path : String) -> void:
 				current_node = process_group(xml_data, current_node, root_node)
 			elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT_END:
 				print("Closing: " + current_node.name)
-				if current_node == root_node:
+				if current_node == svg_root:
 					printerr("Hierarchy error, current not is already scene root")
 					break
 				current_node = current_node.get_parent()
@@ -51,7 +53,15 @@ func _load_svg(file_path : String) -> void:
 			process_svg_polygon(xml_data, current_node, root_node)
 		elif xml_data.get_node_name() == "path":
 			process_svg_path(xml_data, current_node, root_node)
-
+		elif xml_data.get_node_name() == "svg":
+			if xml_data.has_attribute("viewBox") and xml_data.has_attribute("width") and xml_data.has_attribute("height"):
+				var view_box := xml_data.get_named_attribute_value("viewBox").split_floats(" ")
+				var width := float(xml_data.get_named_attribute_value("width"))
+				var height := float(xml_data.get_named_attribute_value("height"))
+				svg_root.scale.x = width / view_box[2]
+				svg_root.scale.y = height / view_box[3]
+		else:
+			print(xml_data.get_node_name())
 
 func process_group(element:XMLParser, current_node, root_node) -> Node2D:
 	var new_group = Node2D.new()
@@ -59,7 +69,7 @@ func process_group(element:XMLParser, current_node, root_node) -> Node2D:
 	new_group.transform = get_svg_transform(element)
 	current_node.add_child(new_group)
 	new_group.set_owner(root_node)
-	new_group.set_meta("_edit_group_", true)
+	#new_group.set_meta("_edit_group_", true)
 	print("group " + new_group.name + " created")
 	return new_group
 
