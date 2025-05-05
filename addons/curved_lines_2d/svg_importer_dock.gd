@@ -23,6 +23,10 @@ func _load_svg(file_path : String) -> void:
 	var xml_data = XMLParser.new()
 	var root_node := EditorInterface.get_edited_scene_root()
 	var current_node := root_node
+	
+	if not root_node is Node2D:
+		printerr("Scene root must be Node 2D")
+		return 
 
 	for c in root_node.get_children():
 		c.queue_free()
@@ -36,6 +40,9 @@ func _load_svg(file_path : String) -> void:
 			if xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 				process_group(xml_data, current_node, root_node)
 			elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT_END:
+				if current_node == root_node:
+					printerr("Hierarchy error, current not is already scene root")
+					break
 				current_node = current_node.get_parent()
 		elif xml_data.get_node_name() == "rect":
 			process_svg_rectangle(xml_data, current_node, root_node)
@@ -136,7 +143,6 @@ func process_svg_path(element:XMLParser, current_node, root_node) -> void:
 		string_array_count += 1
 		
 		for i in string_array.size()-1:
-			print(string_array[i])
 			match string_array[i]:
 				"m":
 					while string_array.size() > i + 2 and string_array[i+1].is_valid_float():
@@ -245,17 +251,22 @@ func create_path2d(	name:String,
 	new_path.set_owner(root_node)
 	
 	if style.has("stroke"):
-		new_path.line = Line2D.new()
-		new_path.add_child(new_path.line)
-		new_path.line.set_owner(root_node)
-		new_path.line.default_color = Color(style["stroke"])
+		var line := Line2D.new()
+		new_path.add_child(line)
+		line.set_owner(root_node)
+		if style["stroke"] != "none" and not style["stroke"].begins_with("url"):
+			line.default_color = Color(style["stroke"])
 		if style.has("stroke-width"):
-			new_path.line.width = float(style['stroke-width'])
+			line.width = float(style['stroke-width'])
+		new_path.line = line
 	if style.has("fill"):
-		new_path.polygon = Polygon2D.new()
-		new_path.polygon.set_owner(root_node)
-		new_path.add_child(new_path.polygon)
-		new_path.polygon.color = Color(style["fill"])
+		var polygon := Polygon2D.new()
+		new_path.add_child(polygon)
+		polygon.set_owner(root_node)
+		if style["fill"] != "none" and not style["fill"].begins_with("url"):
+			polygon.color = Color(style["fill"])
+		new_path.polygon = polygon
+
 
 func create_line2d(	name:String, 
 					parent:Node, 
