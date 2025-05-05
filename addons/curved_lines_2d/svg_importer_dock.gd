@@ -2,7 +2,6 @@
 extends Control
 
 
-
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	if not typeof(data) == TYPE_DICTIONARY and "type" in data and data["type"] == "files":
 		return false
@@ -34,9 +33,11 @@ func _load_svg(file_path : String) -> void:
 	scene_root.add_child(svg_root, true)
 	svg_root.set_owner(scene_root)
 	var current_node := svg_root
-	
+	var in_style_block := false
 	while xml_data.read() == OK:
 		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
+			if in_style_block:
+				print(xml_data.get_node_name())
 			continue
 		elif xml_data.get_node_name() == "g":
 			if xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
@@ -53,6 +54,8 @@ func _load_svg(file_path : String) -> void:
 			process_svg_polygon(xml_data, current_node, scene_root)
 		elif xml_data.get_node_name() == "path":
 			process_svg_path(xml_data, current_node, scene_root)
+		elif xml_data.get_node_name() == "circle":
+			process_svg_circle(xml_data, current_node, scene_root)
 		elif xml_data.get_node_name() == "svg":
 			if xml_data.has_attribute("viewBox") and xml_data.has_attribute("width") and xml_data.has_attribute("height"):
 				var view_box := xml_data.get_named_attribute_value("viewBox").split_floats(" ")
@@ -64,8 +67,11 @@ func _load_svg(file_path : String) -> void:
 					svg_root.scale *= 3.78
 				elif xml_data.get_named_attribute_value("width").ends_with("cm"):
 					svg_root.scale *= 37.8
+		elif xml_data.get_node_name() == "style":
+			in_style_block = xml_data.get_node_type() != XMLParser.NODE_ELEMENT_END
 		else:
 			print(xml_data.get_node_name())
+
 
 func process_group(element:XMLParser, current_node, scene_root) -> Node2D:
 	var new_group = Node2D.new()
@@ -78,32 +84,57 @@ func process_group(element:XMLParser, current_node, scene_root) -> Node2D:
 	return new_group
 
 
-func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
-	var new_rect = ColorRect.new()
-	new_rect.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Rect"
-	current_node.add_child(new_rect, true)
-	new_rect.set_owner(scene_root)
-	
-	#transform
-	var x = float(element.get_named_attribute_value("x"))
-	var y = float(element.get_named_attribute_value("y"))
-	var width = float(element.get_named_attribute_value("width"))
-	var height = float(element.get_named_attribute_value("height"))
+func process_svg_circle(element:XMLParser, current_node : Node2D, scene_root : Node2D) -> void:
+	var new_circle = Circle2D.new()
+	new_circle.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Circle"
+	current_node.add_child(new_circle, true)
+	new_circle.set_owner(scene_root)
+	var x = float(element.get_named_attribute_value("cx"))
+	var y = float(element.get_named_attribute_value("cy"))
 	var transform = get_svg_transform(element)
-	new_rect.position = Vector2((x), (y))
-	new_rect.size = Vector2(width, height)
-	new_rect.position = transform * new_rect.position
-	new_rect.size.x *= transform[0][0] 
-	new_rect.size.y *= transform[1][1]
-	
-	#style
+	new_circle.radius = float(element.get_named_attribute_value("r"))
+	new_circle.position = Vector2(x, y) * transform
 	var style = get_svg_style(element)
 	if style.has("fill"):
-		new_rect.color = Color(style["fill"])
+		new_circle.fill = Color(style["fill"])
 	if style.has("fill-opacity"):
-		new_rect.color.a = float(style["fill-opacity"])
-		
-	print("-rect ", new_rect.name, " created")
+		new_circle.fill.a = float(style["fill-opacity"])
+	if style.has("stroke"):
+		new_circle.stroke = Color(style["stroke"])
+	if style.has("stroke-opacity"):
+		new_circle.stroke.a = float(style["stroke-opacity"])
+	if style.has("stroke-width"):
+		new_circle.stroke_width = float(style["stroke-width"])
+	new_circle.antialiased = false
+
+
+func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
+	print("TODO: rect")
+	#var new_rect = ColorRect.new()
+	#new_rect.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Rect"
+	#current_node.add_child(new_rect, true)
+	#new_rect.set_owner(scene_root)
+	#
+	##transform
+	#var x = float(element.get_named_attribute_value("x"))
+	#var y = float(element.get_named_attribute_value("y"))
+	#var width = float(element.get_named_attribute_value("width"))
+	#var height = float(element.get_named_attribute_value("height"))
+	#var transform = get_svg_transform(element)
+	#new_rect.position = Vector2((x), (y))
+	#new_rect.size = Vector2(width, height)
+	#new_rect.position = transform * new_rect.position
+	#new_rect.size.x *= transform[0][0] 
+	#new_rect.size.y *= transform[1][1]
+	#
+	##style
+	#var style = get_svg_style(element)
+	#if style.has("fill"):
+		#new_rect.color = Color(style["fill"])
+	#if style.has("fill-opacity"):
+		#new_rect.color.a = float(style["fill-opacity"])
+		#
+	#print("-rect ", new_rect.name, " created")
 
 
 func process_svg_polygon(element:XMLParser, current_node, scene_root) -> void:
