@@ -21,9 +21,9 @@ func _drop_data(at_position: Vector2, data: Variant) -> void:
 
 func _load_svg(file_path : String) -> void:
 	var xml_data = XMLParser.new()
-	var root_node := EditorInterface.get_edited_scene_root()
+	var scene_root := EditorInterface.get_edited_scene_root()
 
-	if not root_node is Node2D:
+	if not scene_root is Node2D:
 		printerr("Scene root must be Node 2D")
 		return 
 	if xml_data.open(file_path) != OK:
@@ -31,8 +31,8 @@ func _load_svg(file_path : String) -> void:
 
 	var svg_root := Node2D.new()
 	svg_root.name = "SvgImport"
-	root_node.add_child(svg_root)
-	svg_root.set_owner(root_node)
+	scene_root.add_child(svg_root, true)
+	svg_root.set_owner(scene_root)
 	var current_node := svg_root
 	
 	while xml_data.read() == OK:
@@ -40,7 +40,7 @@ func _load_svg(file_path : String) -> void:
 			continue
 		elif xml_data.get_node_name() == "g":
 			if xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
-				current_node = process_group(xml_data, current_node, root_node)
+				current_node = process_group(xml_data, current_node, scene_root)
 			elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT_END:
 				print("Closing: " + current_node.name)
 				if current_node == svg_root:
@@ -48,11 +48,11 @@ func _load_svg(file_path : String) -> void:
 					break
 				current_node = current_node.get_parent()
 		elif xml_data.get_node_name() == "rect":
-			process_svg_rectangle(xml_data, current_node, root_node)
+			process_svg_rectangle(xml_data, current_node, scene_root)
 		elif xml_data.get_node_name() == "polygon":
-			process_svg_polygon(xml_data, current_node, root_node)
+			process_svg_polygon(xml_data, current_node, scene_root)
 		elif xml_data.get_node_name() == "path":
-			process_svg_path(xml_data, current_node, root_node)
+			process_svg_path(xml_data, current_node, scene_root)
 		elif xml_data.get_node_name() == "svg":
 			if xml_data.has_attribute("viewBox") and xml_data.has_attribute("width") and xml_data.has_attribute("height"):
 				var view_box := xml_data.get_named_attribute_value("viewBox").split_floats(" ")
@@ -60,25 +60,27 @@ func _load_svg(file_path : String) -> void:
 				var height := float(xml_data.get_named_attribute_value("height"))
 				svg_root.scale.x = width / view_box[2]
 				svg_root.scale.y = height / view_box[3]
+				if xml_data.get_named_attribute_value("width").ends_with("mm"): # unit conversion to pixel
+					svg_root.scale *= 3.78
 		else:
 			print(xml_data.get_node_name())
 
-func process_group(element:XMLParser, current_node, root_node) -> Node2D:
+func process_group(element:XMLParser, current_node, scene_root) -> Node2D:
 	var new_group = Node2D.new()
 	new_group.name = element.get_named_attribute_value("id")
 	new_group.transform = get_svg_transform(element)
-	current_node.add_child(new_group)
-	new_group.set_owner(root_node)
+	current_node.add_child(new_group, true)
+	new_group.set_owner(scene_root)
 	#new_group.set_meta("_edit_group_", true)
 	print("group " + new_group.name + " created")
 	return new_group
 
 
-func process_svg_rectangle(element:XMLParser, current_node, root_node) -> void:
+func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
 	var new_rect = ColorRect.new()
 	new_rect.name = element.get_named_attribute_value("id")
-	current_node.add_child(new_rect)
-	new_rect.set_owner(root_node)
+	current_node.add_child(new_rect, true)
+	new_rect.set_owner(scene_root)
 	
 	#transform
 	var x = float(element.get_named_attribute_value("x"))
@@ -102,7 +104,7 @@ func process_svg_rectangle(element:XMLParser, current_node, root_node) -> void:
 	print("-rect ", new_rect.name, " created")
 
 
-func process_svg_polygon(element:XMLParser, current_node, root_node) -> void:
+func process_svg_polygon(element:XMLParser, current_node, scene_root) -> void:
 	var points : PackedVector2Array
 	var points_split = element.get_named_attribute_value("points").split(" ", false)
 	for i in points_split:
@@ -114,8 +116,8 @@ func process_svg_polygon(element:XMLParser, current_node, root_node) -> void:
 	var new_line = Line2D.new()
 	new_line.name = element.get_named_attribute_value("id")
 	new_line.transform = get_svg_transform(element)
-	current_node.add_child(new_line)
-	new_line.set_owner(root_node)
+	current_node.add_child(new_line, true)
+	new_line.set_owner(scene_root)
 	new_line.points = points
 	
 	#style
@@ -128,7 +130,7 @@ func process_svg_polygon(element:XMLParser, current_node, root_node) -> void:
 	print("-line ", new_line.name, " created")
 
 
-func process_svg_path(element:XMLParser, current_node, root_node) -> void:
+func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
 	#prepare element string
 	var element_string = element.get_named_attribute_value("d")
 	element_string = element_string.replacen(",", " ")
@@ -195,7 +197,6 @@ func process_svg_path(element:XMLParser, current_node, root_node) -> void:
 						cursor = Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor)
 						i += 2
-				#simpify Bezier curves with straight line
 				"c": 
 					while string_array.size() > i + 6 and string_array[i+1].is_valid_float():
 						var c_out := Vector2(float(string_array[i+1]), float(string_array[i+2]))
@@ -228,12 +229,13 @@ func process_svg_path(element:XMLParser, current_node, root_node) -> void:
 						i += 4
 		
 		if curve.get_point_count() > 1:
-			create_path2d(	element.get_named_attribute_value("id") + "_" + str(string_array_count), 
-							current_node, 
-							curve, 
-							get_svg_transform(element), 
-							get_svg_style(element),
-							root_node)
+			create_path2d(element.get_named_attribute_value("id") + "_" + str(string_array_count), 
+								current_node, 
+								curve, 
+								get_svg_transform(element), 
+								get_svg_style(element),
+								scene_root,
+								string_array[string_array.size()-1].to_upper() == "Z")
 		
 		#if string_array[string_array.size()-1].to_upper() == "Z": #closed polygon
 			#create_polygon2d(	element.get_named_attribute_value("id") + "_" + str(string_array_count), 
@@ -241,43 +243,50 @@ func process_svg_path(element:XMLParser, current_node, root_node) -> void:
 								#points, 
 								#get_svg_transform(element), 
 								#get_svg_style(element),
-								#root_node)
+								#scene_root)
 		#else:
 			#create_line2d(	element.get_named_attribute_value("id") + "_" + str(string_array_count), 
 							#current_node, 
 							#points, 
 							#get_svg_transform(element), 
 							#get_svg_style(element),
-							#root_node)
+							#scene_root)
 
 
-func create_path2d(	name:String, 
-					parent:Node, 
-					curve:Curve2D, 
-					transform:Transform2D, 
-					style:Dictionary,
-					root_node:Node2D) -> void:
+func create_path2d(path_name: String, 
+					parent: Node, 
+					curve: Curve2D, 
+					transform: Transform2D, 
+					style: Dictionary,
+					scene_root: Node2D,
+					is_closed:= false) -> void:
 	var new_path = DrawablePath2D.new()
-	new_path.name = name
+	new_path.name = path_name
 	new_path.transform = transform
 	new_path.curve = curve
 	new_path.self_modulate = Color.TRANSPARENT
-	parent.add_child(new_path)
-	new_path.set_owner(root_node)
+	parent.add_child(new_path, true)
+	new_path.set_owner(scene_root)
 	
 	if style.has("stroke") and style["stroke"] != "none": 
 		var line := Line2D.new()
-		new_path.add_child(line)
-		line.set_owner(root_node)
+		line.name = "Stroke"
+		new_path.add_child(line, true)
+		line.set_owner(scene_root)
 		if not style["stroke"].begins_with("url"):
 			line.default_color = Color(style["stroke"])
 		if style.has("stroke-width"):
 			line.width = float(style['stroke-width'])
 		new_path.line = line
+		line.end_cap_mode = Line2D.LINE_CAP_ROUND
+		line.begin_cap_mode = Line2D.LINE_CAP_ROUND
+		line.joint_mode = Line2D.LINE_JOINT_ROUND
+		line.closed = is_closed
 	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
-		new_path.add_child(polygon)
-		polygon.set_owner(root_node)
+		polygon.name = "Fill"
+		new_path.add_child(polygon, true)
+		polygon.set_owner(scene_root)
 		if not style["fill"].begins_with("url"):
 			polygon.color = Color(style["fill"])
 		new_path.polygon = polygon
@@ -288,12 +297,12 @@ func create_line2d(	name:String,
 					points:PackedVector2Array, 
 					transform:Transform2D, 
 					style:Dictionary,
-					root_node:Node2D) -> void:
+					scene_root:Node2D) -> void:
 	var new_line = Line2D.new()
 	new_line.name = name
 	new_line.transform = transform
-	parent.add_child(new_line)
-	new_line.set_owner(root_node)
+	parent.add_child(new_line, true)
+	new_line.set_owner(scene_root)
 	new_line.points = points
 	
 	#style
@@ -308,15 +317,15 @@ func create_polygon2d(	name:String,
 						points:PackedVector2Array, 
 						transform:Transform2D, 
 						style:Dictionary,
-						root_node : Node2D) -> void:
+						scene_root : Node2D) -> void:
 	var new_poly
 	#style
 	if style.has("fill") and style["fill"] != "none":
 		#create base
 		new_poly = Polygon2D.new()
 		new_poly.name = name
-		parent.add_child(new_poly)
-		new_poly.set_owner(root_node)
+		parent.add_child(new_poly, true)
+		new_poly.set_owner(scene_root)
 		new_poly.transform = transform
 		new_poly.polygon = points
 		new_poly.color = Color(style["fill"])
@@ -326,11 +335,11 @@ func create_polygon2d(	name:String,
 		var new_outline = Line2D.new()
 		new_outline.name = name + "_stroke"
 		if new_poly:
-			new_poly.add_child(new_outline)
+			new_poly.add_child(new_outline, true)
 		else:
-			parent.add_child(new_outline)
+			parent.add_child(new_outline, true)
 			new_outline.transform = transform
-		new_outline.set_owner(root_node)
+		new_outline.set_owner(scene_root)
 		points.append(points[0])
 		new_outline.points = points
 		
