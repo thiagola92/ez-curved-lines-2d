@@ -25,6 +25,10 @@ Using godot's `AnimationPlayer` you can even create key frames for the curves li
 	- [Explainer on Youtube](#explainer-on-youtube)
 	- [Leopard face timelapse on Youtube](#leopard-face-timelapse-on-youtube)
 	- [Attributions](#attributions)
+	- [SVG Path importer TODO](#svg-path-importer-todo)
+		- [Must have](#must-have)
+		- [Should have](#should-have)
+		- [Would be nice](#would-be-nice)
 
 ## Quick Start
 
@@ -129,3 +133,25 @@ This way you can move it up the hierarchy of your scene to become a direct desce
 This plugin was fully inspired by [Mark Hedberg's blog on rendering curves in Godot](https://www.hedberggames.com/blog/rendering-curves-in-godot).
 
 The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames)
+
+
+## SVG Path importer TODO
+
+### Must have
+
+- [ ] Rectangle to path converter (incl. rx and ry)
+- [ ] Circle to path converter
+- [ ] Polygon and polyline to path converter
+- [ ] Print warnings and hints for unsupported stuff
+- [ ] Code clean up (Circle2D replaced by path conversion)
+
+### Should have
+
+- [ ] Quadratic bezier curves
+- [ ] Better path attribute string parsing (support leading and trailing whitespace, newlines)
+
+
+### Would be nice
+
+- [ ] Arcs to cubic bezier curve conversion
+- [ ] Ellipse to path converter (can be done by inkscape)
