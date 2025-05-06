@@ -68,7 +68,7 @@ func _load_svg(file_path : String) -> void:
 				elif xml_data.get_named_attribute_value("width").ends_with("cm"):
 					svg_root.scale *= 37.8
 		elif xml_data.get_node_name() == "style":
-			in_style_block = xml_data.get_node_type() != XMLParser.NODE_ELEMENT_END
+			printerr("Only inline styles are supported")
 		else:
 			print(xml_data.get_node_name())
 
@@ -85,31 +85,11 @@ func process_group(element:XMLParser, current_node, scene_root) -> Node2D:
 
 
 func process_svg_circle(element:XMLParser, current_node : Node2D, scene_root : Node2D) -> void:
-	var new_circle = Circle2D.new()
-	new_circle.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Circle"
-	current_node.add_child(new_circle, true)
-	new_circle.set_owner(scene_root)
-	var x = float(element.get_named_attribute_value("cx"))
-	var y = float(element.get_named_attribute_value("cy"))
-	var transform = get_svg_transform(element)
-	new_circle.radius = float(element.get_named_attribute_value("r"))
-	new_circle.position = Vector2(x, y) * transform
-	var style = get_svg_style(element)
-	if style.has("fill"):
-		new_circle.fill = Color(style["fill"])
-	if style.has("fill-opacity"):
-		new_circle.fill.a = float(style["fill-opacity"])
-	if style.has("stroke"):
-		new_circle.stroke = Color(style["stroke"])
-	if style.has("stroke-opacity"):
-		new_circle.stroke.a = float(style["stroke-opacity"])
-	if style.has("stroke-width"):
-		new_circle.stroke_width = float(style["stroke-width"])
-	new_circle.antialiased = false
+	print("TODO: convert circle and ellipse to DrawablePath2D")
 
 
 func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
-	print("TODO: rect")
+	print("TODO convert rect to DrawablePath2D")
 	#var new_rect = ColorRect.new()
 	#new_rect.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Rect"
 	#current_node.add_child(new_rect, true)
@@ -138,40 +118,41 @@ func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
 
 
 func process_svg_polygon(element:XMLParser, current_node, scene_root) -> void:
-	var points : PackedVector2Array
-	var points_split = element.get_named_attribute_value("points").split(" ", false)
-	for i in points_split:
-		var values = i.split_floats(",", false)
-		points.append(Vector2(values[0], values[1]))
-	points.append(points[0])
+		print("TODO convert polygon and polyline to DrawablePath2D")
 
-	#create closed line
-	var new_line = Line2D.new()
-	new_line.name = element.get_named_attribute_value("id")  if element.has_attribute("id") else "Line"
-	new_line.transform = get_svg_transform(element)
-	current_node.add_child(new_line, true)
-	new_line.set_owner(scene_root)
-	new_line.points = points
-	
-	#style
-	var style = get_svg_style(element)
-	if style.has("fill"):
-		new_line.default_color = Color(style["fill"])
-	if style.has("stroke-width"):
-		new_line.width = float(style["stroke-width"])
-	if style.is_empty():
-		new_line.width = 1.0
-	print("-line ", new_line.name, " created")
+	#var points : PackedVector2Array
+	#var points_split = element.get_named_attribute_value("points").split(" ", false)
+	#for i in points_split:
+		#var values = i.split_floats(",", false)
+		#points.append(Vector2(values[0], values[1]))
+	#points.append(points[0])
+#
+	##create closed line
+	#var new_line = Line2D.new()
+	#new_line.name = element.get_named_attribute_value("id")  if element.has_attribute("id") else "Line"
+	#new_line.transform = get_svg_transform(element)
+	#current_node.add_child(new_line, true)
+	#new_line.set_owner(scene_root)
+	#new_line.points = points
+	#
+	##style
+	#var style = get_svg_style(element)
+	#if style.has("fill"):
+		#new_line.default_color = Color(style["fill"])
+	#if style.has("stroke-width"):
+		#new_line.width = float(style["stroke-width"])
+	#if style.is_empty():
+		#new_line.width = 1.0
+	#print("-line ", new_line.name, " created")
 
 
 func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
-	#prepare element string
+	# FIXME: better parsing, splits into sub arrays not necessary
 	var element_string = element.get_named_attribute_value("d")
 	element_string = element_string.replacen(",", " ")
-	for symbol in ["m", "M", "v", "V", "h", "H", "l", "L", "c", "C", "s", "S", "z", "Z"]:
+	for symbol in ["m", "M", "v", "V", "h", "H", "l", "L", "c", "C", "s", "S", "a", "A", "q", "Q", "t", "T", "z", "Z"]:
 		element_string = element_string.replace(symbol, " " + symbol + " ")
-	print(element_string)
-	#split element string into multiple arrays
+
 	var element_string_array = element_string.split(" ", false)
 	var string_arrays = []
 	var string_array_top : PackedStringArray
@@ -271,7 +252,12 @@ func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
 						var c_in := Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor, c_in - cursor)
 						i += 4
-		print(curve.get_point_count())
+				"A":
+					while string_array.size() > i + 10 and string_array[i+1].is_valid_float():
+						cursor = Vector2(float(string_array[i+9]), float(string_array[i+10]))
+						curve.add_point(cursor)
+						i += 10
+
 		if curve.get_point_count() > 1:
 			var id = element.get_named_attribute_value("id") if element.has_attribute("id") else "Path"
 			create_path2d(id + "_" + str(string_array_count), 
@@ -281,21 +267,6 @@ func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
 								get_svg_style(element),
 								scene_root,
 								string_array[string_array.size()-1].to_upper() == "Z")
-		
-		#if string_array[string_array.size()-1].to_upper() == "Z": #closed polygon
-			#create_polygon2d(	element.get_named_attribute_value("id") + "_" + str(string_array_count), 
-								#current_node, 
-								#points, 
-								#get_svg_transform(element), 
-								#get_svg_style(element),
-								#scene_root)
-		#else:
-			#create_line2d(	element.get_named_attribute_value("id") + "_" + str(string_array_count), 
-							#current_node, 
-							#points, 
-							#get_svg_transform(element), 
-							#get_svg_style(element),
-							#scene_root)
 
 
 func create_path2d(path_name: String, 
@@ -344,63 +315,8 @@ func create_path2d(path_name: String,
 		line.width = 1.0
 		line.closed = is_closed
 
-func create_line2d(	name:String, 
-					parent:Node, 
-					points:PackedVector2Array, 
-					transform:Transform2D, 
-					style:Dictionary,
-					scene_root:Node2D) -> void:
-	var new_line = Line2D.new()
-	new_line.name = name
-	new_line.transform = transform
-	parent.add_child(new_line, true)
-	new_line.set_owner(scene_root)
-	new_line.points = points
-	
-	#style
-	if style.has("stroke"):
-		new_line.default_color = Color(style["stroke"])
-	if style.has("stroke-width"):
-		new_line.width = float(style["stroke-width"])
 
-
-func create_polygon2d(	name:String, 
-						parent:Node, 
-						points:PackedVector2Array, 
-						transform:Transform2D, 
-						style:Dictionary,
-						scene_root : Node2D) -> void:
-	var new_poly
-	#style
-	if style.has("fill") and style["fill"] != "none":
-		#create base
-		new_poly = Polygon2D.new()
-		new_poly.name = name
-		parent.add_child(new_poly, true)
-		new_poly.set_owner(scene_root)
-		new_poly.transform = transform
-		new_poly.polygon = points
-		new_poly.color = Color(style["fill"])
-	
-	if style.has("stroke") and style["stroke"] != "none":
-		#create outline
-		var new_outline = Line2D.new()
-		new_outline.name = name + "_stroke"
-		if new_poly:
-			new_poly.add_child(new_outline, true)
-		else:
-			parent.add_child(new_outline, true)
-			new_outline.transform = transform
-		new_outline.set_owner(scene_root)
-		points.append(points[0])
-		new_outline.points = points
-		
-		new_outline.default_color = Color(style["stroke"])
-		if style.has("stroke-width"):
-			new_outline.width = float(style["stroke-width"])
-
-
-static func get_svg_transform(element:XMLParser) -> Transform2D:
+func get_svg_transform(element:XMLParser) -> Transform2D:
 	var transform = Transform2D.IDENTITY
 	if element.has_attribute("transform"):
 		var svg_transform = element.get_named_attribute_value("transform")
