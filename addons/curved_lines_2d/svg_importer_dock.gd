@@ -289,8 +289,7 @@ func create_path2d(path_name: String,
 	var new_path = DrawablePath2D.new()
 	new_path.name = path_name
 	new_path.transform = transform
-	new_path.position = pos_override * transform
-
+	new_path.position = transform.basis_xform(pos_override)
 	new_path.curve = curve
 	new_path.self_modulate = Color.TRANSPARENT
 	parent.add_child(new_path, true)

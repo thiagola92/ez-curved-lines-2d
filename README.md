@@ -140,15 +140,16 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 ### Must have
 
 - [ ] Rectangle to path converter (incl. rx and ry)
-- [ ] Circle to path converter
+- [x] Circle to path converter
 - [ ] Polygon and polyline to path converter
-- [ ] Print warnings and hints for unsupported stuff
-- [ ] Code clean up (Circle2D replaced by path conversion)
-- [ ] Linear and Radial Gradients
+- [x] Code clean up (Circle2D replaced by path conversion)
+- [ ] Set node-position to path center (reset and remember node transforms, get center of computed points, set subtract center from curve points, reapply transforms)
+- [ ] Show warnings and hints for unsupported stuff
+
 
 
 ### Should have
-
+- [ ] Linear and Radial Gradients
 - [ ] Quadratic bezier curves
 - [ ] Better path attribute string parsing (support leading and trailing whitespace, newlines)
 
