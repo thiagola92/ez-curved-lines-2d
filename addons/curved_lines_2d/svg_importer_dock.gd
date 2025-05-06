@@ -23,7 +23,7 @@ func _load_svg(file_path : String) -> void:
 	var scene_root := EditorInterface.get_edited_scene_root()
 
 	if not scene_root is Node2D:
-		printerr("Scene root must be Node 2D")
+		printerr("Scene root must be Node2D")
 		return 
 	if xml_data.open(file_path) != OK:
 		return
@@ -43,7 +43,6 @@ func _load_svg(file_path : String) -> void:
 			if xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 				current_node = process_group(xml_data, current_node, scene_root)
 			elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT_END:
-				print("Closing: " + current_node.name)
 				if current_node == svg_root:
 					printerr("Hierarchy error, current not is already scene root")
 					break
@@ -79,13 +78,23 @@ func process_group(element:XMLParser, current_node, scene_root) -> Node2D:
 	new_group.transform = get_svg_transform(element)
 	current_node.add_child(new_group, true)
 	new_group.set_owner(scene_root)
-	#new_group.set_meta("_edit_group_", true)
-	print("group " + new_group.name + " created")
 	return new_group
 
 
 func process_svg_circle(element:XMLParser, current_node : Node2D, scene_root : Node2D) -> void:
-	print("TODO: convert circle and ellipse to DrawablePath2D")
+	var cx = float(element.get_named_attribute_value("cx"))
+	var cy = float(element.get_named_attribute_value("cy"))
+	var r = float(element.get_named_attribute_value("r"))
+	var curve := Curve2D.new()
+	var path_name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Circle"
+	curve.add_point(Vector2(r, 0), Vector2.ZERO, Vector2(0, r * 0.5523))
+	curve.add_point(Vector2(0, r), Vector2(r * 0.5523, 0), Vector2(-r * 0.5523, 0))
+	curve.add_point(Vector2(-r, 0), Vector2(0, r * 0.5523), Vector2(0, -r * 0.5523))
+	curve.add_point(Vector2(0, -r),  Vector2(-r * 0.5523, 0), Vector2(r * 0.5523, 0))
+	curve.add_point(Vector2(r, 0), Vector2(0, -r * 0.5523))
+	create_path2d(path_name, current_node, curve, 
+			get_svg_transform(element),
+			get_svg_style(element), scene_root, true, Vector2(cx, cy))
 
 
 func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
@@ -275,10 +284,13 @@ func create_path2d(path_name: String,
 					transform: Transform2D, 
 					style: Dictionary,
 					scene_root: Node2D,
-					is_closed:= false) -> void:
+					is_closed := false,
+					pos_override := Vector2.ZERO) -> void:
 	var new_path = DrawablePath2D.new()
 	new_path.name = path_name
 	new_path.transform = transform
+	new_path.position = pos_override * transform
+
 	new_path.curve = curve
 	new_path.self_modulate = Color.TRANSPARENT
 	parent.add_child(new_path, true)
