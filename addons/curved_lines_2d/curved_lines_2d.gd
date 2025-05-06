@@ -14,18 +14,11 @@ func _enter_tree():
 		preload("res://addons/curved_lines_2d/drawable_path_2d.gd"),
 		preload("res://addons/curved_lines_2d/DrawablePath2D.svg")
 	)
-	add_custom_type(
-		"Circle2D", 
-		"Node2D", 
-		preload("res://addons/curved_lines_2d/circle_2d.gd"),
-		preload("res://addons/curved_lines_2d/DrawablePath2D.svg") # TODO
-	)
 	add_control_to_bottom_panel(svg_importer_dock as Control, "SVG Importer")
 
 
 func _exit_tree():
 	remove_inspector_plugin(plugin)
 	remove_custom_type("DrawablePath2D")
-	remove_custom_type("Circle2D")
 	remove_control_from_bottom_panel(svg_importer_dock)
 	svg_importer_dock.free()
