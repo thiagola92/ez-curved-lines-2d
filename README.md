@@ -144,6 +144,8 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [ ] Polygon and polyline to path converter
 - [ ] Print warnings and hints for unsupported stuff
 - [ ] Code clean up (Circle2D replaced by path conversion)
+- [ ] Linear and Radial Gradients
+
 
 ### Should have
 
