@@ -55,6 +55,8 @@ func _load_svg(file_path : String) -> void:
 			process_svg_path(xml_data, current_node, scene_root)
 		elif xml_data.get_node_name() == "circle":
 			process_svg_circle(xml_data, current_node, scene_root)
+		elif xml_data.get_node_name() == "ellipse":
+			process_svg_ellipse(xml_data, current_node, scene_root)
 		elif xml_data.get_node_name() == "svg":
 			if xml_data.has_attribute("viewBox") and xml_data.has_attribute("width") and xml_data.has_attribute("height"):
 				var view_box := xml_data.get_named_attribute_value("viewBox").split_floats(" ")
@@ -85,16 +87,31 @@ func process_svg_circle(element:XMLParser, current_node : Node2D, scene_root : N
 	var cx = float(element.get_named_attribute_value("cx"))
 	var cy = float(element.get_named_attribute_value("cy"))
 	var r = float(element.get_named_attribute_value("r"))
-	var curve := Curve2D.new()
 	var path_name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Circle"
-	curve.add_point(Vector2(r, 0), Vector2.ZERO, Vector2(0, r * 0.5523))
-	curve.add_point(Vector2(0, r), Vector2(r * 0.5523, 0), Vector2(-r * 0.5523, 0))
-	curve.add_point(Vector2(-r, 0), Vector2(0, r * 0.5523), Vector2(0, -r * 0.5523))
-	curve.add_point(Vector2(0, -r),  Vector2(-r * 0.5523, 0), Vector2(r * 0.5523, 0))
-	curve.add_point(Vector2(r, 0), Vector2(0, -r * 0.5523))
+	create_path_from_ellipse(element, path_name, r, r, Vector2(cx, cy), current_node, scene_root)
+
+
+func process_svg_ellipse(element:XMLParser, current_node : Node2D, scene_root : Node2D) -> void:
+	var cx = float(element.get_named_attribute_value("cx"))
+	var cy = float(element.get_named_attribute_value("cy"))
+	var rx = float(element.get_named_attribute_value("rx"))
+	var ry = float(element.get_named_attribute_value("ry"))
+	var path_name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Ellipse"
+	create_path_from_ellipse(element, path_name, rx, ry, Vector2(cx, cy), current_node, scene_root)
+
+
+func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float, ry: float, 
+		pos : Vector2, current_node : Node2D, scene_root : Node2D) -> void:
+	var curve := Curve2D.new()
+	curve.add_point(Vector2(rx, 0), Vector2.ZERO, Vector2(0, ry * 0.5523))
+	curve.add_point(Vector2(0, ry), Vector2(rx * 0.5523, 0), Vector2(-rx * 0.5523, 0))
+	curve.add_point(Vector2(-rx, 0), Vector2(0, ry * 0.5523), Vector2(0, -ry * 0.5523))
+	curve.add_point(Vector2(0, -ry), Vector2(-rx * 0.5523, 0), Vector2(rx * 0.5523, 0))
+	curve.add_point(Vector2(rx, 0), Vector2(0, -ry * 0.5523))
 	create_path2d(path_name, current_node, curve, 
 			get_svg_transform(element),
-			get_svg_style(element), scene_root, true, Vector2(cx, cy))
+			get_svg_style(element), scene_root, true, pos)
+
 
 
 func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
