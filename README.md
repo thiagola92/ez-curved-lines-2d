@@ -151,6 +151,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 
 ### Should have
 - [ ] styles from style named attributes
+- [ ] css named colors (see: https://github.com/colorjs/color-name/blob/master/index.js)
 - [ ] Import inkscape pivot point
 - [ ] Set 'offset' from editor, repositioning path around this new position
 - [ ] Add button to editor to call center node position func

@@ -174,15 +174,17 @@ func process_svg_polygon(element:XMLParser, current_node, scene_root) -> void:
 
 func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
 	# FIXME: better parsing, splits into sub arrays not necessary
-	var element_string = element.get_named_attribute_value("d")
-	element_string = element_string.replacen(",", " ")
-	for symbol in ["m", "M", "v", "V", "h", "H", "l", "L", "c", "C", "s", "S", "a", "A", "q", "Q", "t", "T", "z", "Z"]:
-		element_string = element_string.replace(symbol, " " + symbol + " ")
 
-	var element_string_array = element_string.split(" ", false)
+	var str_path = parse_attribute_string(
+				element.get_named_attribute_value("d")).replacen(",", " ").strip_edges()
+
+	for symbol in ["m", "M", "v", "V", "h", "H", "l", "L", "c", "C", "s", "S", "a", "A", "q", "Q", "t", "T", "z", "Z"]:
+		str_path = str_path.replace(symbol, " " + symbol + " ")
+
+	var str_path_array = str_path.split(" ", false)
 	var string_arrays = []
 	var string_array_top : PackedStringArray
-	for a in element_string_array:
+	for a in str_path_array:
 		if a == "m" or a == "M":
 			if string_array_top.size() > 0:
 				string_arrays.append(string_array_top)
@@ -309,7 +311,8 @@ func create_path2d(path_name: String,
 	new_path.position = pos_override
 	new_path.curve = curve
 	new_path.self_modulate = Color.TRANSPARENT
-	new_path.set_position_to_center()
+	if pos_override == Vector2.ZERO:
+		new_path.set_position_to_center()
 	if transform == Transform2D.IDENTITY:
 		parent.add_child(new_path, true)
 	else:
@@ -370,6 +373,19 @@ func get_svg_transform(element:XMLParser) -> Transform2D:
 			svg_transform = svg_transform.replace("translate", "").replacen("(", "").replacen(")", "")
 			var transform_split = svg_transform.split_floats(",")
 			transform[2] = Vector2(transform_split[0], transform_split[1])
+		elif svg_transform.begins_with("scale"):
+			svg_transform = svg_transform.replace("scale", "").replacen("(", "").replacen(")", "")
+			var transform_split = svg_transform.split_floats(",")
+			transform = transform.scaled(Vector2(transform_split[0], transform_split[1]))
+		elif svg_transform.begins_with("rotate"):
+			svg_transform = svg_transform.replace("rotate", "").replacen("(", "").replacen(")", "")
+			var transform_split = svg_transform.split_floats(",")
+			if transform_split.size() == 1:
+				transform = transform.rotated(deg_to_rad(transform_split[0]))
+			elif transform_split.size() == 3:
+				transform = transform.translated(-Vector2(transform_split[1], transform_split[2]))
+				transform = transform.rotated(deg_to_rad(transform_split[0]))
+				transform = transform.translated(Vector2(transform_split[1], transform_split[2]))
 		elif svg_transform.begins_with("matrix"):
 			svg_transform = svg_transform.replace("matrix", "").replacen("(", "").replacen(")", "")
 			var matrix = svg_transform.split_floats(",")
@@ -389,5 +405,12 @@ func get_svg_style(element:XMLParser) -> Dictionary:
 		var error = json.parse(svg_style)
 		if error == OK:
 			return json.data
-
 	return style
+
+static func parse_attribute_string(raw_attribute_str : String) -> String:
+	var regex = RegEx.new()
+	regex.compile("\\S+")
+	var str_path = ""
+	for result  in regex.search_all(raw_attribute_str):
+		str_path += result.get_string() + " "
+	return str_path
