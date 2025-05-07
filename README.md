@@ -28,6 +28,7 @@ Using godot's `AnimationPlayer` you can even create key frames for the curves li
 	- [SVG Path importer TODO](#svg-path-importer-todo)
 		- [Must have](#must-have)
 		- [Should have](#should-have)
+		- [Could have](#could-have)
 		- [Would be nice](#would-be-nice)
 
 ## Quick Start
@@ -147,20 +148,22 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Style support: opacity, stroke-opacity,
 - [ ] Style support: paint-order
 - [ ] Show warnings and hints for unsupported stuff: esp. style-node style-named attributes and arcs
-
+- [ ] Undo / Redo (Undo = delete SvgImport node)
 
 ### Should have
-- [ ] styles from style named attributes
-- [ ] css named colors (see: https://github.com/colorjs/color-name/blob/master/index.js)
-- [ ] Import inkscape pivot point
-- [ ] Set 'offset' from editor, repositioning path around this new position
+- [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
 - [ ] Add button to editor to call center node position func
 - [ ] Linear and Radial Gradients
 - [ ] Quadratic bezier curves
-- [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
+- [ ] styles from style named attributes (i.e. stroke-width, stroke, etc)
 
+
+### Could have
+- [ ] css named colors (see: https://github.com/colorjs/color-name/blob/master/index.js)
+- [ ] It should be easier to select DrawableCurve2D in the 2D editor window
+- [ ] Set 'offset' from editor, repositioning path around this new position
+- [ ] Import inkscape pivot point
 
 ### Would be nice
 
 - [ ] Arcs to cubic bezier curve conversion
-- [ ] Ellipse to path converter (can be done by inkscape)
