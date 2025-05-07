@@ -139,7 +139,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 
 ### Must have
 
-- [ ] Rectangle to path converter (incl. rx and ry)
+- [x] Rectangle to path converter (incl. rx and ry)
 - [x] Circle and ellipse to path converter
 - [ ] Polygon and polyline to path converter
 - [x] Code clean up (Circle2D replaced by path conversion)
@@ -157,7 +157,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [ ] Add button to editor to call center node position func
 - [ ] Linear and Radial Gradients
 - [ ] Quadratic bezier curves
-- [ ] Better path attribute string parsing (support leading and trailing whitespace, newlines)
+- [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
 
 
 ### Would be nice
