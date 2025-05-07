@@ -303,6 +303,8 @@ func create_path2d(path_name: String,
 		transform_node.add_child(new_path, true)
 		transform_node.set_owner(scene_root)
 	new_path.set_owner(scene_root)
+	if style.has("opacity"):
+		new_path.modulate.a = float(style["opacity"])
 	
 	if style.has("stroke") and style["stroke"] != "none": 
 		var line := Line2D.new()
@@ -313,11 +315,14 @@ func create_path2d(path_name: String,
 			line.default_color = Color(style["stroke"])
 		if style.has("stroke-width"):
 			line.width = float(style['stroke-width'])
+		if style.has("stroke-opacity"):
+			line.self_modulate.a = float(style["stroke-opacity"])
 		new_path.line = line
 		line.end_cap_mode = Line2D.LINE_CAP_ROUND
 		line.begin_cap_mode = Line2D.LINE_CAP_ROUND
 		line.joint_mode = Line2D.LINE_JOINT_ROUND
 		line.closed = is_closed
+
 	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
@@ -325,7 +330,10 @@ func create_path2d(path_name: String,
 		polygon.set_owner(scene_root)
 		if not style["fill"].begins_with("url"):
 			polygon.color = Color(style["fill"])
+		if style.has("fill-opacity"):
+			polygon.self_modulate.a = float(style["fill-opacity"])
 		new_path.polygon = polygon
+
 	if style.is_empty():
 		var line := Line2D.new()
 		line.name = "Stroke"

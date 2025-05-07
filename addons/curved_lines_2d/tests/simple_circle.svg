@@ -42,7 +42,7 @@
        r="18.787128" />
     <path
        id="circle1"
-       style="opacity:0.99;fill:#cb2d2d;fill-opacity:0.410587;fill-rule:evenodd;stroke:#002b9d;stroke-width:0.701165;stroke-linejoin:round;stroke-miterlimit:80;paint-order:markers fill stroke"
+       style="opacity:0.99;fill:#cb2d2d;fill-opacity:0.410587;fill-rule:evenodd;stroke:#002b9d;stroke-opacity:0.4;stroke-width:0.701165;stroke-linejoin:round;stroke-miterlimit:80;paint-order:markers fill stroke"
        d="m 103.33767,107.12364 c 0,8.20004 -8.503163,14.76583 -18.549843,14.84749 -10.203803,0.0829 -18.549846,-6.64745 -18.549845,-14.84749 10e-7,-8.20004 8.305049,-14.847486 18.549845,-14.847486 10.244795,10e-7 18.549843,6.647446 18.549843,14.847486 z"
        sodipodi:nodetypes="sssss"
        transform="matrix(0.91186775,-0.41048412,-0.09037799,0.99590754,0,0)" />
