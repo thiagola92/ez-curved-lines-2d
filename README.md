@@ -143,12 +143,15 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Circle to path converter
 - [ ] Polygon and polyline to path converter
 - [x] Code clean up (Circle2D replaced by path conversion)
-- [ ] Set node-position to path center (reset and remember node transforms, get center of computed points, set subtract center from curve points, reapply transforms)
+- [x] Set node-position to path center (reset and remember node transforms, get center of computed points, set subtract center from curve points, reapply transforms)
 - [ ] Show warnings and hints for unsupported stuff
-
+- [ ] Style support: opacity, stroke-opacity, paint-order
 
 
 ### Should have
+- [ ] Import inkscape pivot point
+- [ ] Set 'offset' from editor, repositioning path around this new position
+- [ ] Add button to editor to call center node position func
 - [ ] Linear and Radial Gradients
 - [ ] Quadratic bezier curves
 - [ ] Better path attribute string parsing (support leading and trailing whitespace, newlines)

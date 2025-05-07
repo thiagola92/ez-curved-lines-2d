@@ -105,3 +105,23 @@ func curve_changed():
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
+
+
+func set_position_to_center() -> void:
+	var points := curve.tessellate(max_stages, tolerance_degrees)
+	if points.size() < 1:
+		# Cannot calculate a center for 0 points 
+		return
+	var minx := INF
+	var miny := INF
+	var maxx := -INF
+	var maxy := -INF
+	for p : Vector2 in points:
+		minx = p.x if p.x < minx else minx
+		miny = p.y if p.y < miny else miny
+		maxx = p.x if p.x > maxx else maxx
+		maxy = p.y if p.y > maxy else maxy
+	var c = Rect2(minx, miny, maxx - minx, maxy - miny).get_center()
+	position += c
+	for i in range(curve.get_point_count()):
+		curve.set_point_position(i, curve.get_point_position(i) - c)

@@ -172,8 +172,7 @@ func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
 				string_array_top.resize(0)
 		string_array_top.append(a)
 	string_arrays.append(string_array_top)
-	
-	print(string_arrays.size())
+
 	var string_array_count = -1
 	for string_array in string_arrays:
 		var cursor = Vector2.ZERO
@@ -286,13 +285,23 @@ func create_path2d(path_name: String,
 					scene_root: Node2D,
 					is_closed := false,
 					pos_override := Vector2.ZERO) -> void:
+
 	var new_path = DrawablePath2D.new()
 	new_path.name = path_name
-	new_path.transform = transform
-	new_path.position = transform.basis_xform(pos_override)
+	#new_path.transform = transform
+	new_path.position = pos_override
 	new_path.curve = curve
 	new_path.self_modulate = Color.TRANSPARENT
-	parent.add_child(new_path, true)
+	new_path.set_position_to_center()
+	if transform == Transform2D.IDENTITY:
+		parent.add_child(new_path, true)
+	else:
+		var transform_node := Node2D.new()
+		transform_node.name = path_name + "Transform"
+		transform_node.transform = transform
+		parent.add_child(transform_node, true)
+		transform_node.add_child(new_path, true)
+		transform_node.set_owner(scene_root)
 	new_path.set_owner(scene_root)
 	
 	if style.has("stroke") and style["stroke"] != "none": 
