@@ -142,7 +142,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 
 - [x] Rectangle to path converter (incl. rx and ry)
 - [x] Circle and ellipse to path converter
-- [ ] Polygon and polyline to path converter
+- [x] Polygon and polyline to path converter
 - [x] Code clean up (Circle2D replaced by path conversion)
 - [x] Set node-position to path center (reset and remember node transforms, get center of computed points, set subtract center from curve points, reapply transforms)
 - [x] Style support: opacity, stroke-opacity,
