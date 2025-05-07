@@ -1,6 +1,8 @@
 @tool
 extends Control
 
+# Fraction of a radius for a bezier control point
+const R_TO_CP = 0.5523
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	if not typeof(data) == TYPE_DICTIONARY and "type" in data and data["type"] == "files":
@@ -103,11 +105,11 @@ func process_svg_ellipse(element:XMLParser, current_node : Node2D, scene_root : 
 func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float, ry: float, 
 		pos : Vector2, current_node : Node2D, scene_root : Node2D) -> void:
 	var curve := Curve2D.new()
-	curve.add_point(Vector2(rx, 0), Vector2.ZERO, Vector2(0, ry * 0.5523))
-	curve.add_point(Vector2(0, ry), Vector2(rx * 0.5523, 0), Vector2(-rx * 0.5523, 0))
-	curve.add_point(Vector2(-rx, 0), Vector2(0, ry * 0.5523), Vector2(0, -ry * 0.5523))
-	curve.add_point(Vector2(0, -ry), Vector2(-rx * 0.5523, 0), Vector2(rx * 0.5523, 0))
-	curve.add_point(Vector2(rx, 0), Vector2(0, -ry * 0.5523))
+	curve.add_point(Vector2(rx, 0), Vector2.ZERO, Vector2(0, ry * R_TO_CP))
+	curve.add_point(Vector2(0, ry), Vector2(rx * R_TO_CP, 0), Vector2(-rx * R_TO_CP, 0))
+	curve.add_point(Vector2(-rx, 0), Vector2(0, ry * R_TO_CP), Vector2(0, -ry * R_TO_CP))
+	curve.add_point(Vector2(0, -ry), Vector2(-rx * R_TO_CP, 0), Vector2(rx * R_TO_CP, 0))
+	curve.add_point(Vector2(rx, 0), Vector2(0, -ry * R_TO_CP))
 	create_path2d(path_name, current_node, curve, 
 			get_svg_transform(element),
 			get_svg_style(element), scene_root, true, pos)
@@ -115,32 +117,31 @@ func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float,
 
 
 func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
-	print("TODO convert rect to DrawablePath2D")
-	#var new_rect = ColorRect.new()
-	#new_rect.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Rect"
-	#current_node.add_child(new_rect, true)
-	#new_rect.set_owner(scene_root)
-	#
-	##transform
-	#var x = float(element.get_named_attribute_value("x"))
-	#var y = float(element.get_named_attribute_value("y"))
-	#var width = float(element.get_named_attribute_value("width"))
-	#var height = float(element.get_named_attribute_value("height"))
-	#var transform = get_svg_transform(element)
-	#new_rect.position = Vector2((x), (y))
-	#new_rect.size = Vector2(width, height)
-	#new_rect.position = transform * new_rect.position
-	#new_rect.size.x *= transform[0][0] 
-	#new_rect.size.y *= transform[1][1]
-	#
-	##style
-	#var style = get_svg_style(element)
-	#if style.has("fill"):
-		#new_rect.color = Color(style["fill"])
-	#if style.has("fill-opacity"):
-		#new_rect.color.a = float(style["fill-opacity"])
-		#
-	#print("-rect ", new_rect.name, " created")
+	var curve := Curve2D.new()
+	var x = float(element.get_named_attribute_value("x"))
+	var y = float(element.get_named_attribute_value("y"))
+	var ry = float(element.get_named_attribute_value("ry")) if element.has_attribute("ry") else 0
+	var rx = float(element.get_named_attribute_value("rx")) if element.has_attribute("rx") else ry
+	var width = float(element.get_named_attribute_value("width"))
+	var height = float(element.get_named_attribute_value("height"))
+	if rx == 0 and ry == 0:
+		curve.add_point(Vector2.ZERO)
+		curve.add_point(Vector2(width, 0))
+		curve.add_point(Vector2(width, height))
+		curve.add_point(Vector2(0, height))
+	else:
+		curve.add_point(Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
+		curve.add_point(Vector2(width, ry), Vector2(0, -ry * R_TO_CP))
+		curve.add_point(Vector2(width, height - ry), Vector2.ZERO, Vector2(0, ry * R_TO_CP))
+		curve.add_point(Vector2(width - rx, height), Vector2(rx * R_TO_CP, 0))
+		curve.add_point(Vector2(rx, height), Vector2.ZERO, Vector2(-rx * R_TO_CP, 0))
+		curve.add_point(Vector2(0, height - ry), Vector2(0, ry * R_TO_CP))
+		curve.add_point(Vector2(0, ry), Vector2.ZERO, Vector2(0, -ry * R_TO_CP))
+		curve.add_point(Vector2(rx, 0), Vector2(-rx * R_TO_CP, 0))
+	var path_name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Rect"
+	create_path2d(path_name, current_node, curve,
+			get_svg_transform(element), get_svg_style(element), scene_root, true,
+			Vector2(x, y))
 
 
 func process_svg_polygon(element:XMLParser, current_node, scene_root) -> void:
@@ -307,7 +308,6 @@ func create_path2d(path_name: String,
 
 	var new_path = DrawablePath2D.new()
 	new_path.name = path_name
-	#new_path.transform = transform
 	new_path.position = pos_override
 	new_path.curve = curve
 	new_path.self_modulate = Color.TRANSPARENT
