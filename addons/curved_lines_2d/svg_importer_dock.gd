@@ -21,25 +21,27 @@ func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 
 func _drop_data(at_position: Vector2, data: Variant) -> void:
 	if _can_drop_data(at_position, data):
-		_load_svg(data["files"][0])
+		var svg_root = _load_svg(data["files"][0])
+		undo_redo.create_action("Create " + svg_root.name)
+		undo_redo.add_do_method(self, "_load_svg", data["files"][0])
+		undo_redo.add_undo_method(svg_root, "queue_free")
+		undo_redo.commit_action(false)
+		
 
 
-func _load_svg(file_path : String) -> void:
+func _load_svg(file_path : String) -> Node2D:
 	var xml_data = XMLParser.new()
 	var scene_root := EditorInterface.get_edited_scene_root()
 
 	if not scene_root is Node2D:
 		printerr("Scene root must be Node2D")
-		return 
+		return null
 	if xml_data.open(file_path) != OK:
-		return
+		return null
 
 	var svg_root := Node2D.new()
 	svg_root.name = "SvgImport"
 	scene_root.add_child(svg_root, true)
-	undo_redo.create_action("Create " + svg_root.name)
-	undo_redo.add_undo_method(svg_root, "queue_free")
-	undo_redo.commit_action()
 	svg_root.set_owner(scene_root)
 	var current_node := svg_root
 	var in_style_block := false
@@ -83,7 +85,7 @@ func _load_svg(file_path : String) -> void:
 			printerr("Only inline styles are supported")
 		else:
 			print(xml_data.get_node_name())
-
+	return svg_root
 
 func process_group(element:XMLParser, current_node, scene_root) -> Node2D:
 	var new_group = Node2D.new()
