@@ -124,7 +124,6 @@ func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float,
 			get_svg_style(element), scene_root, true, pos)
 
 
-
 func process_svg_rectangle(element:XMLParser, current_node, scene_root) -> void:
 	var curve := Curve2D.new()
 	var x = float(element.get_named_attribute_value("x"))
@@ -318,7 +317,34 @@ func create_path2d(path_name: String,
 	new_path.set_owner(scene_root)
 	if style.has("opacity"):
 		new_path.modulate.a = float(style["opacity"])
-	
+	if style.is_empty():
+		var line := Line2D.new()
+		line.name = "Stroke"
+		new_path.add_child(line, true)
+		line.set_owner(scene_root)
+		new_path.line = line
+		line.width = 1.0
+		line.closed = is_closed
+
+	if paint_order_is_normal(style):
+		add_fill_to_path(new_path, style, scene_root, is_closed)
+		add_stroke_to_path(new_path, style, scene_root, is_closed)
+	else:
+		add_stroke_to_path(new_path, style, scene_root, is_closed)
+		add_fill_to_path(new_path, style, scene_root, is_closed)
+
+
+func paint_order_is_normal(style : Dictionary) -> bool:
+	if style.has("paint-order"):
+		if style["paint-order"] == "normal":
+			return true
+		elif style["paint-order"] == "stroke":
+			return false
+		var parts = style["paint-order"].split(" ")
+		return parts.find("stroke") > parts.find("fill")
+	return true
+
+func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D, is_closed: bool):
 	if style.has("stroke") and style["stroke"] != "none": 
 		var line := Line2D.new()
 		line.name = "Stroke"
@@ -336,6 +362,8 @@ func create_path2d(path_name: String,
 		line.joint_mode = Line2D.LINE_JOINT_ROUND
 		line.closed = is_closed
 
+
+func add_fill_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D, is_closed: bool):
 	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
@@ -346,15 +374,6 @@ func create_path2d(path_name: String,
 		if style.has("fill-opacity"):
 			polygon.self_modulate.a = float(style["fill-opacity"])
 		new_path.polygon = polygon
-
-	if style.is_empty():
-		var line := Line2D.new()
-		line.name = "Stroke"
-		new_path.add_child(line, true)
-		line.set_owner(scene_root)
-		new_path.line = line
-		line.width = 1.0
-		line.closed = is_closed
 
 
 func get_svg_transform(element:XMLParser) -> Transform2D:

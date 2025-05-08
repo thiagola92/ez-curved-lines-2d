@@ -147,7 +147,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Set node-position to path center (reset and remember node transforms, get center of computed points, set subtract center from curve points, reapply transforms)
 - [x] Style support: opacity, stroke-opacity,
 - [x] styles from style named attributes (i.e. stroke-width, stroke, etc)
-- [ ] Style support: paint-order
+- [x] Style support: paint-order
 - [ ] Show warnings and hints for unsupported stuff: esp. style-node style-named attributes and arcs
 
 
