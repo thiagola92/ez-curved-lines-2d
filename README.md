@@ -146,17 +146,17 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Code clean up (Circle2D replaced by path conversion)
 - [x] Set node-position to path center (reset and remember node transforms, get center of computed points, set subtract center from curve points, reapply transforms)
 - [x] Style support: opacity, stroke-opacity,
+- [x] styles from style named attributes (i.e. stroke-width, stroke, etc)
 - [ ] Style support: paint-order
 - [ ] Show warnings and hints for unsupported stuff: esp. style-node style-named attributes and arcs
-- [ ] Undo / Redo (Undo = delete SvgImport node)
+
 
 ### Should have
 - [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
+- [x] Undo (= delete SvgImport node)
 - [ ] Add button to editor to call center node position func
 - [ ] Linear and Radial Gradients
 - [ ] Quadratic bezier curves
-- [ ] styles from style named attributes (i.e. stroke-width, stroke, etc)
-
 
 ### Could have
 - [ ] css named colors (see: https://github.com/colorjs/color-name/blob/master/index.js)

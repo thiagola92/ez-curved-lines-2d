@@ -3,6 +3,10 @@ extends Control
 
 # Fraction of a radius for a bezier control point
 const R_TO_CP = 0.5523
+const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "stroke-opacity", 
+		"fill", "fill-opacity", "paint-order"]
+
+var undo_redo : EditorUndoRedoManager = null
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	if not typeof(data) == TYPE_DICTIONARY and "type" in data and data["type"] == "files":
@@ -33,6 +37,9 @@ func _load_svg(file_path : String) -> void:
 	var svg_root := Node2D.new()
 	svg_root.name = "SvgImport"
 	scene_root.add_child(svg_root, true)
+	undo_redo.create_action("Create " + svg_root.name)
+	undo_redo.add_undo_method(svg_root, "queue_free")
+	undo_redo.commit_action()
 	svg_root.set_owner(scene_root)
 	var current_node := svg_root
 	var in_style_block := false
@@ -292,7 +299,6 @@ func create_path2d(path_name: String,
 					scene_root: Node2D,
 					is_closed := false,
 					pos_override := Vector2.ZERO) -> void:
-
 	var new_path = DrawablePath2D.new()
 	new_path.name = path_name
 	new_path.position = pos_override
@@ -394,7 +400,10 @@ func get_svg_style(element:XMLParser) -> Dictionary:
 		var json = JSON.new()
 		var error = json.parse(svg_style)
 		if error == OK:
-			return json.data
+			style = json.data
+	for style_prop in SUPPORTED_STYLES:
+		if element.has_attribute(style_prop):
+			style[style_prop] = element.get_named_attribute_value(style_prop)
 	return style
 
 static func parse_attribute_string(raw_attribute_str : String) -> String:
