@@ -6,49 +6,75 @@ const R_TO_CP = 0.5523
 const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "stroke-opacity", 
 		"fill", "fill-opacity", "paint-order"]
 
+enum LogLevel { DEBUG, INFO, WARN, ERROR }
 var undo_redo : EditorUndoRedoManager = null
+var log_scroll_container : ScrollContainer = null
+var log_container : VBoxContainer = null
+var error_label_settings : LabelSettings = null
+var warning_label_settings : LabelSettings = null
+var info_label_settings : LabelSettings = null
+var debug_label_settings : LabelSettings = null
+
+
+func _enter_tree() -> void:
+	log_scroll_container = find_child("ScrollContainer")
+	log_container = find_child("ImportLogContainer")
+	error_label_settings = preload("res://addons/curved_lines_2d/error_label_settings.tres")
+	warning_label_settings = preload("res://addons/curved_lines_2d/warn_label_settings.tres")
+	info_label_settings = preload("res://addons/curved_lines_2d/info_label_settings.tres")
+	debug_label_settings = preload("res://addons/curved_lines_2d/debug_label_settings.tres")
+	log_scroll_container.get_v_scroll_bar().connect("changed", func(): log_scroll_container.scroll_vertical = log_scroll_container.get_v_scroll_bar().max_value )
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	if not typeof(data) == TYPE_DICTIONARY and "type" in data and data["type"] == "files":
 		return false
-	
 	for file : String in data["files"]:
 		if file.ends_with(".svg"):
 			return true
-
 	return false
+
+
+func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
+	var lbl := Label.new()
+	match log_level:
+		LogLevel.ERROR:
+			lbl.label_settings = error_label_settings
+		LogLevel.WARN:
+			lbl.label_settings = warning_label_settings
+		LogLevel.DEBUG:
+			lbl.label_settings = debug_label_settings
+		LogLevel.INFO,_:
+			lbl.label_settings = info_label_settings
+	lbl.text = msg
+	log_container.add_child(lbl)
 
 
 func _drop_data(at_position: Vector2, data: Variant) -> void:
 	if _can_drop_data(at_position, data):
 		var svg_root = _load_svg(data["files"][0])
-		undo_redo.create_action("Create " + svg_root.name)
-		undo_redo.add_do_method(self, "_load_svg", data["files"][0])
-		undo_redo.add_undo_method(svg_root, "queue_free")
-		undo_redo.commit_action(false)
 		
 
-
 func _load_svg(file_path : String) -> Node2D:
+	for child in log_container.get_children():
+		child.queue_free()
 	var xml_data = XMLParser.new()
 	var scene_root := EditorInterface.get_edited_scene_root()
 
 	if not scene_root is Node2D:
-		printerr("Scene root must be Node2D")
+		log_message("ERROR: Can only import into 2D scene", LogLevel.ERROR)
 		return null
 	if xml_data.open(file_path) != OK:
+		log_message("ERROR: Failed to open %s for reading" % file_path, LogLevel.ERROR)
 		return null
 
+	log_message("Importing SVG file: %s" % file_path, LogLevel.INFO)
 	var svg_root := Node2D.new()
 	svg_root.name = "SvgImport"
 	scene_root.add_child(svg_root, true)
 	svg_root.set_owner(scene_root)
 	var current_node := svg_root
-	var in_style_block := false
 	while xml_data.read() == OK:
 		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
-			if in_style_block:
-				print(xml_data.get_node_name())
 			continue
 		elif xml_data.get_node_name() == "g":
 			if xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
@@ -81,10 +107,16 @@ func _load_svg(file_path : String) -> Node2D:
 					svg_root.scale *= 3.78
 				elif xml_data.get_named_attribute_value("width").ends_with("cm"):
 					svg_root.scale *= 37.8
-		elif xml_data.get_node_name() == "style":
-			printerr("Only inline styles are supported")
-		else:
-			print(xml_data.get_node_name())
+		elif xml_data.get_node_name() == "style" and xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
+			log_message("⚠️ Skipping <style> node, only inline style attribute and some presentation attributes are supported", LogLevel.WARN)
+		elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
+			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
+	log_message("Import finished.\n\nThe SVG importer is in a very early stage of development.")
+	
+	var link_button := LinkButton.new()
+	link_button.text = "Click here to report issues or improvement requests on github"
+	link_button.uri = "https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues"
+	log_container.add_child(link_button)
 	return svg_root
 
 func process_group(element:XMLParser, current_node, scene_root) -> Node2D:
@@ -275,11 +307,50 @@ func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
 						var c_in := Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor, c_in - cursor)
 						i += 4
-				"A":
-					while string_array.size() > i + 10 and string_array[i+1].is_valid_float():
-						cursor = Vector2(float(string_array[i+9]), float(string_array[i+10]))
+				"q":
+					log_message("WARNING: the 'q' (relative quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+							element.get_named_attribute_value("id") if element.has_attribute("id") else "?", LogLevel.WARN)
+					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
+						cursor += Vector2(float(string_array[i+3]), float(string_array[i+4]))
 						curve.add_point(cursor)
-						i += 10
+						i += 4
+				"Q":
+					log_message("WARNING: the 'Q' (absolute quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
+					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
+						cursor = Vector2(float(string_array[i+3]), float(string_array[i+4]))
+						curve.add_point(cursor)
+						i += 4
+				"t":
+					log_message("WARNING: the 't' (relative smooth quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
+					while string_array.size() > i + 2 and string_array[i+2].is_valid_float():
+						cursor += Vector2(float(string_array[i+1]), float(string_array[i+2]))
+						curve.add_point(cursor)
+						i += 2
+				"T":
+					log_message("WARNING: the 'T' (absolute smooth quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
+					while string_array.size() > i + 2 and string_array[i+2].is_valid_float():
+						cursor = Vector2(float(string_array[i+1]), float(string_array[i+2]))
+						curve.add_point(cursor)
+						i += 2
+				"a":
+					log_message("WARNING: the 'a' (relative arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
+					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
+						cursor += Vector2(float(string_array[i+6]), float(string_array[i+7]))
+						log_message(str(cursor), LogLevel.DEBUG)
+						curve.add_point(cursor)
+						i += 7
+				"A":
+					log_message("WARNING: the 'A' (absolute arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
+					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
+						cursor = Vector2(float(string_array[i+6]), float(string_array[i+7]))
+						log_message(str(cursor), LogLevel.DEBUG)
+						curve.add_point(cursor)
+						i += 7
 
 		if curve.get_point_count() > 1:
 			var id = element.get_named_attribute_value("id") if element.has_attribute("id") else "Path"
@@ -422,9 +493,18 @@ func get_svg_style(element:XMLParser) -> Dictionary:
 		var error = json.parse(svg_style)
 		if error == OK:
 			style = json.data
+		else:
+			log_message("Failed to parse some styles for <%s id=\"%s\">" % [element.get_node_name(),
+					element.get_named_attribute_value("id") if element.has_attribute("id") else "?"], 
+					LogLevel.WARN)
 	for style_prop in SUPPORTED_STYLES:
 		if element.has_attribute(style_prop):
 			style[style_prop] = element.get_named_attribute_value(style_prop)
+	if not style.is_empty():
+		log_message("Parsed style for <%s id=\"%s\">:" % [element.get_node_name(),
+					element.get_named_attribute_value("id") if element.has_attribute("id") else "?"],
+					LogLevel.DEBUG)
+		log_message(str(style), LogLevel.DEBUG)
 	return style
 
 static func parse_attribute_string(raw_attribute_str : String) -> String:

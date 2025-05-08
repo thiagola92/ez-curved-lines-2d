@@ -148,15 +148,16 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Style support: opacity, stroke-opacity,
 - [x] styles from style named attributes (i.e. stroke-width, stroke, etc)
 - [x] Style support: paint-order
-- [ ] Show warnings and hints for unsupported stuff: esp. style-node style-named attributes and arcs
-
+- [x] Show warnings and hints for unsupported stuff: unhandled nodes, arcs
+- [ ] Import a collision polygon optionally as well
+- [ ] Import options (tesselation settings, collision polygons, import as DrawablePath2D or just shapes)
+- [ ] Linear and Radial Gradients
+- [ ] Quadratic bezier curves
 
 ### Should have
 - [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
-- [x] Undo (= delete SvgImport node)
 - [ ] Add button to editor to call center node position func
-- [ ] Linear and Radial Gradients
-- [ ] Quadratic bezier curves
+
 
 ### Could have
 - [ ] css named colors (see: https://github.com/colorjs/color-name/blob/master/index.js)
@@ -167,3 +168,4 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 ### Would be nice
 
 - [ ] Arcs to cubic bezier curve conversion
+- [ ] Undo/Redo (Undo = delete SvgImport node)
