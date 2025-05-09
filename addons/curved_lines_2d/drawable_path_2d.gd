@@ -107,11 +107,11 @@ func curve_changed():
 	path_changed.emit(new_points)
 
 
-func set_position_to_center() -> void:
+func get_bounding_rect() -> Rect2:
 	var points := curve.tessellate(max_stages, tolerance_degrees)
 	if points.size() < 1:
 		# Cannot calculate a center for 0 points 
-		return
+		return Rect2(Vector2.ZERO, Vector2.ZERO)
 	var minx := INF
 	var miny := INF
 	var maxx := -INF
@@ -121,7 +121,11 @@ func set_position_to_center() -> void:
 		miny = p.y if p.y < miny else miny
 		maxx = p.x if p.x > maxx else maxx
 		maxy = p.y if p.y > maxy else maxy
-	var c = Rect2(minx, miny, maxx - minx, maxy - miny).get_center()
+	return Rect2(minx, miny, maxx - minx, maxy - miny)
+
+
+func set_position_to_center() -> void:
+	var c = get_bounding_rect().get_center()
 	position += c
 	for i in range(curve.get_point_count()):
 		curve.set_point_position(i, curve.get_point_position(i) - c)

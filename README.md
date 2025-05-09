@@ -29,7 +29,7 @@ Using godot's `AnimationPlayer` you can even create key frames for the curves li
 		- [Must have](#must-have)
 		- [Should have](#should-have)
 		- [Could have](#could-have)
-		- [Would be nice](#would-be-nice)
+		- [Would be nice (if I learn how to)](#would-be-nice-if-i-learn-how-to)
 
 ## Quick Start
 
@@ -150,23 +150,26 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Style support: paint-order
 - [x] Show warnings and hints for unsupported stuff: unhandled nodes, arcs
 - [x] Quadratic bezier curves
-- [ ] Linear Gradients
-- [ ] Radial Gradients
+- [ ] Linear Gradient Fill polygons
+- [ ] Radial Gradient Fill polygons
 - [ ] Import a collision polygon optionally as well
 - [ ] Import options (tesselation settings, collision polygons, import as DrawablePath2D or just shapes)
 
 
 ### Should have
 - [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
+- [ ] SVG Import log: show/hide different log levels, clear log
 - [ ] Add button to editor to call center node position func
 
 
 ### Could have
 - [ ] It should be easier to select DrawableCurve2D in the 2D editor window
 - [ ] Set 'offset' from editor, repositioning path around this new position
+- [ ] SVG Import log: add button to select node with problem
 - [ ] Import inkscape pivot point
 
-### Would be nice
+### Would be nice (if I learn how to)
 
 - [ ] Arcs to cubic bezier curve conversion
+- [ ] Gradient fills for Line2D strokes (would probably require a shader)
 - [ ] Undo/Redo (Undo = delete SvgImport node)

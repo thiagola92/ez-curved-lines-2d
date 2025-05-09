@@ -73,6 +73,8 @@ func _load_svg(file_path : String) -> Node2D:
 	scene_root.add_child(svg_root, true)
 	svg_root.set_owner(scene_root)
 	var current_node := svg_root
+	var svg_linear_gradients : Array[Dictionary] = []
+
 	while xml_data.read() == OK:
 		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
 			continue
@@ -104,13 +106,20 @@ func _load_svg(file_path : String) -> Node2D:
 				svg_root.scale.x = width / view_box[2]
 				svg_root.scale.y = height / view_box[3]
 				if xml_data.get_named_attribute_value("width").ends_with("mm"): # unit conversion to pixel
+					log_message("⚠️ Units for this image are millimeters (mm), image scale set to 3.78")
 					svg_root.scale *= 3.78
 				elif xml_data.get_named_attribute_value("width").ends_with("cm"):
+					log_message("⚠️ Units for this image are centimeters (cm), image scale set to 37.8")
 					svg_root.scale *= 37.8
 		elif xml_data.get_node_name() == "style" and xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping <style> node, only inline style attribute and some presentation attributes are supported", LogLevel.WARN)
+		elif xml_data.get_node_name() == "defs":
+			pass
+		elif xml_data.get_node_name() == "linearGradient":
+			svg_linear_gradients.append(parse_linear_gradient(xml_data, svg_linear_gradients))
 		elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
+	log_message("Parsed linear gradients: %s" % str(svg_linear_gradients), LogLevel.DEBUG)
 	log_message("Import finished.\n\nThe SVG importer is in a very early stage of development.")
 	
 	var link_button := LinkButton.new()
@@ -118,6 +127,39 @@ func _load_svg(file_path : String) -> Node2D:
 	link_button.uri = "https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues"
 	log_container.add_child(link_button)
 	return svg_root
+
+
+func get_gradient_by_href(href : String, current_gradients : Array[Dictionary]) -> Dictionary:
+	var idx := current_gradients.find_custom(func(x): return "id" in x and "#" + x["id"] == href)
+	if idx < 0:
+		return {}
+	return current_gradients[idx]
+
+
+func parse_linear_gradient(xml_data : XMLParser, current_gradients : Array[Dictionary]) -> Dictionary:
+	var new_gradient := {}
+	for i in range(xml_data.get_attribute_count()):
+		new_gradient[xml_data.get_attribute_name(i)] = xml_data.get_attribute_value(i)
+
+	if "xlink:href" in new_gradient:
+		new_gradient.merge(get_gradient_by_href(new_gradient["xlink:href"], current_gradients), false)
+	elif "href" in new_gradient:
+		new_gradient.merge(get_gradient_by_href(new_gradient["href"], current_gradients), false)
+
+	if not xml_data.is_empty():
+		new_gradient["stops"] = []
+		while xml_data.read() == OK:
+			if xml_data.get_node_type() == XMLParser.NODE_ELEMENT and xml_data.get_node_name() == "stop":
+				new_gradient["stops"].append({
+					"style": get_svg_style(xml_data),
+					"offset": float(xml_data.get_named_attribute_value_safe("offset")),
+					"id": xml_data.get_named_attribute_value_safe("id")
+				})
+			elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT_END and xml_data.get_node_name() == "linearGradient":
+				break
+
+	return new_gradient
+
 
 func process_group(element:XMLParser, current_node, scene_root) -> Node2D:
 	var new_group = Node2D.new()
@@ -449,7 +491,9 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 		line.name = "Stroke"
 		new_path.add_child(line, true)
 		line.set_owner(scene_root)
-		if not style["stroke"].begins_with("url"):
+		if style["stroke"].begins_with("url"):
+			log_message("⚠️ Unsupported stroke style: " + style["stroke"])
+		else:
 			line.default_color = Color(style["stroke"])
 		if style.has("stroke-width"):
 			line.width = float(style['stroke-width'])
@@ -468,7 +512,9 @@ func add_fill_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D,
 		polygon.name = "Fill"
 		new_path.add_child(polygon, true)
 		polygon.set_owner(scene_root)
-		if not style["fill"].begins_with("url"):
+		if style["fill"].begins_with("url"):
+			log_message("⚠️ Unsupported fill style: " + style["fill"])
+		else:
 			polygon.color = Color(style["fill"])
 		if style.has("fill-opacity"):
 			polygon.self_modulate.a = float(style["fill-opacity"])
@@ -510,6 +556,7 @@ func get_svg_style(element:XMLParser) -> Dictionary:
 	var style = {}
 	if element.has_attribute("style"):
 		var svg_style = element.get_named_attribute_value("style")
+		svg_style = svg_style.rstrip(";")
 		svg_style = svg_style.replacen(": ", ":")
 		svg_style = svg_style.replacen(":", "\":\"")
 		svg_style = svg_style.replacen("; ", "\",\"")
