@@ -149,10 +149,10 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] styles from style named attributes (i.e. stroke-width, stroke, etc)
 - [x] Style support: paint-order
 - [x] Show warnings and hints for unsupported stuff: unhandled nodes, arcs
+- [x] Quadratic bezier curves
 - [ ] Import a collision polygon optionally as well
 - [ ] Import options (tesselation settings, collision polygons, import as DrawablePath2D or just shapes)
 - [ ] Linear and Radial Gradients
-- [ ] Quadratic bezier curves
 
 ### Should have
 - [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
@@ -160,7 +160,6 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 
 
 ### Could have
-- [ ] css named colors (see: https://github.com/colorjs/color-name/blob/master/index.js)
 - [ ] It should be easier to select DrawableCurve2D in the 2D editor window
 - [ ] Set 'offset' from editor, repositioning path around this new position
 - [ ] Import inkscape pivot point

@@ -309,31 +309,57 @@ func process_svg_path(element:XMLParser, current_node, scene_root) -> void:
 						i += 4
 				"q":
 					log_message("WARNING: the 'q' (relative quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
-							element.get_named_attribute_value("id") if element.has_attribute("id") else "?", LogLevel.WARN)
+							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
+						var prev_point := curve.get_point_position(curve.get_point_count() - 1)
+						var quadratic_control_point = cursor + Vector2(float(string_array[i+1]), float(string_array[i+2]))
+						log_message("previous point pos: " + str(prev_point), LogLevel.DEBUG)
+						log_message("quadratic control point: " + str(quadratic_control_point), LogLevel.DEBUG)
+						var c_out = (quadratic_control_point - prev_point) * (2.0/3.0)
+						log_message("cubic control point out: " + str(c_out), LogLevel.DEBUG)
 						cursor += Vector2(float(string_array[i+3]), float(string_array[i+4]))
-						curve.add_point(cursor)
+						log_message("next point pos: " + str(cursor), LogLevel.DEBUG)
+						var c_in = (quadratic_control_point - cursor) * (2.0/3.0)
+						log_message("next control point in: " + str(c_in), LogLevel.DEBUG)
+						curve.set_point_out(curve.get_point_count() - 1, c_out)
+						curve.add_point(cursor, c_in)
 						i += 4
 				"Q":
-					log_message("WARNING: the 'Q' (absolute quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
-							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
+						var prev_point := curve.get_point_position(curve.get_point_count() - 1)
+						var quadratic_control_point := Vector2(float(string_array[i+1]), float(string_array[i+2]))
+						log_message("previous point pos: " + str(prev_point), LogLevel.DEBUG)
+						log_message("quadratic control point: " + str(quadratic_control_point), LogLevel.DEBUG)
+						var c_out = (quadratic_control_point - prev_point) * (2.0/3.0)
+						log_message("cubic control point out: " + str(c_out), LogLevel.DEBUG)
 						cursor = Vector2(float(string_array[i+3]), float(string_array[i+4]))
-						curve.add_point(cursor)
+						log_message("next point pos: " + str(cursor), LogLevel.DEBUG)
+						var c_in = (quadratic_control_point - cursor) * (2.0/3.0)
+						log_message("next control point in: " + str(c_in), LogLevel.DEBUG)
+						curve.set_point_out(curve.get_point_count() - 1, c_out)
+						curve.add_point(cursor, c_in)
 						i += 4
 				"t":
-					log_message("WARNING: the 't' (relative smooth quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
-							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 2 and string_array[i+2].is_valid_float():
+						var c_out := -curve.get_point_in(curve.get_point_count() - 1)
+						var quadratic_control_point := curve.get_point_position(curve.get_point_count() - 1) + (c_out / (2.0/3.0))
+						log_message("quadratic control point: " + str(quadratic_control_point), LogLevel.DEBUG)
+						curve.set_point_out(curve.get_point_count() - 1, c_out)
 						cursor += Vector2(float(string_array[i+1]), float(string_array[i+2]))
-						curve.add_point(cursor)
+						var c_in = (quadratic_control_point - cursor) * (2.0/3.0)
+						log_message("next control point in: " + str(c_in), LogLevel.DEBUG)
+						curve.add_point(cursor, c_in)
 						i += 2
 				"T":
-					log_message("WARNING: the 'T' (absolute smooth quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
-							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 2 and string_array[i+2].is_valid_float():
+						var c_out := -curve.get_point_in(curve.get_point_count() - 1)
+						var quadratic_control_point := curve.get_point_position(curve.get_point_count() - 1) + (c_out / (2.0/3.0))
+						log_message("quadratic control point: " + str(quadratic_control_point), LogLevel.DEBUG)
+						curve.set_point_out(curve.get_point_count() - 1, c_out)
 						cursor = Vector2(float(string_array[i+1]), float(string_array[i+2]))
-						curve.add_point(cursor)
+						var c_in = (quadratic_control_point - cursor) * (2.0/3.0)
+						log_message("next control point in: " + str(c_in), LogLevel.DEBUG)
+						curve.add_point(cursor, c_in)
 						i += 2
 				"a":
 					log_message("WARNING: the 'a' (relative arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
