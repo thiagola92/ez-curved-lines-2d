@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="66.83889mm"
-   height="29.28101mm"
-   viewBox="0 0 66.83889 29.281009"
+   width="1199.5mm"
+   height="399.5mm"
+   viewBox="0 0 1199.5 399.49999"
    version="1.1"
    id="svg1"
    inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
@@ -23,10 +23,10 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#505050"
      inkscape:document-units="mm"
-     inkscape:zoom="1.1981234"
-     inkscape:cx="185.70708"
-     inkscape:cy="290.87154"
-     inkscape:current-layer="layer1" />
+     inkscape:zoom="0.14976543"
+     inkscape:cx="3231.7205"
+     inkscape:cy="-1078.353"
+     inkscape:current-layer="svg1" />
   <defs
      id="defs1" />
   <g
@@ -55,4 +55,31 @@
        rx="8.5020113"
        ry="14.243629" />
   </g>
+  <rect
+     x="1.0000135"
+     y="0.99999505"
+     width="1198"
+     height="398"
+     fill="none"
+     stroke="#0000ff"
+     stroke-width="1"
+     id="rect1" />
+  <path
+     d="M 300,200 H 150 A 150,150 0 1 0 300,49.999996 Z"
+     fill="#ff0000"
+     stroke="#0000ff"
+     stroke-width="5"
+     id="path3" />
+  <path
+     d="M 275,175 V 24.999996 A 150,150 0 0 0 125,175 Z"
+     fill="#ffff00"
+     stroke="#0000ff"
+     stroke-width="5"
+     id="path4" />
+  <path
+     d="m 600.00001,350 50,-25 A 27.95085,27.95085 0 0 1 700,300 l 50,-25 a 55.826394,27.913197 60 0 1 50,-25 l 50,-25 a 83.718657,27.906219 60 0 1 50,-25 l 50,-25 a 111.6151,27.903776 60 0 1 50,-25 l 50,-25"
+     fill="none"
+     stroke="#ff0000"
+     stroke-width="5"
+     id="path5" />
 </svg>
