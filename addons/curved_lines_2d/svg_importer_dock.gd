@@ -438,6 +438,8 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	new_path.self_modulate = Color.TRANSPARENT
 	if pos_override == Vector2.ZERO:
 		new_path.set_position_to_center()
+	
+	var gradient_point_parent : Node2D = parent
 	if transform == Transform2D.IDENTITY:
 		parent.add_child(new_path, true)
 	else:
@@ -447,6 +449,7 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		parent.add_child(transform_node, true)
 		transform_node.add_child(new_path, true)
 		transform_node.set_owner(scene_root)
+		gradient_point_parent = transform_node
 	new_path.set_owner(scene_root)
 	if style.has("opacity"):
 		new_path.modulate.a = float(style["opacity"])
@@ -460,11 +463,11 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		line.closed = is_closed
 
 	if paint_order_is_normal(style):
-		add_fill_to_path(new_path, style, scene_root, is_closed, gradients)
+		add_fill_to_path(new_path, style, scene_root, is_closed, gradients, gradient_point_parent)
 		add_stroke_to_path(new_path, style, scene_root, is_closed)
 	else:
 		add_stroke_to_path(new_path, style, scene_root, is_closed)
-		add_fill_to_path(new_path, style, scene_root, is_closed, gradients)
+		add_fill_to_path(new_path, style, scene_root, is_closed, gradients, gradient_point_parent)
 
 
 func paint_order_is_normal(style : Dictionary) -> bool:
@@ -500,7 +503,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 
 
 func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root : Node2D, is_closed: bool,
-		gradients : Array[Dictionary]):
+		gradients : Array[Dictionary], gradient_point_parent : Node2D):
 	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
@@ -535,18 +538,32 @@ func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root :
 					process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else 
 					Transform2D.IDENTITY
 				)
-				var translated_box_tl = box.position + new_path.position
-
+				log_message(str(transform))
+				log_message(svg_gradient["gradientTransform"] if "gradientTransform" in svg_gradient else "--")
 				var fill_from = Vector2(float(svg_gradient["x1"]), float(svg_gradient["y1"]))
 				var fill_to = Vector2(float(svg_gradient["x2"]), float(svg_gradient["y2"]))
-				log_message("From %s -> %s" % [str(fill_from), str(fill_from * transform)])
-				log_message("From' %s -> %s" % [str(fill_from - translated_box_tl), str((fill_from*transform - translated_box_tl*transform))])
 
-				log_message("To %s -> %s" % [str(fill_to), str(fill_to * transform)])
-				log_message("To' %s -> %s" % [str(fill_to - translated_box_tl), str((fill_to*transform - translated_box_tl*transform))])
+				var from_to_transform_node = Node2D.new()
+				var from_node = Node2D.new()
+				var to_node = Node2D.new()
 
-				log_message("Box TL %s/%s -> %s/%s" % [str(translated_box_tl), str(translated_box_tl + box.size),
-						str(translated_box_tl * transform), str((translated_box_tl + box.size) * transform)])
+				from_to_transform_node.name = "FromToTransform(%s)" % new_path.name
+				
+				from_node.position = fill_from
+				from_node.name = "From(%s)" % new_path.name
+				to_node.position = fill_to
+				to_node.name = "To(%s)" % new_path.name
+				from_to_transform_node.add_child(from_node, true)
+				from_to_transform_node.add_child(to_node, true)
+				gradient_point_parent.add_child(from_to_transform_node, true)
+				from_to_transform_node.set_owner(scene_root)
+				from_to_transform_node.transform = transform
+				to_node.set_owner(scene_root)
+				from_node.set_owner(scene_root)
+				var translated_box_tl = box.position + new_path.position
+
+				log_message(str(box.position))
+				log_message(str(box.position + new_path.position))
 
 				texture.fill_from = (fill_from - translated_box_tl) / box.size
 				texture.fill_to = (fill_to - translated_box_tl) / box.size
