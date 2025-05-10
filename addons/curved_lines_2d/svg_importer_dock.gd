@@ -538,35 +538,36 @@ func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root :
 					process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else 
 					Transform2D.IDENTITY
 				)
-				log_message(str(transform))
-				log_message(svg_gradient["gradientTransform"] if "gradientTransform" in svg_gradient else "--")
 				var fill_from = Vector2(float(svg_gradient["x1"]), float(svg_gradient["y1"]))
 				var fill_to = Vector2(float(svg_gradient["x2"]), float(svg_gradient["y2"]))
-
-				var from_to_transform_node = Node2D.new()
+				var gradient_transform_node = Node2D.new()
 				var from_node = Node2D.new()
 				var to_node = Node2D.new()
-
-				from_to_transform_node.name = "FromToTransform(%s)" % new_path.name
-				
+				var box_tl_node = Node2D.new()
+				var box_br_node = Node2D.new()
+				gradient_transform_node.name = "Gradient(%s)" % new_path.name
 				from_node.position = fill_from
 				from_node.name = "From(%s)" % new_path.name
 				to_node.position = fill_to
 				to_node.name = "To(%s)" % new_path.name
-				from_to_transform_node.add_child(from_node, true)
-				from_to_transform_node.add_child(to_node, true)
-				gradient_point_parent.add_child(from_to_transform_node, true)
-				from_to_transform_node.set_owner(scene_root)
-				from_to_transform_node.transform = transform
+				box_tl_node.position = new_path.position + box.position
+				box_br_node.position = box_tl_node.position + box.size
+				box_tl_node.name = "BoxTopLeft(%s)" % new_path.name
+				box_br_node.name = "BoxBottomRight(%s)" % new_path.name
+				gradient_transform_node.add_child(from_node, true)
+				gradient_transform_node.add_child(to_node, true)
+				gradient_point_parent.add_child(gradient_transform_node, true)
+				gradient_transform_node.set_owner(scene_root)
+				gradient_transform_node.transform = transform
+				gradient_point_parent.add_child(box_tl_node, true)
+				gradient_point_parent.add_child(box_br_node, true)
+				box_tl_node.set_owner(scene_root)
+				box_br_node.set_owner(scene_root)
 				to_node.set_owner(scene_root)
 				from_node.set_owner(scene_root)
-				var translated_box_tl = box.position + new_path.position
-
-				log_message(str(box.position))
-				log_message(str(box.position + new_path.position))
-
-				texture.fill_from = (fill_from - translated_box_tl) / box.size
-				texture.fill_to = (fill_to - translated_box_tl) / box.size
+				texture.fill_from = (from_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
+				texture.fill_to = (to_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
+				
 
 			polygon.texture_offset = -box.position
 			polygon.texture = texture

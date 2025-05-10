@@ -150,7 +150,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Style support: paint-order
 - [x] Show warnings and hints for unsupported stuff: unhandled nodes, arcs
 - [x] Quadratic bezier curves
-- [ ] Linear Gradient Fill polygons
+- [x] Linear Gradient Fill polygons
 - [ ] Radial Gradient Fill polygons
 - [ ] Import a collision polygon optionally as well
 - [ ] Import options (tesselation settings, collision polygons, import as DrawablePath2D or just shapes)
