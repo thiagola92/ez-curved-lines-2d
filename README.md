@@ -153,7 +153,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Linear Gradient Fill polygons
 - [ ] Radial Gradient Fill polygons
 - [ ] Import a collision polygon optionally as well
-- [ ] Import options (tesselation settings, collision polygons, import as DrawablePath2D or just shapes)
+- [ ] Import options (tesselation settings, collision polygons, import as DrawablePath2D or just shapes, lock nodes)
 
 
 ### Should have
