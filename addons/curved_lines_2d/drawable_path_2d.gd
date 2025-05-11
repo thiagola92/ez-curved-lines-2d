@@ -51,6 +51,8 @@ signal assigned_node_changed()
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
+var lock_assigned_shapes := true
+
 # Wire up signals at runtime
 func _ready():
 	if update_curve_at_runtime:
@@ -79,13 +81,16 @@ func _exit_tree():
 
 func _on_assigned_node_changed():
 	if is_instance_valid(line):
-		line.set_meta("_edit_lock_", true)
+		if lock_assigned_shapes:
+			line.set_meta("_edit_lock_", true)
 		curve_changed()
 	if is_instance_valid(polygon):
-		polygon.set_meta("_edit_lock_", true)
+		if lock_assigned_shapes:
+			polygon.set_meta("_edit_lock_", true)
 		curve_changed()
 	if is_instance_valid(collision_polygon):
-		collision_polygon.set_meta("_edit_lock_", true)
+		if lock_assigned_shapes:
+			collision_polygon.set_meta("_edit_lock_", true)
 		curve_changed()
 
 

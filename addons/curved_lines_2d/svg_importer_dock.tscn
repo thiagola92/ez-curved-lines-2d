@@ -1,6 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://drrarjj0668n"]
+[gd_scene load_steps=5 format=3 uid="uid://drrarjj0668n"]
 
 [ext_resource type="Script" uid="uid://bp5vvj23w57js" path="res://addons/curved_lines_2d/svg_importer_dock.gd" id="1_gt4al"]
+[ext_resource type="LabelSettings" uid="uid://bspk1rkq1cmhx" path="res://addons/curved_lines_2d/info_label_settings.tres" id="2_rycm0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rycm0"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.180392, 0.180392, 0.180392, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.262933, 0.262932, 0.262932, 1)
+border_blend = true
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gt4al"]
 bg_color = Color(0.180005, 0.180005, 0.180005, 1)
@@ -27,11 +41,38 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 20
 
-[node name="Control" type="Control" parent="HBoxContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Import Settings"
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+size_flags_vertical = 3
 mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_rycm0")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2/PanelContainer"]
+layout_mode = 2
+
+[node name="ImportCollisionPolygonsCheckBox" type="CheckBox" parent="HBoxContainer/VBoxContainer2/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Import collision polygons"
+
+[node name="ImportCollisionPolygonsForAllShapesCheckBox" type="CheckBox" parent="HBoxContainer/VBoxContainer2/PanelContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+text = "Also import strokes as collision polygon"
+
+[node name="LockShapesCheckBox" type="CheckBox" parent="HBoxContainer/VBoxContainer2/PanelContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Lock imported shapes in editor"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
@@ -51,3 +92,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = -5
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer/ScrollContainer/ImportLogContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+text = " - Dag/Drop a .svg file here to start import -"
+label_settings = ExtResource("2_rycm0")
+horizontal_alignment = 1
+
+[connection signal="toggled" from="HBoxContainer/VBoxContainer2/PanelContainer/VBoxContainer/ImportCollisionPolygonsCheckBox" to="." method="_on_import_collision_polygons_check_box_toggled"]
+[connection signal="toggled" from="HBoxContainer/VBoxContainer2/PanelContainer/VBoxContainer/ImportCollisionPolygonsForAllShapesCheckBox" to="." method="_on_import_collision_polygons_for_all_shapes_check_box_toggled"]
+[connection signal="toggled" from="HBoxContainer/VBoxContainer2/PanelContainer/VBoxContainer/LockShapesCheckBox" to="." method="_on_lock_shapes_check_box_toggled"]

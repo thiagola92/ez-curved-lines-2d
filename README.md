@@ -153,22 +153,24 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Linear Gradient Fill polygons
 - [x] Radial Gradient Fill polygons (partial)
 - [x] Inherit style from parent node (&lt;g&gt;)
-- [ ] Import a collision polygon optionally as well
-- [ ] Import options (tesselation settings, collision polygons, import as DrawablePath2D or just shapes, lock nodes)
+- [x] Import option: collision polygon
+- [x] Import option: lock nodes
+- [ ] Import option: Keep Bezier Curves in DrawablePath2D (hides/shows lock nodes)
+- [ ] Import option: tesselation settings
 
 
 ### Should have
 - [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
-- [ ] SVG Import log: show/hide different log levels, clear log
-- [ ] Add button to editor to call center node position func
-
+- [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
 
 ### Could have
+- [ ] Add button to editor to call center node position func
 - [ ] It should be easier to select DrawableCurve2D in the 2D editor window (ReferenceRect)
 - [ ] Helper nodes for gradient from-, stop- and to-handles (Node2D @tool, use _draw only in edit mode)
 - [ ] Set 'offset' from editor, repositioning path around this new position (hijack the offset-button?)
 - [ ] SVG Import log: add button to select node with problem
 - [ ] Import inkscape pivot point to override the centered position with
+- [ ] SVG Import log: show/hide different log levels, clear log
 
 ### Would be nice (if I learn how to)
 

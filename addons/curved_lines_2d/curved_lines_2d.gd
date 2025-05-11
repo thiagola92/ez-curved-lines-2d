@@ -15,7 +15,7 @@ func _enter_tree():
 		preload("res://addons/curved_lines_2d/DrawablePath2D.svg")
 	)
 	svg_importer_dock.undo_redo = get_undo_redo()
-	add_control_to_bottom_panel(svg_importer_dock as Control, "SVG Importer")
+	add_control_to_bottom_panel(svg_importer_dock as Control, "EZ SVG Importer")
 
 
 func _exit_tree():

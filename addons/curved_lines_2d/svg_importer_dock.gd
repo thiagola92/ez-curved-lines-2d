@@ -17,15 +17,23 @@ var warning_label_settings : LabelSettings = null
 var info_label_settings : LabelSettings = null
 var debug_label_settings : LabelSettings = null
 
+## Settings
+var import_collision_polygons := false
+var import_collision_polygons_for_all_shapes := false
+var import_collision_polygons_for_all_shapes_checkbox : Control = null
+var lock_shapes := true
+
 
 func _enter_tree() -> void:
 	log_scroll_container = find_child("ScrollContainer")
 	log_container = find_child("ImportLogContainer")
+	import_collision_polygons_for_all_shapes_checkbox = find_child("ImportCollisionPolygonsForAllShapesCheckBox")
 	error_label_settings = preload("res://addons/curved_lines_2d/error_label_settings.tres")
 	warning_label_settings = preload("res://addons/curved_lines_2d/warn_label_settings.tres")
 	info_label_settings = preload("res://addons/curved_lines_2d/info_label_settings.tres")
 	debug_label_settings = preload("res://addons/curved_lines_2d/debug_label_settings.tres")
 	log_scroll_container.get_v_scroll_bar().connect("changed", func(): log_scroll_container.scroll_vertical = log_scroll_container.get_v_scroll_bar().max_value )
+
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	if not typeof(data) == TYPE_DICTIONARY and "type" in data and data["type"] == "files":
@@ -420,6 +428,7 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	new_path.name = path_name
 	new_path.position = pos_override
 	new_path.curve = curve
+	new_path.lock_assigned_shapes = lock_shapes
 	new_path.self_modulate = Color.TRANSPARENT
 	if pos_override == Vector2.ZERO:
 		new_path.set_position_to_center()
@@ -459,6 +468,14 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	else:
 		add_stroke_to_path(new_path, style, scene_root, is_closed)
 		add_fill_to_path(new_path, style, scene_root, gradients, gradient_point_parent)
+
+	# FIXME: Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
+	if (import_collision_polygons and 
+			("fill" in style or import_collision_polygons_for_all_shapes)):
+		var poly := CollisionPolygon2D.new()
+		new_path.add_child(poly, true)
+		poly.set_owner(scene_root)
+		new_path.collision_polygon = poly
 
 
 func paint_order_is_normal(style : Dictionary) -> bool:
@@ -570,6 +587,9 @@ func apply_gradient(new_path : DrawablePath2D, svg_gradient: Dictionary, polygon
 	var box_br_node = create_helper_node("BoxBottomRight(%s)" % new_path.name, gradient_point_parent, scene_root, box_tl_node.position + box.size)
 	texture.fill_from = (from_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
 	texture.fill_to = (to_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
+	gradient_transform_node.queue_free()
+	box_tl_node.queue_free()
+	box_br_node.queue_free()
 
 
 func create_helper_node(node_name : String, node_parent : Node2D, node_owner : Node2D,
@@ -644,6 +664,7 @@ func get_svg_style(element:XMLParser) -> Dictionary:
 
 	return style
 
+
 static func parse_attribute_string(raw_attribute_str : String) -> String:
 	var regex = RegEx.new()
 	regex.compile("\\S+")
@@ -651,3 +672,16 @@ static func parse_attribute_string(raw_attribute_str : String) -> String:
 	for result  in regex.search_all(raw_attribute_str):
 		str_path += result.get_string() + " "
 	return str_path.strip_edges()
+
+
+func _on_import_collision_polygons_check_box_toggled(toggled_on: bool) -> void:
+	import_collision_polygons = toggled_on
+	import_collision_polygons_for_all_shapes_checkbox.visible = toggled_on
+
+
+func _on_import_collision_polygons_for_all_shapes_check_box_toggled(toggled_on: bool) -> void:
+	import_collision_polygons_for_all_shapes = toggled_on
+
+
+func _on_lock_shapes_check_box_toggled(toggled_on: bool) -> void:
+	lock_shapes = toggled_on
