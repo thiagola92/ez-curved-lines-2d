@@ -122,7 +122,6 @@ func _load_svg(file_path : String) -> Node2D:
 			svg_gradients.append(parse_gradient(xml_data))
 		elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
-	log_message("Parsed gradients: %s" % str(svg_gradients), LogLevel.DEBUG)
 	log_message("Import finished.\n\nThe SVG importer is in a very early stage of development.")
 
 	var link_button := LinkButton.new()
@@ -355,19 +354,12 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						curve.add_point(cursor, c_in - cursor)
 						i += 4
 				"q":
-					log_message("WARNING: the 'q' (relative quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
-							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
 						var prev_point := curve.get_point_position(curve.get_point_count() - 1)
 						var quadratic_control_point = cursor + Vector2(float(string_array[i+1]), float(string_array[i+2]))
-						log_message("previous point pos: " + str(prev_point), LogLevel.DEBUG)
-						log_message("quadratic control point: " + str(quadratic_control_point), LogLevel.DEBUG)
 						var c_out = (quadratic_control_point - prev_point) * (2.0/3.0)
-						log_message("cubic control point out: " + str(c_out), LogLevel.DEBUG)
 						cursor += Vector2(float(string_array[i+3]), float(string_array[i+4]))
-						log_message("next point pos: " + str(cursor), LogLevel.DEBUG)
 						var c_in = (quadratic_control_point - cursor) * (2.0/3.0)
-						log_message("next control point in: " + str(c_in), LogLevel.DEBUG)
 						curve.set_point_out(curve.get_point_count() - 1, c_out)
 						curve.add_point(cursor, c_in)
 						i += 4
@@ -375,14 +367,9 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
 						var prev_point := curve.get_point_position(curve.get_point_count() - 1)
 						var quadratic_control_point := Vector2(float(string_array[i+1]), float(string_array[i+2]))
-						log_message("previous point pos: " + str(prev_point), LogLevel.DEBUG)
-						log_message("quadratic control point: " + str(quadratic_control_point), LogLevel.DEBUG)
 						var c_out = (quadratic_control_point - prev_point) * (2.0/3.0)
-						log_message("cubic control point out: " + str(c_out), LogLevel.DEBUG)
 						cursor = Vector2(float(string_array[i+3]), float(string_array[i+4]))
-						log_message("next point pos: " + str(cursor), LogLevel.DEBUG)
 						var c_in = (quadratic_control_point - cursor) * (2.0/3.0)
-						log_message("next control point in: " + str(c_in), LogLevel.DEBUG)
 						curve.set_point_out(curve.get_point_count() - 1, c_out)
 						curve.add_point(cursor, c_in)
 						i += 4
@@ -390,22 +377,18 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 					while string_array.size() > i + 2 and string_array[i+2].is_valid_float():
 						var c_out := -curve.get_point_in(curve.get_point_count() - 1)
 						var quadratic_control_point := curve.get_point_position(curve.get_point_count() - 1) + (c_out / (2.0/3.0))
-						log_message("quadratic control point: " + str(quadratic_control_point), LogLevel.DEBUG)
 						curve.set_point_out(curve.get_point_count() - 1, c_out)
 						cursor += Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						var c_in = (quadratic_control_point - cursor) * (2.0/3.0)
-						log_message("next control point in: " + str(c_in), LogLevel.DEBUG)
 						curve.add_point(cursor, c_in)
 						i += 2
 				"T":
 					while string_array.size() > i + 2 and string_array[i+2].is_valid_float():
 						var c_out := -curve.get_point_in(curve.get_point_count() - 1)
 						var quadratic_control_point := curve.get_point_position(curve.get_point_count() - 1) + (c_out / (2.0/3.0))
-						log_message("quadratic control point: " + str(quadratic_control_point), LogLevel.DEBUG)
 						curve.set_point_out(curve.get_point_count() - 1, c_out)
 						cursor = Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						var c_in = (quadratic_control_point - cursor) * (2.0/3.0)
-						log_message("next control point in: " + str(c_in), LogLevel.DEBUG)
 						curve.add_point(cursor, c_in)
 						i += 2
 				"a":
@@ -413,7 +396,6 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
 						cursor += Vector2(float(string_array[i+6]), float(string_array[i+7]))
-						log_message(str(cursor), LogLevel.DEBUG)
 						curve.add_point(cursor)
 						i += 7
 				"A":
@@ -421,7 +403,6 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
 						cursor = Vector2(float(string_array[i+6]), float(string_array[i+7]))
-						log_message(str(cursor), LogLevel.DEBUG)
 						curve.add_point(cursor)
 						i += 7
 
@@ -541,8 +522,6 @@ func add_gradient_to_fill(new_path : DrawablePath2D, svg_gradient: Dictionary, p
 	elif "href" in svg_gradient:
 		svg_gradient.merge(get_gradient_by_href(svg_gradient["href"], gradients), false)
 
-	log_message("Processing gradient #%s:" % svg_gradient["id"], LogLevel.DEBUG)
-	log_message(str(svg_gradient), LogLevel.DEBUG)
 	var texture := GradientTexture2D.new()
 	var box := new_path.get_bounding_rect()
 	texture.width = ceil(box.size.x)
@@ -662,11 +641,7 @@ func get_svg_style(element:XMLParser) -> Dictionary:
 	for style_prop in SUPPORTED_STYLES:
 		if element.has_attribute(style_prop):
 			style[style_prop] = element.get_named_attribute_value(style_prop)
-	if not style.is_empty():
-		log_message("Parsed style for <%s id=\"%s\">:" % [element.get_node_name(),
-					element.get_named_attribute_value("id") if element.has_attribute("id") else "?"],
-					LogLevel.DEBUG)
-		log_message(str(style), LogLevel.DEBUG)
+
 	return style
 
 static func parse_attribute_string(raw_attribute_str : String) -> String:
