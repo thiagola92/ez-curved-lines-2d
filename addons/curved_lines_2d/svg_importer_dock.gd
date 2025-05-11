@@ -463,13 +463,15 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		new_path.line = line
 		line.width = 1.0
 		line.closed = is_closed
+	elif "fill" not in style and "stroke" not in style:
+		style["fill"] = "#000000"
 
 	if paint_order_is_normal(style):
-		add_fill_to_path(new_path, style, scene_root, is_closed, gradients, gradient_point_parent)
+		add_fill_to_path(new_path, style, scene_root, gradients, gradient_point_parent)
 		add_stroke_to_path(new_path, style, scene_root, is_closed)
 	else:
 		add_stroke_to_path(new_path, style, scene_root, is_closed)
-		add_fill_to_path(new_path, style, scene_root, is_closed, gradients, gradient_point_parent)
+		add_fill_to_path(new_path, style, scene_root, gradients, gradient_point_parent)
 
 
 func paint_order_is_normal(style : Dictionary) -> bool:
@@ -504,7 +506,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 		line.closed = is_closed
 
 
-func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root : Node2D, is_closed: bool,
+func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root : Node2D,
 		gradients : Array[Dictionary], gradient_point_parent : Node2D):
 
 	if style.has("fill") and style["fill"] != "none":
@@ -550,23 +552,39 @@ func add_gradient_to_fill(new_path : DrawablePath2D, svg_gradient: Dictionary, p
 	texture.gradient.colors = gradient_data.values()
 	texture.gradient.offsets = gradient_data.keys()
 
-	if "x1" in svg_gradient and "y1" in svg_gradient and "x2" in svg_gradient and "y2" in svg_gradient:
+	if svg_gradient["is_radial"] and "cx" in svg_gradient and "cy" in svg_gradient and "r" in svg_gradient:
+		var gradient_transform = (
+			process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else 
+			Transform2D.IDENTITY
+		)
+		var fill_from = Vector2(float(svg_gradient["cx"]), float(svg_gradient["cy"]))
+		var fill_to = fill_from + Vector2.RIGHT * float(svg_gradient["r"])
+		apply_gradient(new_path, svg_gradient, polygon, scene_root, gradients, gradient_point_parent,
+				box, texture, fill_from, fill_to, gradient_transform)
+		texture.fill = GradientTexture2D.FILL_RADIAL
+	elif "x1" in svg_gradient and "y1" in svg_gradient and "x2" in svg_gradient and "y2" in svg_gradient:
 		var gradient_transform = (
 			process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else 
 			Transform2D.IDENTITY
 		)
 		var fill_from = Vector2(float(svg_gradient["x1"]), float(svg_gradient["y1"]))
 		var fill_to = Vector2(float(svg_gradient["x2"]), float(svg_gradient["y2"]))
-		var gradient_transform_node = create_helper_node("Gradient(%s)" % new_path.name, gradient_point_parent, scene_root, Vector2.ZERO, gradient_transform)
-		var from_node = create_helper_node("From(%s)" % new_path.name, gradient_transform_node, scene_root, fill_from)
-		var to_node = create_helper_node("To(%s)" % new_path.name, gradient_transform_node, scene_root, fill_to)
-		var box_tl_node = create_helper_node("BoxTopLeft(%s)" % new_path.name, gradient_point_parent, scene_root, new_path.position + box.position)
-		var box_br_node = create_helper_node("BoxBottomRight(%s)" % new_path.name, gradient_point_parent, scene_root, box_tl_node.position + box.size)
-		texture.fill_from = (from_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
-		texture.fill_to = (to_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
-
+		apply_gradient(new_path, svg_gradient, polygon, scene_root, gradients, gradient_point_parent,
+				box, texture, fill_from, fill_to, gradient_transform)
 	polygon.texture_offset = -box.position
 	polygon.texture = texture
+
+
+func apply_gradient(new_path : DrawablePath2D, svg_gradient: Dictionary, polygon : Polygon2D,
+		scene_root : Node2D, gradients : Array[Dictionary], gradient_point_parent : Node2D, box : Rect2,
+		texture : GradientTexture2D, fill_from : Vector2, fill_to : Vector2, gradient_transform : Transform2D) -> void:
+	var gradient_transform_node = create_helper_node("Gradient(%s)" % new_path.name, gradient_point_parent, scene_root, Vector2.ZERO, gradient_transform)
+	var from_node = create_helper_node("From(%s)" % new_path.name, gradient_transform_node, scene_root, fill_from)
+	var to_node = create_helper_node("To(%s)" % new_path.name, gradient_transform_node, scene_root, fill_to)
+	var box_tl_node = create_helper_node("BoxTopLeft(%s)" % new_path.name, gradient_point_parent, scene_root, new_path.position + box.position)
+	var box_br_node = create_helper_node("BoxBottomRight(%s)" % new_path.name, gradient_point_parent, scene_root, box_tl_node.position + box.size)
+	texture.fill_from = (from_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
+	texture.fill_to = (to_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
 
 
 func create_helper_node(node_name : String, node_parent : Node2D, node_owner : Node2D, 

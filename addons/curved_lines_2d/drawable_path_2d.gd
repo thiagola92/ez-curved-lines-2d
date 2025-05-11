@@ -101,6 +101,9 @@ func curve_changed():
 	if is_instance_valid(line):
 		line.points = new_points
 	if is_instance_valid(polygon):
+		# Fixes edge case where polygon won't fill when start- and end-node are very close
+		if new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
+			new_points.remove_at(new_points.size() - 1)
 		polygon.polygon = new_points
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
