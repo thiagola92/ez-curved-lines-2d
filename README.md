@@ -163,10 +163,11 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 
 
 ### Could have
-- [ ] It should be easier to select DrawableCurve2D in the 2D editor window
-- [ ] Set 'offset' from editor, repositioning path around this new position
+- [ ] It should be easier to select DrawableCurve2D in the 2D editor window (ReferenceRect)
+- [ ] Helper nodes for gradient from-, stop- and to-handles (Node2D @tool, use _draw only in edit mode)
+- [ ] Set 'offset' from editor, repositioning path around this new position (hijack the offset-button?)
 - [ ] SVG Import log: add button to select node with problem
-- [ ] Import inkscape pivot point
+- [ ] Import inkscape pivot point to override the centered position with
 
 ### Would be nice (if I learn how to)
 
