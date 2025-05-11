@@ -73,7 +73,7 @@ func _load_svg(file_path : String) -> Node2D:
 	scene_root.add_child(svg_root, true)
 	svg_root.set_owner(scene_root)
 	var current_node := svg_root
-	var svg_linear_gradients : Array[Dictionary] = []
+	var svg_gradients : Array[Dictionary] = []
 
 	while xml_data.read() == OK:
 		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
@@ -87,17 +87,17 @@ func _load_svg(file_path : String) -> Node2D:
 					break
 				current_node = current_node.get_parent()
 		elif xml_data.get_node_name() == "rect":
-			process_svg_rectangle(xml_data, current_node, scene_root, svg_linear_gradients)
+			process_svg_rectangle(xml_data, current_node, scene_root, svg_gradients)
 		elif xml_data.get_node_name() == "polygon":
-			process_svg_polygon(xml_data, current_node, scene_root, true, svg_linear_gradients)
+			process_svg_polygon(xml_data, current_node, scene_root, true, svg_gradients)
 		elif xml_data.get_node_name() == "polyline":
-			process_svg_polygon(xml_data, current_node, scene_root, false, svg_linear_gradients)
+			process_svg_polygon(xml_data, current_node, scene_root, false, svg_gradients)
 		elif xml_data.get_node_name() == "path":
-			process_svg_path(xml_data, current_node, scene_root, svg_linear_gradients)
+			process_svg_path(xml_data, current_node, scene_root, svg_gradients)
 		elif xml_data.get_node_name() == "circle":
-			process_svg_circle(xml_data, current_node, scene_root, svg_linear_gradients)
+			process_svg_circle(xml_data, current_node, scene_root, svg_gradients)
 		elif xml_data.get_node_name() == "ellipse":
-			process_svg_ellipse(xml_data, current_node, scene_root, svg_linear_gradients)
+			process_svg_ellipse(xml_data, current_node, scene_root, svg_gradients)
 		elif xml_data.get_node_name() == "svg":
 			if xml_data.has_attribute("viewBox") and xml_data.has_attribute("width") and xml_data.has_attribute("height"):
 				var view_box := xml_data.get_named_attribute_value("viewBox").split_floats(" ")
@@ -115,11 +115,11 @@ func _load_svg(file_path : String) -> Node2D:
 			log_message("⚠️ Skipping <style> node, only inline style attribute and some presentation attributes are supported", LogLevel.WARN)
 		elif xml_data.get_node_name() == "defs":
 			pass
-		elif xml_data.get_node_name() == "linearGradient":
-			svg_linear_gradients.append(parse_linear_gradient(xml_data, svg_linear_gradients))
+		elif xml_data.get_node_name() == "linearGradient" or xml_data.get_node_name() == "radialGradient":
+			svg_gradients.append(parse_gradient(xml_data))
 		elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
-	log_message("Parsed linear gradients: %s" % str(svg_linear_gradients), LogLevel.DEBUG)
+	log_message("Parsed gradients: %s" % str(svg_gradients), LogLevel.DEBUG)
 	log_message("Import finished.\n\nThe SVG importer is in a very early stage of development.")
 	
 	var link_button := LinkButton.new()
@@ -136,24 +136,26 @@ func get_gradient_by_href(href : String, gradients : Array[Dictionary]) -> Dicti
 	return gradients[idx]
 
 
-func parse_linear_gradient(xml_data : XMLParser, current_gradients : Array[Dictionary]) -> Dictionary:
-	var new_gradient := {}
-	for i in range(xml_data.get_attribute_count()):
-		new_gradient[xml_data.get_attribute_name(i)] = xml_data.get_attribute_value(i)
-
-	if not xml_data.is_empty():
+func parse_gradient(element : XMLParser) -> Dictionary:
+	var new_gradient := {
+		'is_radial': element.get_node_name() == "radialGradient"
+	}
+	for i in range(element.get_attribute_count()):
+		new_gradient[element.get_attribute_name(i)] = element.get_attribute_value(i)
+	if not element.is_empty():
 		new_gradient["stops"] = []
-		while xml_data.read() == OK:
-			if xml_data.get_node_type() == XMLParser.NODE_ELEMENT and xml_data.get_node_name() == "stop":
+		while element.read() == OK:
+			if element.get_node_type() == XMLParser.NODE_ELEMENT and element.get_node_name() == "stop":
 				new_gradient["stops"].append({
-					"style": get_svg_style(xml_data),
-					"offset": float(xml_data.get_named_attribute_value_safe("offset")),
-					"id": xml_data.get_named_attribute_value_safe("id")
+					"style": get_svg_style(element),
+					"offset": float(element.get_named_attribute_value_safe("offset")),
+					"id": element.get_named_attribute_value_safe("id")
 				})
-			elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT_END and xml_data.get_node_name() == "linearGradient":
+			elif element.get_node_type() == XMLParser.NODE_ELEMENT_END and element.get_node_name() == "linearGradient":
 				break
-
 	return new_gradient
+
+
 
 
 func process_group(element:XMLParser, current_node : Node2D, scene_root : Node2D) -> Node2D:
@@ -504,6 +506,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 
 func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root : Node2D, is_closed: bool,
 		gradients : Array[Dictionary], gradient_point_parent : Node2D):
+
 	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
@@ -512,70 +515,71 @@ func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root :
 		if style["fill"].begins_with("url"):
 			var href : String = style["fill"].replace("url(", "").replace(")", "")
 			var svg_gradient = get_gradient_by_href(href, gradients)
-			if "xlink:href" in svg_gradient:
-				svg_gradient.merge(get_gradient_by_href(svg_gradient["xlink:href"], gradients), false)
-			elif "href" in svg_gradient:
-				svg_gradient.merge(get_gradient_by_href(svg_gradient["href"], gradients), false)
-
-			log_message("Processing gradient %s:" % href, LogLevel.DEBUG)
-			log_message(str(svg_gradient), LogLevel.DEBUG)
-			var texture := GradientTexture2D.new()
-			var box := new_path.get_bounding_rect()
-			texture.width = ceil(box.size.x)
-			texture.height = ceil(box.size.y)
-			texture.gradient = Gradient.new()
-			var stops = svg_gradient["stops"] if "stops" in svg_gradient else []
-			var gradient_data := {}
-			for i in range(stops.size()):
-				var stop_style = stops[i]["style"] if "style" in stops[i] else { "stop-color": "#ffffff" }
-				var stop_color = stop_style["stop-color"] if "stop-color" in stop_style else "#ffffff"
-				var stop_opacity = stop_style["stop-opacity"] if "stop-opacity" in stop_style else "1"
-				gradient_data[float(stops[i]["offset"])] = Color(stop_color, float(stop_opacity))
-			texture.gradient.colors = gradient_data.values()
-			texture.gradient.offsets = gradient_data.keys()
-			if "x1" in svg_gradient and "y1" in svg_gradient and "x2" in svg_gradient and "y2" in svg_gradient:
-				var transform = (
-					process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else 
-					Transform2D.IDENTITY
-				)
-				var fill_from = Vector2(float(svg_gradient["x1"]), float(svg_gradient["y1"]))
-				var fill_to = Vector2(float(svg_gradient["x2"]), float(svg_gradient["y2"]))
-				var gradient_transform_node = Node2D.new()
-				var from_node = Node2D.new()
-				var to_node = Node2D.new()
-				var box_tl_node = Node2D.new()
-				var box_br_node = Node2D.new()
-				gradient_transform_node.name = "Gradient(%s)" % new_path.name
-				from_node.position = fill_from
-				from_node.name = "From(%s)" % new_path.name
-				to_node.position = fill_to
-				to_node.name = "To(%s)" % new_path.name
-				box_tl_node.position = new_path.position + box.position
-				box_br_node.position = box_tl_node.position + box.size
-				box_tl_node.name = "BoxTopLeft(%s)" % new_path.name
-				box_br_node.name = "BoxBottomRight(%s)" % new_path.name
-				gradient_transform_node.add_child(from_node, true)
-				gradient_transform_node.add_child(to_node, true)
-				gradient_point_parent.add_child(gradient_transform_node, true)
-				gradient_transform_node.set_owner(scene_root)
-				gradient_transform_node.transform = transform
-				gradient_point_parent.add_child(box_tl_node, true)
-				gradient_point_parent.add_child(box_br_node, true)
-				box_tl_node.set_owner(scene_root)
-				box_br_node.set_owner(scene_root)
-				to_node.set_owner(scene_root)
-				from_node.set_owner(scene_root)
-				texture.fill_from = (from_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
-				texture.fill_to = (to_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
-				
-
-			polygon.texture_offset = -box.position
-			polygon.texture = texture
+			if svg_gradient.is_empty():
+				log_message("⚠️ Cannot find gradient for href=%s" % href, LogLevel.WARN)
+			else:
+				add_gradient_to_fill(new_path, svg_gradient, polygon, scene_root, gradients, gradient_point_parent)
 		else:
 			polygon.color = Color(style["fill"])
 		if style.has("fill-opacity"):
 			polygon.self_modulate.a = float(style["fill-opacity"])
 		new_path.polygon = polygon
+
+
+func add_gradient_to_fill(new_path : DrawablePath2D, svg_gradient: Dictionary, polygon : Polygon2D,
+		scene_root : Node2D, gradients : Array[Dictionary], gradient_point_parent : Node2D) -> void:
+	if "xlink:href" in svg_gradient:
+		svg_gradient.merge(get_gradient_by_href(svg_gradient["xlink:href"], gradients), false)
+	elif "href" in svg_gradient:
+		svg_gradient.merge(get_gradient_by_href(svg_gradient["href"], gradients), false)
+
+	log_message("Processing gradient #%s:" % svg_gradient["id"], LogLevel.DEBUG)
+	log_message(str(svg_gradient), LogLevel.DEBUG)
+	var texture := GradientTexture2D.new()
+	var box := new_path.get_bounding_rect()
+	texture.width = ceil(box.size.x)
+	texture.height = ceil(box.size.y)
+	texture.gradient = Gradient.new()
+	var stops = svg_gradient["stops"] if "stops" in svg_gradient else []
+	var gradient_data := {}
+	for i in range(stops.size()):
+		var stop_style = stops[i]["style"] if "style" in stops[i] else { "stop-color": "#ffffff" }
+		var stop_color = stop_style["stop-color"] if "stop-color" in stop_style else "#ffffff"
+		var stop_opacity = stop_style["stop-opacity"] if "stop-opacity" in stop_style else "1"
+		gradient_data[float(stops[i]["offset"])] = Color(stop_color, float(stop_opacity))
+	texture.gradient.colors = gradient_data.values()
+	texture.gradient.offsets = gradient_data.keys()
+
+	if "x1" in svg_gradient and "y1" in svg_gradient and "x2" in svg_gradient and "y2" in svg_gradient:
+		var gradient_transform = (
+			process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else 
+			Transform2D.IDENTITY
+		)
+		var fill_from = Vector2(float(svg_gradient["x1"]), float(svg_gradient["y1"]))
+		var fill_to = Vector2(float(svg_gradient["x2"]), float(svg_gradient["y2"]))
+		var gradient_transform_node = create_helper_node("Gradient(%s)" % new_path.name, gradient_point_parent, scene_root, Vector2.ZERO, gradient_transform)
+		var from_node = create_helper_node("From(%s)" % new_path.name, gradient_transform_node, scene_root, fill_from)
+		var to_node = create_helper_node("To(%s)" % new_path.name, gradient_transform_node, scene_root, fill_to)
+		var box_tl_node = create_helper_node("BoxTopLeft(%s)" % new_path.name, gradient_point_parent, scene_root, new_path.position + box.position)
+		var box_br_node = create_helper_node("BoxBottomRight(%s)" % new_path.name, gradient_point_parent, scene_root, box_tl_node.position + box.size)
+		texture.fill_from = (from_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
+		texture.fill_to = (to_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
+
+	polygon.texture_offset = -box.position
+	polygon.texture = texture
+
+
+func create_helper_node(node_name : String, node_parent : Node2D, node_owner : Node2D, 
+		node_position := Vector2.ZERO, node_transform := Transform2D.IDENTITY) -> Node2D:
+	var helper_node := Node2D.new()
+	helper_node.name = node_name
+	node_parent.add_child(helper_node, true)
+	helper_node.set_owner(node_owner)
+	if node_position != Vector2.ZERO:
+		helper_node.position = node_position
+	if node_transform != Transform2D.IDENTITY:
+		helper_node.transform = node_transform
+	return helper_node
 
 
 func get_svg_transform(element:XMLParser) -> Transform2D:
