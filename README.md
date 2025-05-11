@@ -26,7 +26,7 @@ Using godot's `AnimationPlayer` you can even create key frames for the curves li
 	- [Leopard face timelapse on Youtube](#leopard-face-timelapse-on-youtube)
 	- [Attributions](#attributions)
 	- [SVG Path importer TODO](#svg-path-importer-todo)
-		- [Must have](#must-have)
+		- [Must have (MVP)](#must-have-mvp)
 		- [Should have](#should-have)
 		- [Could have](#could-have)
 		- [Would be nice (if I learn how to)](#would-be-nice-if-i-learn-how-to)
@@ -138,7 +138,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 
 ## SVG Path importer TODO
 
-### Must have
+### Must have (MVP)
 
 - [x] Rectangle to path converter (incl. rx and ry)
 - [x] Circle and ellipse to path converter
