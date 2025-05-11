@@ -3,8 +3,10 @@ extends Control
 
 # Fraction of a radius for a bezier control point
 const R_TO_CP = 0.5523
-const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "stroke-opacity", 
+const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "stroke-opacity",
 		"fill", "fill-opacity", "paint-order"]
+const SVG_ROOT_META_NAME := "svg_root"
+const SVG_STYLE_META_NAME := "svg_style"
 
 enum LogLevel { DEBUG, INFO, WARN, ERROR }
 var undo_redo : EditorUndoRedoManager = null
@@ -52,7 +54,7 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 func _drop_data(at_position: Vector2, data: Variant) -> void:
 	if _can_drop_data(at_position, data):
 		var svg_root = _load_svg(data["files"][0])
-		
+
 
 func _load_svg(file_path : String) -> Node2D:
 	for child in log_container.get_children():
@@ -69,7 +71,8 @@ func _load_svg(file_path : String) -> Node2D:
 
 	log_message("Importing SVG file: %s" % file_path, LogLevel.INFO)
 	var svg_root := Node2D.new()
-	svg_root.name = "SvgImport"
+	svg_root.name = file_path.get_file().replace(".svg", "").capitalize()
+	svg_root.set_meta(SVG_ROOT_META_NAME, true)
 	scene_root.add_child(svg_root, true)
 	svg_root.set_owner(scene_root)
 	var current_node := svg_root
@@ -121,7 +124,7 @@ func _load_svg(file_path : String) -> Node2D:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
 	log_message("Parsed gradients: %s" % str(svg_gradients), LogLevel.DEBUG)
 	log_message("Import finished.\n\nThe SVG importer is in a very early stage of development.")
-	
+
 	var link_button := LinkButton.new()
 	link_button.text = "Click here to report issues or improvement requests on github"
 	link_button.uri = "https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues"
@@ -156,14 +159,13 @@ func parse_gradient(element : XMLParser) -> Dictionary:
 	return new_gradient
 
 
-
-
 func process_group(element:XMLParser, current_node : Node2D, scene_root : Node2D) -> Node2D:
 	var new_group = Node2D.new()
 	new_group.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Group"
 	new_group.transform = get_svg_transform(element)
 	current_node.add_child(new_group, true)
 	new_group.set_owner(scene_root)
+	new_group.set_meta(SVG_STYLE_META_NAME, get_svg_style(element))
 	return new_group
 
 
@@ -186,7 +188,7 @@ func process_svg_ellipse(element:XMLParser, current_node : Node2D, scene_root : 
 	create_path_from_ellipse(element, path_name, rx, ry, Vector2(cx, cy), current_node, scene_root, gradients)
 
 
-func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float, ry: float, 
+func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float, ry: float,
 		pos : Vector2, current_node : Node2D, scene_root : Node2D,
 		gradients : Array[Dictionary]) -> void:
 	var curve := Curve2D.new()
@@ -195,7 +197,7 @@ func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float,
 	curve.add_point(Vector2(-rx, 0), Vector2(0, ry * R_TO_CP), Vector2(0, -ry * R_TO_CP))
 	curve.add_point(Vector2(0, -ry), Vector2(-rx * R_TO_CP, 0), Vector2(rx * R_TO_CP, 0))
 	curve.add_point(Vector2(rx, 0), Vector2(0, -ry * R_TO_CP))
-	create_path2d(path_name, current_node, curve, 
+	create_path2d(path_name, current_node, curve,
 			get_svg_transform(element),
 			get_svg_style(element), scene_root, gradients, true, pos)
 
@@ -270,7 +272,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 		var cursor = Vector2.ZERO
 		var curve = Curve2D.new()
 		string_array_count += 1
-		
+
 		for i in string_array.size()-1:
 			match string_array[i]:
 				"m":
@@ -313,7 +315,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						cursor = Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor)
 						i += 2
-				"c": 
+				"c":
 					while string_array.size() > i + 6 and string_array[i+1].is_valid_float():
 						var c_out := Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						var c_2 :=  Vector2(float(string_array[i+3]), float(string_array[i+4]))
@@ -353,7 +355,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						curve.add_point(cursor, c_in - cursor)
 						i += 4
 				"q":
-					log_message("WARNING: the 'q' (relative quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+					log_message("WARNING: the 'q' (relative quadratic Bézier curveto) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
 						var prev_point := curve.get_point_position(curve.get_point_count() - 1)
@@ -407,7 +409,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						curve.add_point(cursor, c_in)
 						i += 2
 				"a":
-					log_message("WARNING: the 'a' (relative arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+					log_message("WARNING: the 'a' (relative arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
 						cursor += Vector2(float(string_array[i+6]), float(string_array[i+7]))
@@ -415,7 +417,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						curve.add_point(cursor)
 						i += 7
 				"A":
-					log_message("WARNING: the 'A' (absolute arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" % 
+					log_message("WARNING: the 'A' (absolute arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
 						cursor = Vector2(float(string_array[i+6]), float(string_array[i+7]))
@@ -425,12 +427,12 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 
 		if curve.get_point_count() > 1:
 			var id = element.get_named_attribute_value("id") if element.has_attribute("id") else "Path"
-			create_path2d(id + "_" + str(string_array_count), current_node,  curve, 
+			create_path2d(id, current_node,  curve,
 						get_svg_transform(element), get_svg_style(element), scene_root, gradients,
 						string_array[string_array.size()-1].to_upper() == "Z")
 
 
-func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: Transform2D, 
+func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: Transform2D,
 						style: Dictionary, scene_root: Node2D, gradients : Array[Dictionary],
 						is_closed := false, pos_override := Vector2.ZERO) -> void:
 	var new_path = DrawablePath2D.new()
@@ -440,7 +442,11 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	new_path.self_modulate = Color.TRANSPARENT
 	if pos_override == Vector2.ZERO:
 		new_path.set_position_to_center()
-	
+
+	var ancestor = parent
+	while !ancestor.has_meta(SVG_ROOT_META_NAME):
+		style.merge(ancestor.get_meta(SVG_STYLE_META_NAME, {}))
+		ancestor = ancestor.get_parent()
 	var gradient_point_parent : Node2D = parent
 	if transform == Transform2D.IDENTITY:
 		parent.add_child(new_path, true)
@@ -486,7 +492,7 @@ func paint_order_is_normal(style : Dictionary) -> bool:
 
 
 func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D, is_closed: bool):
-	if style.has("stroke") and style["stroke"] != "none": 
+	if style.has("stroke") and style["stroke"] != "none":
 		var line := Line2D.new()
 		line.name = "Stroke"
 		new_path.add_child(line, true)
@@ -554,7 +560,7 @@ func add_gradient_to_fill(new_path : DrawablePath2D, svg_gradient: Dictionary, p
 
 	if svg_gradient["is_radial"] and "cx" in svg_gradient and "cy" in svg_gradient and "r" in svg_gradient:
 		var gradient_transform = (
-			process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else 
+			process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else
 			Transform2D.IDENTITY
 		)
 		var fill_from = Vector2(float(svg_gradient["cx"]), float(svg_gradient["cy"]))
@@ -564,7 +570,7 @@ func add_gradient_to_fill(new_path : DrawablePath2D, svg_gradient: Dictionary, p
 		texture.fill = GradientTexture2D.FILL_RADIAL
 	elif "x1" in svg_gradient and "y1" in svg_gradient and "x2" in svg_gradient and "y2" in svg_gradient:
 		var gradient_transform = (
-			process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else 
+			process_svg_transform(svg_gradient["gradientTransform"]) if "gradientTransform" in svg_gradient else
 			Transform2D.IDENTITY
 		)
 		var fill_from = Vector2(float(svg_gradient["x1"]), float(svg_gradient["y1"]))
@@ -587,7 +593,7 @@ func apply_gradient(new_path : DrawablePath2D, svg_gradient: Dictionary, polygon
 	texture.fill_to = (to_node.global_position - box_tl_node.global_position) / (box_br_node.global_position - box_tl_node.global_position)
 
 
-func create_helper_node(node_name : String, node_parent : Node2D, node_owner : Node2D, 
+func create_helper_node(node_name : String, node_parent : Node2D, node_owner : Node2D,
 		node_position := Vector2.ZERO, node_transform := Transform2D.IDENTITY) -> Node2D:
 	var helper_node := Node2D.new()
 	helper_node.name = node_name
@@ -651,7 +657,7 @@ func get_svg_style(element:XMLParser) -> Dictionary:
 			style = json.data
 		else:
 			log_message("Failed to parse some styles for <%s id=\"%s\">" % [element.get_node_name(),
-					element.get_named_attribute_value("id") if element.has_attribute("id") else "?"], 
+					element.get_named_attribute_value("id") if element.has_attribute("id") else "?"],
 					LogLevel.WARN)
 	for style_prop in SUPPORTED_STYLES:
 		if element.has_attribute(style_prop):
