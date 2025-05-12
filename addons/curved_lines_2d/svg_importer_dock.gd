@@ -21,18 +21,27 @@ var debug_label_settings : LabelSettings = null
 var import_collision_polygons := false
 var import_collision_polygons_for_all_shapes := false
 var import_collision_polygons_for_all_shapes_checkbox : Control = null
+var keep_drawable_path_node := true
+var lock_shapes_checkbox : Control = null
 var lock_shapes := true
-
+var antialiased_shapes := false
+var import_file_dialog : EditorFileDialog = null
 
 func _enter_tree() -> void:
 	log_scroll_container = find_child("ScrollContainer")
 	log_container = find_child("ImportLogContainer")
 	import_collision_polygons_for_all_shapes_checkbox = find_child("ImportCollisionPolygonsForAllShapesCheckBox")
+	lock_shapes_checkbox = find_child("LockShapesCheckBox")
 	error_label_settings = preload("res://addons/curved_lines_2d/error_label_settings.tres")
 	warning_label_settings = preload("res://addons/curved_lines_2d/warn_label_settings.tres")
 	info_label_settings = preload("res://addons/curved_lines_2d/info_label_settings.tres")
 	debug_label_settings = preload("res://addons/curved_lines_2d/debug_label_settings.tres")
 	log_scroll_container.get_v_scroll_bar().connect("changed", func(): log_scroll_container.scroll_vertical = log_scroll_container.get_v_scroll_bar().max_value )
+	import_file_dialog = EditorFileDialog.new()
+	import_file_dialog.add_filter("*.svg", "SVG image")
+	import_file_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
+	import_file_dialog.file_selected.connect(_load_svg)
+	EditorInterface.get_base_control().add_child(import_file_dialog)
 
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
@@ -428,7 +437,7 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	new_path.name = path_name
 	new_path.position = pos_override
 	new_path.curve = curve
-	new_path.lock_assigned_shapes = lock_shapes
+	new_path.lock_assigned_shapes = keep_drawable_path_node and lock_shapes
 	new_path.self_modulate = Color.TRANSPARENT
 	if pos_override == Vector2.ZERO:
 		new_path.set_position_to_center()
@@ -454,6 +463,7 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	if style.is_empty():
 		var line := Line2D.new()
 		line.name = "Stroke"
+		line.antialiased = antialiased_shapes
 		new_path.add_child(line, true)
 		line.set_owner(scene_root)
 		new_path.line = line
@@ -477,6 +487,13 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		poly.set_owner(scene_root)
 		new_path.collision_polygon = poly
 
+	if not keep_drawable_path_node:
+		var bare_node := Node2D.new()
+		bare_node.name = new_path.name
+		bare_node.position = new_path.position
+		new_path.replace_by(bare_node)
+		new_path.queue_free()
+
 
 func paint_order_is_normal(style : Dictionary) -> bool:
 	if style.has("paint-order"):
@@ -493,6 +510,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 	if style.has("stroke") and style["stroke"] != "none":
 		var line := Line2D.new()
 		line.name = "Stroke"
+		line.antialiased = antialiased_shapes
 		new_path.add_child(line, true)
 		line.set_owner(scene_root)
 		if style["stroke"].begins_with("url"):
@@ -516,6 +534,7 @@ func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root :
 	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
+		polygon.antialiased = antialiased_shapes
 		new_path.add_child(polygon, true)
 		polygon.set_owner(scene_root)
 		if style["fill"].begins_with("url"):
@@ -683,5 +702,18 @@ func _on_import_collision_polygons_for_all_shapes_check_box_toggled(toggled_on: 
 	import_collision_polygons_for_all_shapes = toggled_on
 
 
+func _on_keep_drawable_path_2d_node_check_box_toggled(toggled_on: bool) -> void:
+	keep_drawable_path_node = toggled_on
+	lock_shapes_checkbox.visible = toggled_on
+
+
 func _on_lock_shapes_check_box_toggled(toggled_on: bool) -> void:
 	lock_shapes = toggled_on
+
+
+func _on_antialiased_check_box_toggled(toggled_on: bool) -> void:
+	antialiased_shapes = toggled_on
+
+
+func _on_open_file_dialog_button_pressed() -> void:
+	import_file_dialog.popup_file_dialog()

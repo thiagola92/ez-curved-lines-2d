@@ -155,17 +155,17 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 - [x] Inherit style from parent node (&lt;g&gt;)
 - [x] Import option: collision polygon
 - [x] Import option: lock nodes
-- [ ] Import option: Keep Bezier Curves in DrawablePath2D (hides/shows lock nodes)
-- [ ] Import option: tesselation settings
+- [x] Import option: Keep Bezier Curves in DrawablePath2D (hides/shows lock nodes)
 
 
 ### Should have
 - [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
 - [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
+- [ ] It should be easier to select DrawableCurve2D in the 2D editor window (ReferenceRect)
+- [ ] Draw a more subtle path in stead of hiding the Path2D
 
 ### Could have
 - [ ] Add button to editor to call center node position func
-- [ ] It should be easier to select DrawableCurve2D in the 2D editor window (ReferenceRect)
 - [ ] Helper nodes for gradient from-, stop- and to-handles (Node2D @tool, use _draw only in edit mode)
 - [ ] Set 'offset' from editor, repositioning path around this new position (hijack the offset-button?)
 - [ ] SVG Import log: add button to select node with problem
