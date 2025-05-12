@@ -51,6 +51,8 @@ signal assigned_node_changed()
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
+var lock_assigned_shapes := true
+
 # Wire up signals at runtime
 func _ready():
 	if update_curve_at_runtime:
@@ -79,13 +81,16 @@ func _exit_tree():
 
 func _on_assigned_node_changed():
 	if is_instance_valid(line):
-		line.set_meta("_edit_lock_", true)
+		if lock_assigned_shapes:
+			line.set_meta("_edit_lock_", true)
 		curve_changed()
 	if is_instance_valid(polygon):
-		polygon.set_meta("_edit_lock_", true)
+		if lock_assigned_shapes:
+			polygon.set_meta("_edit_lock_", true)
 		curve_changed()
 	if is_instance_valid(collision_polygon):
-		collision_polygon.set_meta("_edit_lock_", true)
+		if lock_assigned_shapes:
+			collision_polygon.set_meta("_edit_lock_", true)
 		curve_changed()
 
 
@@ -98,6 +103,10 @@ func curve_changed():
 		return
 
 	var new_points := curve.tessellate(max_stages, tolerance_degrees)
+	# Fixes cases start- and end-node are so close to each other that
+	# polygons won't fill and closed lines won't cap nicely
+	if new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
+		new_points.remove_at(new_points.size() - 1)
 	if is_instance_valid(line):
 		line.points = new_points
 	if is_instance_valid(polygon):
@@ -105,3 +114,27 @@ func curve_changed():
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
+
+
+func get_bounding_rect() -> Rect2:
+	var points := curve.tessellate(max_stages, tolerance_degrees)
+	if points.size() < 1:
+		# Cannot calculate a center for 0 points 
+		return Rect2(Vector2.ZERO, Vector2.ZERO)
+	var minx := INF
+	var miny := INF
+	var maxx := -INF
+	var maxy := -INF
+	for p : Vector2 in points:
+		minx = p.x if p.x < minx else minx
+		miny = p.y if p.y < miny else miny
+		maxx = p.x if p.x > maxx else maxx
+		maxy = p.y if p.y > maxy else maxy
+	return Rect2(minx, miny, maxx - minx, maxy - miny)
+
+
+func set_position_to_center() -> void:
+	var c = get_bounding_rect().get_center()
+	position += c
+	for i in range(curve.get_point_count()):
+		curve.set_point_position(i, curve.get_point_position(i) - c)

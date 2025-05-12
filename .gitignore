@@ -3,3 +3,4 @@
 /android/
 .editorconfig
 addons/godot-plugin-refresher
+.vscode
