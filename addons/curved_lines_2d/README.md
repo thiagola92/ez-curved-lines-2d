@@ -144,7 +144,7 @@ The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by 
 
 # Experimental SVG Importer for `Polygon2D`, `Line2D` and `CollisionPolygon2D`
 
-Release 1.3.0 ships an experimental import for seamless `.svg` files (scalable) vector graphics. Inspired by the importer script in [pixelriot/SVG2Godpt](https://github.com/pixelriot/SVG2Godot), it adds Bezier Curve support, building upon the `DrawablePath2D` node.
+Release 1.3.0 ships an experimental import for seamless `.svg` files (scalable) vector graphics. Inspired by the importer script in [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot), it adds Bezier Curve support, building upon the `DrawablePath2D` node.
 
 ![SVG Importer panel](./screenshots/svg_importer_screenshot.png)
 
