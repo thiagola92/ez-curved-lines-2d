@@ -4,6 +4,10 @@ This plugin helps you draw smooth curved 2D lines, polygons and collision polygo
 
 Using godot's `AnimationPlayer` you can even create key frames for the curves lines to animate them.
 
+Version 1.3.0 adds an experimental [importer for SVG files](#experimental-svg-importer-for-polygon2d-line2d-and-collisionpolygon2d) via the bottom pane.
+
+Contact me on bluesky: [@zucht2.bsky.social](https://bsky.app/profile/zucht2.bsky.social)
+
 
 - [EZ Curved Lines 2D for Godot 4.4](#ez-curved-lines-2d-for-godot-44)
   - [Quick Start](#quick-start)
@@ -25,6 +29,12 @@ Using godot's `AnimationPlayer` you can even create key frames for the curves li
   - [Explainer on Youtube](#explainer-on-youtube)
   - [Leopard face timelapse on Youtube](#leopard-face-timelapse-on-youtube)
   - [Attributions](#attributions)
+- [Experimental SVG Importer for `Polygon2D`, `Line2D` and `CollisionPolygon2D`](#experimental-svg-importer-for-polygon2d-line2d-and-collisionpolygon2d)
+  - [Wishlist / Roadmap](#wishlist--roadmap)
+    - [Must have (MVP)](#must-have-mvp)
+    - [Should have](#should-have)
+    - [Could have](#could-have)
+    - [Would be nice (if I learn how to)](#would-be-nice-if-i-learn-how-to)
 
 
 ## Quick Start
@@ -131,3 +141,58 @@ This way you can move it up the hierarchy of your scene to become a direct desce
 This plugin was fully inspired by [Mark Hedberg's blog on rendering curves in Godot](https://www.hedberggames.com/blog/rendering-curves-in-godot).
 
 The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames)
+
+# Experimental SVG Importer for `Polygon2D`, `Line2D` and `CollisionPolygon2D`
+
+Release 1.3.0 ships an experimental import for seamless `.svg` files (scalable) vector graphics. Inspired by the importer script in [pixelriot/SVG2Godpt](https://github.com/pixelriot/SVG2Godot), it adds Bezier Curve support, building upon the `DrawablePath2D` node.
+
+![SVG Importer panel](./screenshots/svg_importer_screenshot.png)
+
+It supports a very small - yet (in my humble opinion) relevant - subset of the [svg specification](https://www.w3.org/TR/SVG/Overview.html).
+
+My humble invitation to you is to try it out, give feedback, suggest improvements, fix bugs, in short: contribute.
+
+## Wishlist / Roadmap
+
+### Must have (MVP)
+
+- [x] Rectangle to path converter (incl. rx and ry)
+- [x] Circle and ellipse to path converter
+- [x] Polygon and polyline to path converter
+- [x] Code clean up (Circle2D replaced by path conversion)
+- [x] Set node-position to path center (reset and remember node transforms, get center of computed points, set subtract center from curve points, reapply transforms)
+- [x] Style support: opacity, stroke-opacity,
+- [x] styles from style named attributes (i.e. stroke-width, stroke, etc)
+- [x] Style support: paint-order
+- [x] Show warnings and hints for unsupported stuff: unhandled nodes, arcs
+- [x] Quadratic bezier curves
+- [x] Linear Gradient Fill polygons
+- [x] Radial Gradient Fill polygons (partial)
+- [x] Inherit style from parent node (&lt;g&gt;)
+- [x] Import option: collision polygon
+- [x] Import option: lock nodes
+- [x] Import option: Keep Bezier Curves in DrawablePath2D (hides/shows lock nodes)
+
+
+### Should have
+- [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
+- [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
+- [ ] It should be easier to select DrawableCurve2D in the 2D editor window
+- [ ] Draw a more subtle path in stead of hiding the Path2D
+- [ ] Set 'offset' from editor, repositioning path around this new position (hijack the offset-button?)
+
+### Could have
+- [ ] Add button to editor to call center node position func
+- [ ] Helper nodes for gradient from-, stop- and to-handles (Node2D @tool, use _draw only in edit mode)
+- [ ] SVG Import log: add button to select node with problem
+- [ ] Import inkscape pivot point to override the centered position with
+- [ ] SVG Import log: show/hide different log levels, clear log
+- [ ] Import `<text>` (with embedded fonts? reference to ttf with a dialog?)
+
+### Would be nice (if I learn how to)
+
+- [ ] Arcs to cubic bezier curve conversion
+- [ ] Gradient fills for Line2D strokes (would probably require a shader)
+- [ ] Gradient skew, rotate, fx/fy/fr
+- [ ] Pattern fills
+- [ ] Undo/Redo (Undo = delete SvgImport node)

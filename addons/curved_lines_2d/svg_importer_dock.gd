@@ -26,6 +26,7 @@ var lock_shapes_checkbox : Control = null
 var lock_shapes := true
 var antialiased_shapes := false
 var import_file_dialog : EditorFileDialog = null
+var warning_dialog : AcceptDialog = null
 
 func _enter_tree() -> void:
 	log_scroll_container = find_child("ScrollContainer")
@@ -42,6 +43,8 @@ func _enter_tree() -> void:
 	import_file_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
 	import_file_dialog.file_selected.connect(_load_svg)
 	EditorInterface.get_base_control().add_child(import_file_dialog)
+	warning_dialog = AcceptDialog.new()
+	EditorInterface.get_base_control().add_child(warning_dialog)
 
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
@@ -57,6 +60,8 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 	var lbl := Label.new()
 	match log_level:
 		LogLevel.ERROR:
+			warning_dialog.dialog_text = msg
+			warning_dialog.popup_centered()
 			lbl.label_settings = error_label_settings
 		LogLevel.WARN:
 			lbl.label_settings = warning_label_settings
