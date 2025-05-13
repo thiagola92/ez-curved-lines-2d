@@ -54,7 +54,9 @@ signal assigned_node_changed()
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
-var lock_assigned_shapes := true
+@export_group("Editor settings")
+@export var shape_hint_color := Color.LIME_GREEN
+@export var lock_assigned_shapes := true
 
 # Wire up signals at runtime
 func _ready():
@@ -100,10 +102,34 @@ func _on_assigned_node_changed():
 		curve_changed()
 
 
+func _draw_hint_rect(stroke_width : float, color : Color) -> void:
+	var vp_zoom = EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
+	var hint_rect = get_bounding_rect().grow(
+		line.width / 2.0 if is_instance_valid(line) else 0
+	)
+	draw_rect(hint_rect, color, false, (stroke_width / global_scale.x) / vp_zoom)
+
+
+func _draw_curve() -> void:
+	var vp_zoom = EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
+	var points = curve.tessellate(max_stages, tolerance_degrees)
+	var color := shape_hint_color if shape_hint_color else Color.LIME_GREEN
+	var last_p := Vector2.INF
+	for p : Vector2 in points:
+		if last_p != Vector2.INF:
+			draw_line(last_p, p, color, (1 / global_scale.x) / vp_zoom, true)
+		last_p = p
+	if is_instance_valid(line) and line.closed and points.size() > 1:
+		draw_line(last_p, points[0], color, (1 / global_scale.x) / vp_zoom, true)
+
 func _draw() -> void:
 	if Engine.is_editor_hint():
+		var editor_selection := EditorInterface.get_selection()
 		if has_meta("_select_hint_"):
-			draw_rect(get_bounding_rect(), Color.WEB_GRAY, false, -1)
+			_draw_hint_rect(1, Color.WEB_GRAY)
+		if self == editor_selection.get_selected_nodes().pop_back():
+			_draw_hint_rect(2, Color(0.737, 0.463, 0.337))
+			_draw_curve()
 	else:
 		return
 
@@ -128,6 +154,8 @@ func curve_changed():
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
+	if Engine.is_editor_hint():
+		queue_redraw()
 
 
 ## Calculate and return the bounding rect in local space
