@@ -175,10 +175,12 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 
 ### Should have
 - [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
+- [x] It should be easier to select ScalableVectorShape2D in the 2D editor window
+- [x] Set 'offset' from editor, repositioning path around this new position (hijack the offset-button?)
+- [x] Draw a more subtle path in stead of hiding the Path2D
+- [ ] Create handles for ScalableVectorShape2D bezier manipulation (like inkscape)
 - [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
-- [ ] It should be easier to select DrawableCurve2D in the 2D editor window
-- [ ] Draw a more subtle path in stead of hiding the Path2D
-- [ ] Set 'offset' from editor, repositioning path around this new position (hijack the offset-button?)
+- [ ] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 
 ### Could have
 - [ ] Add button to editor to call center node position func

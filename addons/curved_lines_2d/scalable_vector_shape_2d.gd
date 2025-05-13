@@ -193,3 +193,12 @@ func set_position_to_center() -> void:
 	position += c
 	for i in range(curve.get_point_count()):
 		curve.set_point_position(i, curve.get_point_position(i) - c)
+
+
+func set_origin(global_pos : Vector2) -> void:
+	var local_pos = to_local(global_pos)
+	for i in range(curve.get_point_count()):
+		curve.set_point_position(i, curve.get_point_position(i) - local_pos)
+	global_position = global_pos
+	if is_instance_valid(polygon) and polygon.texture is GradientTexture2D:
+		polygon.texture_offset = -get_bounding_rect().position

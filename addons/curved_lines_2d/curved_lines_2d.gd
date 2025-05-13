@@ -47,6 +47,17 @@ func find_scalable_vector_shape_2d_nodes_at(pos : Vector2) -> Array[Node]:
 					.filter(func(x : ScalableVectorShape2D): return x.has_point(pos)))
 	return []
 
+
+func _is_change_pivot_button_active() -> bool:
+	var results = (
+			EditorInterface.get_editor_viewport_2d().find_parent("*CanvasItemEditor*")
+					.find_children("*Button*", "", true, false)
+	)
+	if results.size() >= 6:
+		return results[5].button_pressed
+	return false
+
+
 func _get_select_mode_button() -> Button:
 	if is_instance_valid(select_mode_button):
 		return select_mode_button
@@ -59,23 +70,31 @@ func _get_select_mode_button() -> Button:
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
-	if not _get_select_mode_button().button_pressed:
+	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
 		return false
+
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return false
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
-		var results := find_scalable_vector_shape_2d_nodes_at(mouse_pos)
-		var refined_result := results.rfind_custom(func(x): return x.has_fine_point(mouse_pos))
-		if refined_result > -1 and results[refined_result]:
-			EditorInterface.edit_node(results[refined_result])
-			return true
-		var result = results.pop_back()
-		if is_instance_valid(result):
-			EditorInterface.edit_node(result)
-			return true
+		if _is_change_pivot_button_active():
+			var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+			if is_instance_valid(current_selection) and current_selection is ScalableVectorShape2D:
+				current_selection.set_origin(mouse_pos)
+		else:
+			var results := find_scalable_vector_shape_2d_nodes_at(mouse_pos)
+			var refined_result := results.rfind_custom(func(x): return x.has_fine_point(mouse_pos))
+			if refined_result > -1 and results[refined_result]:
+				EditorInterface.edit_node(results[refined_result])
+				return true
+			var result = results.pop_back()
+			if is_instance_valid(result):
+				EditorInterface.edit_node(result)
+				return true
 		return false
+
+
 
 	if event is InputEventMouseMotion:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
