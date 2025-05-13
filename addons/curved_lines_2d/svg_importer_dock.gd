@@ -438,7 +438,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: Transform2D,
 						style: Dictionary, scene_root: Node2D, gradients : Array[Dictionary],
 						is_closed := false, pos_override := Vector2.ZERO) -> void:
-	var new_path = DrawablePath2D.new()
+	var new_path = ScalableVectorShape2D.new()
 	new_path.name = path_name
 	new_path.position = pos_override
 	new_path.curve = curve
@@ -532,7 +532,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 		line.closed = is_closed
 
 
-func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root : Node2D,
+func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene_root : Node2D,
 		gradients : Array[Dictionary], gradient_point_parent : Node2D):
 
 	if style.has("fill") and style["fill"] != "none":
@@ -555,7 +555,7 @@ func add_fill_to_path(new_path : DrawablePath2D, style: Dictionary, scene_root :
 		new_path.polygon = polygon
 
 
-func add_gradient_to_fill(new_path : DrawablePath2D, svg_gradient: Dictionary, polygon : Polygon2D,
+func add_gradient_to_fill(new_path : ScalableVectorShape2D, svg_gradient: Dictionary, polygon : Polygon2D,
 		scene_root : Node2D, gradients : Array[Dictionary], gradient_point_parent : Node2D) -> void:
 	if "xlink:href" in svg_gradient:
 		svg_gradient.merge(get_gradient_by_href(svg_gradient["xlink:href"], gradients), false)
@@ -600,7 +600,7 @@ func add_gradient_to_fill(new_path : DrawablePath2D, svg_gradient: Dictionary, p
 	polygon.texture = texture
 
 
-func apply_gradient(new_path : DrawablePath2D, svg_gradient: Dictionary, polygon : Polygon2D,
+func apply_gradient(new_path : ScalableVectorShape2D, svg_gradient: Dictionary, polygon : Polygon2D,
 		scene_root : Node2D, gradients : Array[Dictionary], gradient_point_parent : Node2D, box : Rect2,
 		texture : GradientTexture2D, fill_from : Vector2, fill_to : Vector2, gradient_transform : Transform2D) -> void:
 	var gradient_transform_node = create_helper_node("Gradient(%s)" % new_path.name, gradient_point_parent, scene_root, Vector2.ZERO, gradient_transform)

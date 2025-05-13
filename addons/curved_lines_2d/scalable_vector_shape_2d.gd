@@ -1,8 +1,8 @@
-## A custom node that extends Path2D so it can be drawn as a Line2D
+## A custom node that uses a Curve2D to control shapes like Line2D, Polygon2D with
 ## Original adapted code: https://www.hedberggames.com/blog/rendering-curves-in-godot
 @tool
-extends Path2D
-class_name  DrawablePath2D
+extends Node2D
+class_name ScalableVectorShape2D
 
 ## Emitted when a new set of points was calculated for a connected Line2D, Polygon2D, or CollisionPolygon2D
 signal path_changed(new_points : PackedVector2Array)
@@ -11,20 +11,23 @@ signal path_changed(new_points : PackedVector2Array)
 ## the instance of assigned Line2D, Polygon2D, or CollisionPolygon2D has changed
 signal assigned_node_changed()
 
+## The Curve2D that dynamically triggers updates of the shapes assigned to this node
+## Changes to this curve will also emit the path_changed signal with the updated points array
+@export var curve: Curve2D = Curve2D.new()
 
-## The Polygon2D controlled by this Path2D
+## The Polygon2D controlled by this node's curve property
 @export var polygon: Polygon2D:
 	set(_poly):
 		polygon = _poly
 		assigned_node_changed.emit()
 
-## The Line2D controlled by this Path2D
+## The Line2D controlled by this node's curve property
 @export var line: Line2D:
 	set(_line):
 		line = _line
 		assigned_node_changed.emit()
 
-## The CollisionPolygon2D controlled by this Path2D
+## The CollisionPolygon2D controlled by this node's curve property
 @export var collision_polygon: CollisionPolygon2D:
 	set(_poly):
 		collision_polygon = _poly
@@ -51,7 +54,9 @@ signal assigned_node_changed()
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
-var lock_assigned_shapes := true
+@export_group("Editor settings")
+@export var shape_hint_color := Color.LIME_GREEN
+@export var lock_assigned_shapes := true
 
 # Wire up signals at runtime
 func _ready():
@@ -83,18 +88,54 @@ func _on_assigned_node_changed():
 	if is_instance_valid(line):
 		if lock_assigned_shapes:
 			line.set_meta("_edit_lock_", true)
+			line.show_behind_parent = true
 		curve_changed()
 	if is_instance_valid(polygon):
 		if lock_assigned_shapes:
 			polygon.set_meta("_edit_lock_", true)
+			polygon.show_behind_parent = true
 		curve_changed()
 	if is_instance_valid(collision_polygon):
 		if lock_assigned_shapes:
 			collision_polygon.set_meta("_edit_lock_", true)
+			collision_polygon.show_behind_parent = true
 		curve_changed()
 
 
-# Redraw the line based on the new curve, using its tesselate method
+func _draw_hint_rect(stroke_width : float, color : Color) -> void:
+	var vp_zoom = EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
+	var hint_rect = get_bounding_rect().grow(
+		line.width / 2.0 if is_instance_valid(line) else 0
+	)
+	draw_rect(hint_rect, color, false, (stroke_width / global_scale.x) / vp_zoom)
+
+
+func _draw_curve() -> void:
+	var vp_zoom = EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
+	var points = curve.tessellate(max_stages, tolerance_degrees)
+	var color := shape_hint_color if shape_hint_color else Color.LIME_GREEN
+	var last_p := Vector2.INF
+	for p : Vector2 in points:
+		if last_p != Vector2.INF:
+			draw_line(last_p, p, color, (1 / global_scale.x) / vp_zoom, true)
+		last_p = p
+	if is_instance_valid(line) and line.closed and points.size() > 1:
+		draw_line(last_p, points[0], color, (1 / global_scale.x) / vp_zoom, true)
+
+
+func _draw() -> void:
+	if Engine.is_editor_hint():
+		var editor_selection := EditorInterface.get_selection()
+		if has_meta("_select_hint_"):
+			_draw_hint_rect(1, Color.WEB_GRAY)
+		if self == editor_selection.get_selected_nodes().pop_back():
+			_draw_hint_rect(2, Color(0.737, 0.463, 0.337))
+			_draw_curve()
+	else:
+		return
+
+
+## Redraw the line based on the new curve, using its tesselate method
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
 			and not is_instance_valid(collision_polygon) 
@@ -114,8 +155,11 @@ func curve_changed():
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
+	if Engine.is_editor_hint():
+		queue_redraw()
 
 
+## Calculate and return the bounding rect in local space
 func get_bounding_rect() -> Rect2:
 	var points := curve.tessellate(max_stages, tolerance_degrees)
 	if points.size() < 1:
@@ -131,6 +175,17 @@ func get_bounding_rect() -> Rect2:
 		maxx = p.x if p.x > maxx else maxx
 		maxy = p.y if p.y > maxy else maxy
 	return Rect2(minx, miny, maxx - minx, maxy - miny)
+
+
+func has_point(global_pos : Vector2) -> bool:
+	return get_bounding_rect().grow(
+		line.width / 2.0 if is_instance_valid(line) else 0
+	).has_point(to_local(global_pos))
+
+
+func has_fine_point(global_pos : Vector2) -> bool:
+	var poly_points := curve.tessellate(max_stages, tolerance_degrees)
+	return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
 
 
 func set_position_to_center() -> void:
