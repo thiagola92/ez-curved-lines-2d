@@ -1,7 +1,7 @@
-## A custom node that extends Path2D so it can be drawn as a Line2D
+## A custom node that uses a Curve2D to control shapes like Line2D, Polygon2D with
 ## Original adapted code: https://www.hedberggames.com/blog/rendering-curves-in-godot
 @tool
-extends Path2D
+extends Node2D
 class_name  DrawablePath2D
 
 ## Emitted when a new set of points was calculated for a connected Line2D, Polygon2D, or CollisionPolygon2D
@@ -11,20 +11,23 @@ signal path_changed(new_points : PackedVector2Array)
 ## the instance of assigned Line2D, Polygon2D, or CollisionPolygon2D has changed
 signal assigned_node_changed()
 
+## The Curve2D that dynamically triggers updates of the shapes assigned to this node
+## Changes to this curve will also emit the path_changed signal with the updated points array
+@export var curve: Curve2D = Curve2D.new()
 
-## The Polygon2D controlled by this Path2D
+## The Polygon2D controlled by this node's curve property
 @export var polygon: Polygon2D:
 	set(_poly):
 		polygon = _poly
 		assigned_node_changed.emit()
 
-## The Line2D controlled by this Path2D
+## The Line2D controlled by this node's curve property
 @export var line: Line2D:
 	set(_line):
 		line = _line
 		assigned_node_changed.emit()
 
-## The CollisionPolygon2D controlled by this Path2D
+## The CollisionPolygon2D controlled by this node's curve property
 @export var collision_polygon: CollisionPolygon2D:
 	set(_poly):
 		collision_polygon = _poly
@@ -83,18 +86,29 @@ func _on_assigned_node_changed():
 	if is_instance_valid(line):
 		if lock_assigned_shapes:
 			line.set_meta("_edit_lock_", true)
+			line.show_behind_parent = true
 		curve_changed()
 	if is_instance_valid(polygon):
 		if lock_assigned_shapes:
 			polygon.set_meta("_edit_lock_", true)
+			polygon.show_behind_parent = true
 		curve_changed()
 	if is_instance_valid(collision_polygon):
 		if lock_assigned_shapes:
 			collision_polygon.set_meta("_edit_lock_", true)
+			collision_polygon.show_behind_parent = true
 		curve_changed()
 
 
-# Redraw the line based on the new curve, using its tesselate method
+func _draw() -> void:
+	if Engine.is_editor_hint():
+		if has_meta("_select_hint_"):
+			draw_rect(get_bounding_rect(), Color.WEB_GRAY, false, -1)
+	else:
+		return
+
+
+## Redraw the line based on the new curve, using its tesselate method
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
 			and not is_instance_valid(collision_polygon) 
@@ -116,6 +130,7 @@ func curve_changed():
 	path_changed.emit(new_points)
 
 
+## Calculate and return the bounding rect in local space
 func get_bounding_rect() -> Rect2:
 	var points := curve.tessellate(max_stages, tolerance_degrees)
 	if points.size() < 1:
@@ -131,6 +146,10 @@ func get_bounding_rect() -> Rect2:
 		maxx = p.x if p.x > maxx else maxx
 		maxy = p.y if p.y > maxy else maxy
 	return Rect2(minx, miny, maxx - minx, maxy - miny)
+
+
+func has_point(global_pos : Vector2) -> bool:
+	return get_bounding_rect().has_point(to_local(global_pos))
 
 
 func set_position_to_center() -> void:

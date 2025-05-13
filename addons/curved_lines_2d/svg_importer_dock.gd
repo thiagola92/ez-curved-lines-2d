@@ -443,7 +443,6 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	new_path.position = pos_override
 	new_path.curve = curve
 	new_path.lock_assigned_shapes = keep_drawable_path_node and lock_shapes
-	new_path.self_modulate = Color.TRANSPARENT
 	if pos_override == Vector2.ZERO:
 		new_path.set_position_to_center()
 
