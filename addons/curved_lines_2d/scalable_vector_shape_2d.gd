@@ -103,27 +103,67 @@ func _on_assigned_node_changed():
 
 
 func _draw_hint_rect(stroke_width : float, color : Color) -> void:
-	var vp_zoom = EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
+	# FIXME: move to plugin
 	var hint_rect = get_bounding_rect().grow(
 		line.width / 2.0 if is_instance_valid(line) else 0
 	)
-	draw_rect(hint_rect, color, false, (stroke_width / global_scale.x) / vp_zoom)
+	draw_rect(hint_rect, color, false, _s(1))
 
 
 func _draw_curve() -> void:
-	var vp_zoom = EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
+	# FIXME: move to plugin
 	var points = curve.tessellate(max_stages, tolerance_degrees)
 	var color := shape_hint_color if shape_hint_color else Color.LIME_GREEN
 	var last_p := Vector2.INF
 	for p : Vector2 in points:
 		if last_p != Vector2.INF:
-			draw_line(last_p, p, color, (1 / global_scale.x) / vp_zoom, true)
+			draw_line(last_p, p, color, _s(1), true)
 		last_p = p
 	if is_instance_valid(line) and line.closed and points.size() > 1:
-		draw_line(last_p, points[0], color, (1 / global_scale.x) / vp_zoom, true)
+		draw_line(last_p, points[0], color, _s(1), true)
+
+
+func _s(x := 1.0) -> float:
+	return (x / global_scale.x) / EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
+
+
+func _draw_handles() -> void:
+	# FIXME: move to plugin
+	var n = curve.point_count
+	var color := shape_hint_color if shape_hint_color else Color.LIME_GREEN
+	var is_closed := n > 1 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
+
+	for i in range(n):
+		var p = curve.get_point_position(i)
+		var c_i = curve.get_point_in(i)
+		var c_o = curve.get_point_out(i)
+		if i == 0 and is_closed:
+			c_o = curve.get_point_out(0)
+			continue
+		elif i == n - 1 and is_closed:
+			continue
+
+		if c_i != Vector2.ZERO and c_i == -c_o:
+			# mirrored handles
+			var d := _s(5)
+			var rect := Rect2(p.x - d, p.y - d, d * 2, d * 2)
+			draw_rect(rect, Color.DIM_GRAY, .5)
+			draw_rect(rect, Color.WHITE, false, _s(1))
+		else:
+			# unmirrored handles / zero length handles
+			var d := _s(8)
+			var rect := Rect2(p.x - d, p.y - d, d * 2, d * 2)
+			var pts := PackedVector2Array([
+					Vector2(p.x - d, p.y), Vector2(p.x, p.y - d), 
+					Vector2(p.x + d, p.y), Vector2(p.x, p.y + d)
+			])
+			draw_polygon(pts, [Color.DIM_GRAY])
+			pts.append(Vector2(p.x - d, p.y))
+			draw_polyline(pts, Color.WHITE, _s(2))
 
 
 func _draw() -> void:
+	# FIXME: move to plugin
 	if Engine.is_editor_hint():
 		var editor_selection := EditorInterface.get_selection()
 		if has_meta("_select_hint_"):
@@ -131,6 +171,7 @@ func _draw() -> void:
 		if self == editor_selection.get_selected_nodes().pop_back():
 			_draw_hint_rect(2, Color(0.737, 0.463, 0.337))
 			_draw_curve()
+			_draw_handles()
 	else:
 		return
 
@@ -184,8 +225,10 @@ func has_point(global_pos : Vector2) -> bool:
 
 
 func has_fine_point(global_pos : Vector2) -> bool:
-	var poly_points := curve.tessellate(max_stages, tolerance_degrees)
-	return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
+	if is_instance_valid(polygon) or is_instance_valid(collision_polygon):
+		var poly_points := curve.tessellate(max_stages, tolerance_degrees)
+		return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
+	return false
 
 
 func set_position_to_center() -> void:
