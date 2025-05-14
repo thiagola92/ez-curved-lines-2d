@@ -178,8 +178,8 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] It should be easier to select ScalableVectorShape2D in the 2D editor window
 - [x] Set 'offset' from editor, repositioning path around this new position (hijack the offset-button?)
 - [x] Draw a more subtle path in stead of hiding the Path2D
-- [ ] Draw handles for ScalableVectorShape2D bezier manipulation (like inkscape)
-- [ ] Make handles interactable with mouse, closed shapes should merge begin- and endpoint (like inkscape does)
+- [x] Draw handles for ScalableVectorShape2D bezier manipulation (like inkscape)
+- [x] Make handles interactable with mouse, closed shapes should merge begin- and endpoint (like inkscape does)
 - [ ] Expand bottom dock to supply handle-manipulation buttons (use inkscape icons)
 - [ ] GradientTexture2D should be correctly rotated (test case: chair)
 - [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
