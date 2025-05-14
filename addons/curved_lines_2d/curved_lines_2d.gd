@@ -168,6 +168,8 @@ func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> voi
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
+	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
+		return
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 	for result : ScalableVectorShape2D in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D"):
 		if result == current_selection:

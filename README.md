@@ -181,7 +181,6 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Draw handles for ScalableVectorShape2D bezier manipulation (like inkscape)
 - [x] Make handles interactable with mouse, closed shapes should merge begin- and endpoint (like inkscape does)
 - [ ] Expand bottom dock to supply handle-manipulation buttons (use inkscape icons)
-- [ ] GradientTexture2D should be correctly rotated (test case: chair)
 - [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
 - [ ] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 - [ ] Update SVG importer settings
@@ -201,3 +200,4 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [ ] Gradient skew, rotate, fx/fy/fr
 - [ ] Pattern fills
 - [ ] Undo/Redo (Undo = delete SvgImport node)
+- [ ] GradientTexture2D should be correctly rotated (test case: chair)
