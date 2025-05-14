@@ -29,9 +29,7 @@ func _enter_tree():
 func _on_selection_changed():
 	var scene_root := EditorInterface.get_edited_scene_root()
 	if is_instance_valid(scene_root):
-		# FIXME: could be removed when all hints/guides are drawn in this plugin
-		for n in scene_root.find_children("*", "ScalableVectorShape2D"):
-			n.queue_redraw()
+
 		# inelegant fix to always keep an instance of Node selected, so
 		# _forward_canvas_gui_input will still be called upon losing focus
 		if (not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
@@ -73,36 +71,25 @@ func _get_select_mode_button() -> Button:
 		return select_mode_button
 
 
-func _vp_transform(p : Vector2, svs : ScalableVectorShape2D = null) -> Vector2:
+func _vp_transform(p : Vector2) -> Vector2:
 	var s := EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale()
 	var o := EditorInterface.get_editor_viewport_2d().get_final_transform().get_origin()
-	if is_instance_valid(svs):
-		return svs.to_global(p) * s + o
 	return (p * s) + o
 
 
 func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
-	var n = svs.curve.point_count
 	var color := svs.shape_hint_color if svs.shape_hint_color else Color.LIME_GREEN
-	var is_closed := n > 1 and svs.curve.get_point_position(0).distance_to(svs.curve.get_point_position(n - 1)) < 0.001
 
-	for i in range(n):
-		var p = svs.curve.get_point_position(i)
-		var c_i = svs.curve.get_point_in(i)
-		var c_o = svs.curve.get_point_out(i)
-		if i == 0 and is_closed:
-			c_i = svs.curve.get_point_in(n - 1)
-		elif i == n - 1 and is_closed:
-			continue
+	for handle in svs.get_curve_handles():
 
-		if c_i != Vector2.ZERO and c_i == -c_o:
+		if handle['mirrored']:
 			# mirrored handles
-			var rect := Rect2(_vp_transform(p, svs) - Vector2(5, 5), Vector2(10, 10))
+			var rect := Rect2(_vp_transform(handle['point_position']) - Vector2(5, 5), Vector2(10, 10))
 			viewport_control.draw_rect(rect, Color.DIM_GRAY, .5)
 			viewport_control.draw_rect(rect, Color.WHITE, false, 1)
 		else:
 			# unmirrored handles / zero length handles
-			var p1 := _vp_transform(p, svs)
+			var p1 := _vp_transform(handle['point_position'])
 			var pts := PackedVector2Array([
 					Vector2(p1.x - 8, p1.y), Vector2(p1.x, p1.y - 8), 
 					Vector2(p1.x + 8, p1.y), Vector2(p1.x, p1.y + 8)
@@ -144,10 +131,11 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return false
 
+	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 		if _is_change_pivot_button_active():
-			var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 			if is_instance_valid(current_selection) and current_selection is ScalableVectorShape2D:
 				current_selection.set_origin(mouse_pos)
 		else:
@@ -167,7 +155,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		for result in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D"):
 			result.remove_meta("_select_hint_")
 
-		for result in find_scalable_vector_shape_2d_nodes_at(mouse_pos):
+		for result : ScalableVectorShape2D in find_scalable_vector_shape_2d_nodes_at(mouse_pos):
 			result.set_meta("_select_hint_", true)
 
 		update_overlays()

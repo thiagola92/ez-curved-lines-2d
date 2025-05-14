@@ -122,9 +122,6 @@ func curve_changed():
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
-	# FIXME: replace with listener to signal in plugin
-	#if Engine.is_editor_hint():
-		#queue_redraw()
 
 
 ## Calculate and return the bounding rect in local space
@@ -191,3 +188,26 @@ func get_bounding_box() -> Array[Vector2]:
 
 func get_poly_points() -> Array:
 	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)
+
+
+func get_curve_handles() -> Array:
+	var n = curve.point_count
+	var is_closed := n > 1 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
+	var result := []
+	for i in range(n):
+		var p = curve.get_point_position(i)
+		var c_i = curve.get_point_in(i)
+		var c_o = curve.get_point_out(i)
+		if i == 0 and is_closed:
+			c_i = curve.get_point_in(n - 1)
+		elif i == n - 1 and is_closed:
+			continue
+		result.append({
+			'point_position': to_global(p),
+			'in': c_i,
+			'out': c_o,
+			'mirrored': c_i == -c_o,
+			'in_position': to_global(p + c_i),
+			'out_position': to_global(p + c_o)
+		})
+	return result
