@@ -102,27 +102,6 @@ func _on_assigned_node_changed():
 		curve_changed()
 
 
-func _draw_hint_rect(stroke_width : float, color : Color) -> void:
-	# FIXME: move to plugin
-	var hint_rect = get_bounding_rect().grow(
-		line.width / 2.0 if is_instance_valid(line) else 0
-	)
-	draw_rect(hint_rect, color, false, _s(1))
-
-
-func _draw_curve() -> void:
-	# FIXME: move to plugin
-	var points = curve.tessellate(max_stages, tolerance_degrees)
-	var color := shape_hint_color if shape_hint_color else Color.LIME_GREEN
-	var last_p := Vector2.INF
-	for p : Vector2 in points:
-		if last_p != Vector2.INF:
-			draw_line(last_p, p, color, _s(1), true)
-		last_p = p
-	if is_instance_valid(line) and line.closed and points.size() > 1:
-		draw_line(last_p, points[0], color, _s(1), true)
-
-
 func _s(x := 1.0) -> float:
 	return (x / global_scale.x) / EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
 
@@ -138,8 +117,7 @@ func _draw_handles() -> void:
 		var c_i = curve.get_point_in(i)
 		var c_o = curve.get_point_out(i)
 		if i == 0 and is_closed:
-			c_o = curve.get_point_out(0)
-			continue
+			c_i = curve.get_point_in(n - 1)
 		elif i == n - 1 and is_closed:
 			continue
 
@@ -166,11 +144,7 @@ func _draw() -> void:
 	# FIXME: move to plugin
 	if Engine.is_editor_hint():
 		var editor_selection := EditorInterface.get_selection()
-		if has_meta("_select_hint_"):
-			_draw_hint_rect(1, Color.WEB_GRAY)
 		if self == editor_selection.get_selected_nodes().pop_back():
-			_draw_hint_rect(2, Color(0.737, 0.463, 0.337))
-			_draw_curve()
 			_draw_handles()
 	else:
 		return
@@ -196,6 +170,7 @@ func curve_changed():
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
+	# FIXME: replace with listener to signal in plugin
 	if Engine.is_editor_hint():
 		queue_redraw()
 
@@ -216,6 +191,23 @@ func get_bounding_rect() -> Rect2:
 		maxx = p.x if p.x > maxx else maxx
 		maxy = p.y if p.y > maxy else maxy
 	return Rect2(minx, miny, maxx - minx, maxy - miny)
+
+
+func get_bounding_box() -> Array[Vector2]:
+	var rect = get_bounding_rect().grow(
+		line.width / 2.0 if is_instance_valid(line) else 0
+	)
+	return [
+		to_global(rect.position),
+		to_global(Vector2(rect.position.x + rect.size.x, rect.position.y)),
+		to_global(rect.position + rect.size),
+		to_global(Vector2(rect.position.x, rect.position.y  + rect.size.y)),
+		to_global(rect.position)
+	]
+
+
+func get_poly_points() -> Array:
+	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)
 
 
 func has_point(global_pos : Vector2) -> bool:
