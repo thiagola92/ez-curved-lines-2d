@@ -102,54 +102,6 @@ func _on_assigned_node_changed():
 		curve_changed()
 
 
-func _s(x := 1.0) -> float:
-	return (x / global_scale.x) / EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale().x
-
-
-func _draw_handles() -> void:
-	# FIXME: move to plugin
-	var n = curve.point_count
-	var color := shape_hint_color if shape_hint_color else Color.LIME_GREEN
-	var is_closed := n > 1 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
-
-	for i in range(n):
-		var p = curve.get_point_position(i)
-		var c_i = curve.get_point_in(i)
-		var c_o = curve.get_point_out(i)
-		if i == 0 and is_closed:
-			c_i = curve.get_point_in(n - 1)
-		elif i == n - 1 and is_closed:
-			continue
-
-		if c_i != Vector2.ZERO and c_i == -c_o:
-			# mirrored handles
-			var d := _s(5)
-			var rect := Rect2(p.x - d, p.y - d, d * 2, d * 2)
-			draw_rect(rect, Color.DIM_GRAY, .5)
-			draw_rect(rect, Color.WHITE, false, _s(1))
-		else:
-			# unmirrored handles / zero length handles
-			var d := _s(8)
-			var rect := Rect2(p.x - d, p.y - d, d * 2, d * 2)
-			var pts := PackedVector2Array([
-					Vector2(p.x - d, p.y), Vector2(p.x, p.y - d), 
-					Vector2(p.x + d, p.y), Vector2(p.x, p.y + d)
-			])
-			draw_polygon(pts, [Color.DIM_GRAY])
-			pts.append(Vector2(p.x - d, p.y))
-			draw_polyline(pts, Color.WHITE, _s(2))
-
-
-func _draw() -> void:
-	# FIXME: move to plugin
-	if Engine.is_editor_hint():
-		var editor_selection := EditorInterface.get_selection()
-		if self == editor_selection.get_selected_nodes().pop_back():
-			_draw_handles()
-	else:
-		return
-
-
 ## Redraw the line based on the new curve, using its tesselate method
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
@@ -171,8 +123,8 @@ func curve_changed():
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
 	# FIXME: replace with listener to signal in plugin
-	if Engine.is_editor_hint():
-		queue_redraw()
+	#if Engine.is_editor_hint():
+		#queue_redraw()
 
 
 ## Calculate and return the bounding rect in local space
@@ -192,22 +144,6 @@ func get_bounding_rect() -> Rect2:
 		maxy = p.y if p.y > maxy else maxy
 	return Rect2(minx, miny, maxx - minx, maxy - miny)
 
-
-func get_bounding_box() -> Array[Vector2]:
-	var rect = get_bounding_rect().grow(
-		line.width / 2.0 if is_instance_valid(line) else 0
-	)
-	return [
-		to_global(rect.position),
-		to_global(Vector2(rect.position.x + rect.size.x, rect.position.y)),
-		to_global(rect.position + rect.size),
-		to_global(Vector2(rect.position.x, rect.position.y  + rect.size.y)),
-		to_global(rect.position)
-	]
-
-
-func get_poly_points() -> Array:
-	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)
 
 
 func has_point(global_pos : Vector2) -> bool:
@@ -237,3 +173,21 @@ func set_origin(global_pos : Vector2) -> void:
 	global_position = global_pos
 	if is_instance_valid(polygon) and polygon.texture is GradientTexture2D:
 		polygon.texture_offset = -get_bounding_rect().position
+
+
+
+func get_bounding_box() -> Array[Vector2]:
+	var rect = get_bounding_rect().grow(
+		line.width / 2.0 if is_instance_valid(line) else 0
+	)
+	return [
+		to_global(rect.position),
+		to_global(Vector2(rect.position.x + rect.size.x, rect.position.y)),
+		to_global(rect.position + rect.size),
+		to_global(Vector2(rect.position.x, rect.position.y  + rect.size.y)),
+		to_global(rect.position)
+	]
+
+
+func get_poly_points() -> Array:
+	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)

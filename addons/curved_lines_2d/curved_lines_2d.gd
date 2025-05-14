@@ -73,10 +73,43 @@ func _get_select_mode_button() -> Button:
 		return select_mode_button
 
 
-func _vp_transform(p : Vector2) -> Vector2:
+func _vp_transform(p : Vector2, svs : ScalableVectorShape2D = null) -> Vector2:
 	var s := EditorInterface.get_editor_viewport_2d().get_final_transform().get_scale()
 	var o := EditorInterface.get_editor_viewport_2d().get_final_transform().get_origin()
+	if is_instance_valid(svs):
+		return svs.to_global(p) * s + o
 	return (p * s) + o
+
+
+func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+	var n = svs.curve.point_count
+	var color := svs.shape_hint_color if svs.shape_hint_color else Color.LIME_GREEN
+	var is_closed := n > 1 and svs.curve.get_point_position(0).distance_to(svs.curve.get_point_position(n - 1)) < 0.001
+
+	for i in range(n):
+		var p = svs.curve.get_point_position(i)
+		var c_i = svs.curve.get_point_in(i)
+		var c_o = svs.curve.get_point_out(i)
+		if i == 0 and is_closed:
+			c_i = svs.curve.get_point_in(n - 1)
+		elif i == n - 1 and is_closed:
+			continue
+
+		if c_i != Vector2.ZERO and c_i == -c_o:
+			# mirrored handles
+			var rect := Rect2(_vp_transform(p, svs) - Vector2(5, 5), Vector2(10, 10))
+			viewport_control.draw_rect(rect, Color.DIM_GRAY, .5)
+			viewport_control.draw_rect(rect, Color.WHITE, false, 1)
+		else:
+			# unmirrored handles / zero length handles
+			var p1 := _vp_transform(p, svs)
+			var pts := PackedVector2Array([
+					Vector2(p1.x - 8, p1.y), Vector2(p1.x, p1.y - 8), 
+					Vector2(p1.x + 8, p1.y), Vector2(p1.x, p1.y + 8)
+			])
+			viewport_control.draw_polygon(pts, [Color.DIM_GRAY])
+			pts.append(Vector2(p1.x - 8, p1.y))
+			viewport_control.draw_polyline(pts, Color.WHITE, 2)
 
 
 func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
@@ -98,6 +131,7 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					Color(0.737, 0.463, 0.337), 2.0)
 			_draw_curve(viewport_control, result)
+			_draw_handles(viewport_control, result)
 		elif result.has_meta("_select_hint_"):
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					Color.WEB_GRAY, 1.0)
