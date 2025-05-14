@@ -77,11 +77,21 @@ func _vp_transform(p : Vector2) -> Vector2:
 	return (p * s) + o
 
 
+func _draw_control_point_handle(viewport_control : Control, svs : ScalableVectorShape2D,
+		handle : Dictionary, prefix : String) -> void:
+	if handle[prefix].length():
+		viewport_control.draw_line(_vp_transform(handle['point_position']), 
+				_vp_transform(handle[prefix + '_position']), Color.WEB_GRAY, 1, true)
+		viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, Color.DIM_GRAY)
+		viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, Color.WHITE, false, 1)
+
+
 func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	var color := svs.shape_hint_color if svs.shape_hint_color else Color.LIME_GREEN
 
 	for handle in svs.get_curve_handles():
-
+		_draw_control_point_handle(viewport_control, svs, handle, 'in')
+		_draw_control_point_handle(viewport_control, svs, handle, 'out')
 		if handle['mirrored']:
 			# mirrored handles
 			var rect := Rect2(_vp_transform(handle['point_position']) - Vector2(5, 5), Vector2(10, 10))
@@ -96,7 +106,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			])
 			viewport_control.draw_polygon(pts, [Color.DIM_GRAY])
 			pts.append(Vector2(p1.x - 8, p1.y))
-			viewport_control.draw_polyline(pts, Color.WHITE, 2)
+			viewport_control.draw_polyline(pts, Color.WHITE, 1)
 
 
 func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:

@@ -206,7 +206,7 @@ func get_curve_handles() -> Array:
 			'point_position': to_global(p),
 			'in': c_i,
 			'out': c_o,
-			'mirrored': c_i == -c_o,
+			'mirrored': c_i.length() and c_i.distance_to(-c_o) < 0.01,
 			'in_position': to_global(p + c_i),
 			'out_position': to_global(p + c_o)
 		})
