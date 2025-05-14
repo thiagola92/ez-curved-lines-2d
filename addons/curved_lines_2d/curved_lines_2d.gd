@@ -1,12 +1,16 @@
 @tool
 extends EditorPlugin
 
-
+const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
+const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
+const META_NAME_HOVER_CP_OUT_IDX := "_hover_cp_out_idx_"
+const META_NAME_SELECT_HINT := "_select_hint_"
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
 var plugin
 var svg_importer_dock
 var select_mode_button : Button
+var undo_redo : EditorUndoRedoManager
 
 func _enter_tree():
 	svg_importer_dock = preload("res://addons/curved_lines_2d/svg_importer_dock.tscn").instantiate()
@@ -24,7 +28,7 @@ func _enter_tree():
 		preload("res://addons/curved_lines_2d/scalable_vector_shape_2d.gd"),
 		preload("res://addons/curved_lines_2d/DrawablePath2D.svg")
 	)
-	svg_importer_dock.undo_redo = get_undo_redo()
+	undo_redo = get_undo_redo()
 	add_control_to_bottom_panel(svg_importer_dock as Control, "EZ SVG Importer")
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
 
@@ -80,6 +84,18 @@ func _vp_transform(p : Vector2) -> Vector2:
 	return (p * s) + o
 
 
+func _is_svs_valid(svs : Object) -> bool:
+	return is_instance_valid(svs) and svs is ScalableVectorShape2D
+
+
+func _handle_has_hover(svs : ScalableVectorShape2D) -> bool:
+	return (
+		svs.has_meta(META_NAME_HOVER_POINT_IDX) or 
+		svs.has_meta(META_NAME_HOVER_CP_IN_IDX) or 
+		svs.has_meta(META_NAME_HOVER_CP_OUT_IDX)
+	)
+
+
 func _draw_control_point_handle(viewport_control : Control, svs : ScalableVectorShape2D,
 		handle : Dictionary, prefix : String, is_hovered := false) -> void:
 	if handle[prefix].length():
@@ -95,9 +111,9 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
 		var handle = handles[i]
-		var is_hovered : bool = svs.get_meta("_hover_point_idx_", -1) == i
-		var cp_in_is_hovered : bool = svs.get_meta("_hover_cp_in_idx_", -1) == i
-		var cp_out_is_hovered : bool = svs.get_meta("_hover_cp_out_idx_", -1) == i
+		var is_hovered : bool = svs.get_meta(META_NAME_HOVER_POINT_IDX, -1) == i
+		var cp_in_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_IN_IDX, -1) == i
+		var cp_out_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_OUT_IDX, -1) == i
 		var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 		var width := 2 if is_hovered else 1
 		_draw_control_point_handle(viewport_control, svs, handle, 'in', is_hovered or cp_in_is_hovered)
@@ -117,21 +133,24 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			viewport_control.draw_polygon(pts, [Color.DIM_GRAY])
 			pts.append(Vector2(p1.x - 8, p1.y))
 			viewport_control.draw_polyline(pts, color, width)
-
+		if is_hovered:
+			var default_font = ThemeDB.fallback_font
+			var default_font_size = ThemeDB.fallback_font_size
+			viewport_control.draw_string(default_font, _vp_transform(handle['point_position']), str(i))
 
 func _set_handle_hover(mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
 	var handles = svs.get_curve_handles()
-	svs.remove_meta("_hover_point_idx_")
-	svs.remove_meta("_hover_cp_in_idx_")
-	svs.remove_meta("_hover_cp_out_idx_")
+	svs.remove_meta(META_NAME_HOVER_POINT_IDX)
+	svs.remove_meta(META_NAME_HOVER_CP_IN_IDX)
+	svs.remove_meta(META_NAME_HOVER_CP_OUT_IDX)
 	for i in range(handles.size()):
 		var handle = handles[i]
 		if mouse_pos.distance_to(_vp_transform(handle['point_position'])) < 10:
-			svs.set_meta("_hover_point_idx_", i)
+			svs.set_meta(META_NAME_HOVER_POINT_IDX, i)
 		elif mouse_pos.distance_to(_vp_transform(handle['in_position'])) < 10:
-			svs.set_meta("_hover_cp_in_idx_", i)
+			svs.set_meta(META_NAME_HOVER_CP_IN_IDX, i)
 		elif mouse_pos.distance_to(_vp_transform(handle['out_position'])) < 10:
-			svs.set_meta("_hover_cp_out_idx_", i)
+			svs.set_meta(META_NAME_HOVER_CP_OUT_IDX, i)
 
 
 func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
@@ -154,7 +173,7 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 					VIEWPORT_ORANGE, 2.0)
 			_draw_curve(viewport_control, result)
 			_draw_handles(viewport_control, result)
-		elif result.has_meta("_select_hint_"):
+		elif result.has_meta(META_NAME_SELECT_HINT):
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					Color.WEB_GRAY, 1.0)
 
@@ -171,30 +190,60 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 		if _is_change_pivot_button_active():
-			if is_instance_valid(current_selection) and current_selection is ScalableVectorShape2D:
+			if _is_svs_valid(current_selection):
 				current_selection.set_origin(mouse_pos)
 		else:
-			var results := find_scalable_vector_shape_2d_nodes_at(mouse_pos)
-			var refined_result := results.rfind_custom(func(x): return x.has_fine_point(mouse_pos))
-			if refined_result > -1 and results[refined_result]:
-				EditorInterface.edit_node(results[refined_result])
+			if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
 				return true
-			var result = results.pop_back()
-			if is_instance_valid(result):
-				EditorInterface.edit_node(result)
-				return true
+			else:
+				var results := find_scalable_vector_shape_2d_nodes_at(mouse_pos)
+				var refined_result := results.rfind_custom(func(x): return x.has_fine_point(mouse_pos))
+				if refined_result > -1 and results[refined_result]:
+					EditorInterface.edit_node(results[refined_result])
+					return true
+				var result = results.pop_back()
+				if is_instance_valid(result):
+					EditorInterface.edit_node(result)
+					return true
 		return false
 
 	if event is InputEventMouseMotion:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 		for result in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D"):
-			result.remove_meta("_select_hint_")
+			result.remove_meta(META_NAME_SELECT_HINT)
 
-		for result : ScalableVectorShape2D in find_scalable_vector_shape_2d_nodes_at(mouse_pos):
-			result.set_meta("_select_hint_", true)
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
+			if current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
+				var idx : int = current_selection.get_meta(META_NAME_HOVER_POINT_IDX)
+				undo_redo.create_action("Move point on " + str(current_selection))
+				undo_redo.add_do_method(current_selection, 'set_global_curve_point_position', mouse_pos, idx)
+				undo_redo.add_undo_method(current_selection.curve, 'set_point_position', idx, current_selection.curve.get_point_position(idx))
+				undo_redo.commit_action()
+			elif current_selection.has_meta(META_NAME_HOVER_CP_IN_IDX):
+				var idx : int = current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX)
+				if idx == 0:
+					idx = current_selection.curve.point_count - 1
+				undo_redo.create_action("Move control point in on " + str(current_selection))
+				undo_redo.add_do_method(current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx)
+				undo_redo.add_undo_method(current_selection.curve, 'set_point_in', idx, current_selection.curve.get_point_in(idx))
+				undo_redo.commit_action()
+				#current_selection.set_global_curve_cp_in_position(mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
+			elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
+				var idx : int = current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX)
+				if idx == current_selection.curve.point_count - 1:
+					idx = 0
+				undo_redo.create_action("Move control point in on " + str(current_selection))
+				undo_redo.add_do_method(current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx)
+				undo_redo.add_undo_method(current_selection.curve, 'set_point_out', idx, current_selection.curve.get_point_out(idx))
+				undo_redo.commit_action()
+			update_overlays()
+			return true
+		else:
+			for result : ScalableVectorShape2D in find_scalable_vector_shape_2d_nodes_at(mouse_pos):
+				result.set_meta(META_NAME_SELECT_HINT, true)
 
-		if is_instance_valid(current_selection) and current_selection is ScalableVectorShape2D:
-			_set_handle_hover(_vp_transform(mouse_pos), current_selection)
+			if _is_svs_valid(current_selection):
+				_set_handle_hover(_vp_transform(mouse_pos), current_selection)
 
 		update_overlays()
 
