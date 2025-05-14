@@ -86,7 +86,7 @@ func _vp_transform(p : Vector2) -> Vector2:
 
 
 func _is_svs_valid(svs : Object) -> bool:
-	return is_instance_valid(svs) and svs is ScalableVectorShape2D
+	return is_instance_valid(svs) and svs is ScalableVectorShape2D and svs.curve
 
 
 func _handle_has_hover(svs : ScalableVectorShape2D) -> bool:
@@ -171,7 +171,7 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-	for result : ScalableVectorShape2D in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D"):
+	for result : ScalableVectorShape2D in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D").filter(_is_svs_valid):
 		if result == current_selection:
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					VIEWPORT_ORANGE, 2.0)

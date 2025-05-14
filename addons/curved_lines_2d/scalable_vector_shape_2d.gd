@@ -13,7 +13,10 @@ signal assigned_node_changed()
 
 ## The Curve2D that dynamically triggers updates of the shapes assigned to this node
 ## Changes to this curve will also emit the path_changed signal with the updated points array
-@export var curve: Curve2D = Curve2D.new()
+@export var curve: Curve2D = Curve2D.new():
+	set(_curve):
+		curve = _curve
+		assigned_node_changed.emit()
 
 ## The Polygon2D controlled by this node's curve property
 @export var polygon: Polygon2D:
@@ -85,6 +88,10 @@ func _exit_tree():
 
 
 func _on_assigned_node_changed():
+	if Engine.is_editor_hint() or update_curve_at_runtime:
+		if not curve.changed.is_connected(curve_changed):
+			curve.changed.connect(curve_changed)
+
 	if is_instance_valid(line):
 		if lock_assigned_shapes:
 			line.set_meta("_edit_lock_", true)
@@ -100,7 +107,6 @@ func _on_assigned_node_changed():
 			collision_polygon.set_meta("_edit_lock_", true)
 			collision_polygon.show_behind_parent = true
 		curve_changed()
-
 
 ## Redraw the line based on the new curve, using its tesselate method
 func curve_changed():
@@ -126,6 +132,8 @@ func curve_changed():
 
 ## Calculate and return the bounding rect in local space
 func get_bounding_rect() -> Rect2:
+	if not curve:
+		return Rect2(Vector2.ZERO, Vector2.ZERO)
 	var points := curve.tessellate(max_stages, tolerance_degrees)
 	if points.size() < 1:
 		# Cannot calculate a center for 0 points 

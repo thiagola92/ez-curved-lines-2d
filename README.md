@@ -180,14 +180,18 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Draw a more subtle path in stead of hiding the Path2D
 - [x] Draw handles for ScalableVectorShape2D bezier manipulation (like inkscape)
 - [x] Make handles interactable with mouse, closed shapes should merge begin- and endpoint (like inkscape does)
-- [ ] Expand bottom dock to supply handle-manipulation buttons (use inkscape icons)
-- [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
+- [ ] BUG FIXES: missing / empty curve
+- [ ] Show a hint on closest point on curve if distance to that point is smaller that N pixels [Geometry2D#get_closest_point_to_segment](https://docs.godotengine.org/en/stable/classes/class_geometry2d.html#class-geometry2d-method-get-closest-point-to-segment)
+- [ ] Double click adds a point to the selected shape's curve at either on-segment hint-point (if present) or mouse position
+- [ ] Right click removes a point from the selected shape
 - [ ] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 - [ ] Update SVG importer settings
 
 ### Could have
+- [ ] Expand bottom dock to supply handle-manipulation buttons (use inkscape icons)
+- [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
 - [ ] Add button to editor to call center node position func
-- [ ] Helper nodes for gradient from-, stop- and to-handles (Node2D @tool, use _draw only in edit mode)
+- [ ] Helper nodes for gradient from-, stop- and to-handles
 - [ ] SVG Import log: add button to select node with problem
 - [ ] Import inkscape pivot point to override the centered position with
 - [ ] SVG Import log: show/hide different log levels, clear log
