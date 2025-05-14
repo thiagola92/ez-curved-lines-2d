@@ -190,6 +190,11 @@ func get_poly_points() -> Array:
 	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)
 
 
+func is_curve_closed() -> bool:
+	var n = curve.point_count
+	return n > 1 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
+
+
 func get_curve_handles() -> Array:
 	var n = curve.point_count
 	var is_closed := n > 1 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001

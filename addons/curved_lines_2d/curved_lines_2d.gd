@@ -31,6 +31,7 @@ func _enter_tree():
 	undo_redo = get_undo_redo()
 	add_control_to_bottom_panel(svg_importer_dock as Control, "EZ SVG Importer")
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
+	undo_redo.version_changed.connect(update_overlays)
 
 
 func _on_selection_changed():
@@ -138,6 +139,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			var default_font_size = ThemeDB.fallback_font_size
 			viewport_control.draw_string(default_font, _vp_transform(handle['point_position']), str(i))
 
+
 func _set_handle_hover(mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
 	var handles = svs.get_curve_handles()
 	svs.remove_meta(META_NAME_HOVER_POINT_IDX)
@@ -178,6 +180,54 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 					Color.WEB_GRAY, 1.0)
 
 
+func _update_curve_point_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
+	undo_redo.create_action("Move point on " + str(current_selection))
+	if idx == 0 and current_selection.is_curve_closed():
+		var idx_1 = current_selection.curve.point_count - 1
+		undo_redo.add_do_method(current_selection, 'set_global_curve_point_position', mouse_pos, idx_1)
+		undo_redo.add_undo_method(current_selection.curve, 'set_point_position', idx_1, current_selection.curve.get_point_position(idx_1))
+	undo_redo.add_do_method(current_selection, 'set_global_curve_point_position', mouse_pos, idx)
+	undo_redo.add_undo_method(current_selection.curve, 'set_point_position', idx, current_selection.curve.get_point_position(idx))
+	undo_redo.commit_action()
+
+
+func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
+	if idx == 0:
+		idx = current_selection.curve.point_count - 1
+	undo_redo.create_action("Move control point in %d on %s" % [idx, current_selection])
+	undo_redo.add_do_method(current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx)
+	undo_redo.add_undo_method(current_selection.curve, 'set_point_in', idx, current_selection.curve.get_point_in(idx))
+	current_selection.set_global_curve_cp_in_position(mouse_pos, idx)
+	if Input.is_key_pressed(KEY_SHIFT) and not(idx == current_selection.curve.point_count - 1 and not current_selection.is_curve_closed()):
+		var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
+		undo_redo.add_do_method(current_selection.curve, 'set_point_out', idx_1, -current_selection.curve.get_point_in(idx))
+		undo_redo.add_undo_method(current_selection.curve, 'set_point_out', idx_1, current_selection.curve.get_point_out(idx_1))
+		current_selection.curve.set_point_out(idx_1, -current_selection.curve.get_point_in(idx))
+	undo_redo.commit_action(false)
+
+
+func _update_curve_cp_out_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
+	if idx == current_selection.curve.point_count - 1:
+		idx = 0
+	undo_redo.create_action("Move control point out %d on %s" % [idx, current_selection])
+	undo_redo.add_do_method(current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx)
+	undo_redo.add_undo_method(current_selection.curve, 'set_point_out', idx, current_selection.curve.get_point_out(idx))
+	current_selection.set_global_curve_cp_out_position(mouse_pos, idx)
+	if Input.is_key_pressed(KEY_SHIFT) and not(idx == 0 and not current_selection.is_curve_closed()):
+		var idx_1 = current_selection.curve.point_count - 1 if idx == 0 else idx
+		undo_redo.add_do_method(current_selection.curve, 'set_point_in', idx_1, -current_selection.curve.get_point_out(idx))
+		undo_redo.add_undo_method(current_selection.curve, 'set_point_in', idx_1, current_selection.curve.get_point_in(idx_1))
+		current_selection.curve.set_point_in(idx_1, -current_selection.curve.get_point_out(idx))
+	undo_redo.commit_action(false)
+
+
+func _set_shape_origin(current_selection : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
+	undo_redo.create_action("Set origin on %s" % current_selection)
+	undo_redo.add_do_method(current_selection, 'set_origin', mouse_pos)
+	undo_redo.add_undo_method(current_selection, 'set_origin', current_selection.global_position)
+	undo_redo.commit_action()
+
+
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
 		return false
@@ -191,7 +241,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 		if _is_change_pivot_button_active():
 			if _is_svs_valid(current_selection):
-				current_selection.set_origin(mouse_pos)
+				_set_shape_origin(current_selection, mouse_pos)
 		else:
 			if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
 				return true
@@ -212,32 +262,23 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		for result in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D"):
 			result.remove_meta(META_NAME_SELECT_HINT)
 
-		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
-			if current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
-				var idx : int = current_selection.get_meta(META_NAME_HOVER_POINT_IDX)
-				undo_redo.create_action("Move point on " + str(current_selection))
-				undo_redo.add_do_method(current_selection, 'set_global_curve_point_position', mouse_pos, idx)
-				undo_redo.add_undo_method(current_selection.curve, 'set_point_position', idx, current_selection.curve.get_point_position(idx))
-				undo_redo.commit_action()
-			elif current_selection.has_meta(META_NAME_HOVER_CP_IN_IDX):
-				var idx : int = current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX)
-				if idx == 0:
-					idx = current_selection.curve.point_count - 1
-				undo_redo.create_action("Move control point in on " + str(current_selection))
-				undo_redo.add_do_method(current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx)
-				undo_redo.add_undo_method(current_selection.curve, 'set_point_in', idx, current_selection.curve.get_point_in(idx))
-				undo_redo.commit_action()
-				#current_selection.set_global_curve_cp_in_position(mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
-			elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
-				var idx : int = current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX)
-				if idx == current_selection.curve.point_count - 1:
-					idx = 0
-				undo_redo.create_action("Move control point in on " + str(current_selection))
-				undo_redo.add_do_method(current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx)
-				undo_redo.add_undo_method(current_selection.curve, 'set_point_out', idx, current_selection.curve.get_point_out(idx))
-				undo_redo.commit_action()
-			update_overlays()
-			return true
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and _is_svs_valid(current_selection):
+			if _handle_has_hover(current_selection):
+				if current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
+					var pt_idx : int = current_selection.get_meta(META_NAME_HOVER_POINT_IDX)
+					if Input.is_key_pressed(KEY_SHIFT):
+						if pt_idx == 0:
+							_update_curve_cp_out_position(current_selection, mouse_pos, pt_idx)
+						else:
+							_update_curve_cp_in_position(current_selection, mouse_pos, pt_idx)
+					else:
+						_update_curve_point_position(current_selection, mouse_pos, pt_idx)
+				elif current_selection.has_meta(META_NAME_HOVER_CP_IN_IDX):
+					_update_curve_cp_in_position(current_selection, mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
+				elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
+					_update_curve_cp_out_position(current_selection, mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
+				update_overlays()
+				return true
 		else:
 			for result : ScalableVectorShape2D in find_scalable_vector_shape_2d_nodes_at(mouse_pos):
 				result.set_meta(META_NAME_SELECT_HINT, true)
