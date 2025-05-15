@@ -248,22 +248,47 @@ func replace_curve_points(curve_in : Curve2D) -> void:
 				curve_in.get_point_in(i), curve_in.get_point_out(i))
 
 
-func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
-	var p := to_local(global_pos)
-	var poly_points := curve.tessellate(max_stages, tolerance_degrees)
-	if poly_points.size() < 2:
-		return {
-			"point_position": Vector2.INF
-		}
+func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> Vector2:
+	var curve_segment := Curve2D.new()
+	curve_segment.add_point(
+		curve.get_point_position(segment_p1_idx),
+		Vector2.ZERO,
+		curve.get_point_out(segment_p1_idx)
+	)
+	var segment_p2_idx = (0 if segment_p1_idx == curve.point_count - 1
+			else segment_p1_idx + 1)
+	curve_segment.add_point(
+		curve.get_point_position(segment_p2_idx),
+		curve.get_point_in(segment_p2_idx)
+	)
+	var poly_points := curve_segment.tessellate(max_stages, tolerance_degrees)
 	var closest_result := Vector2.INF
-	var segment_indices : Array[int] = [0, 1]
 	for i in range(1, poly_points.size()):
 		var p_a := poly_points[i - 1]
 		var p_b := poly_points[i]
 		var c_p := Geometry2D.get_closest_point_to_segment(p, p_a, p_b)
 		if p.distance_to(c_p) < p.distance_to(closest_result):
 			closest_result = c_p
-			segment_indices = [i - 1, i]
+	return closest_result
+
+
+func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
+	var p := to_local(global_pos)
+	if curve.point_count < 2:
+		return {
+			"point_position": Vector2.INF
+		}
+
+	var closest_result := Vector2.INF
+	var segment_indices : Array[int] = [0, 1]
+	for i in range(curve.point_count):
+		var c_p := _get_closest_point_on_curve_segment(p, i)
+		if p.distance_to(c_p) < p.distance_to(closest_result):
+			closest_result = c_p
+			if i == curve.point_count - 1:
+				segment_indices = [i, 0]
+			else:
+				segment_indices = [i, i + 1]
 
 	return {
 		"local_point_position": closest_result,
