@@ -276,22 +276,21 @@ func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
 	var p := to_local(global_pos)
 	if curve.point_count < 2:
 		return {
-			"point_position": Vector2.INF
+			"local_point_position": p,
+			"point_position": global_pos,
+			"before_segment": 1
 		}
 
 	var closest_result := Vector2.INF
-	var segment_indices : Array[int] = [0, 1]
+	var before_segment := 1
 	for i in range(curve.point_count):
 		var c_p := _get_closest_point_on_curve_segment(p, i)
 		if p.distance_to(c_p) < p.distance_to(closest_result):
 			closest_result = c_p
-			if i == curve.point_count - 1:
-				segment_indices = [i, 0]
-			else:
-				segment_indices = [i, i + 1]
+			before_segment = i + 1
 
 	return {
 		"local_point_position": closest_result,
 		"point_position": to_global(closest_result),
-		"segment_indices": segment_indices
+		"before_segment": before_segment
 	}

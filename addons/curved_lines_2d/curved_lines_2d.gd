@@ -178,7 +178,6 @@ func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> voi
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		var md_p := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
-		print(md_p)
 		var p = _vp_transform(md_p["point_position"])
 		viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WEB_GRAY, 2)
 		viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WEB_GRAY,2)
@@ -266,10 +265,11 @@ func _get_curve_backup(curve_in : Curve2D) -> Curve2D:
 func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
 	var backup := _get_curve_backup(current_selection.curve)
 	var orig_n := current_selection.curve.point_count
+	if orig_n <= 1:
+		return
 	undo_redo.create_action("Remove point %d from %s" % [idx, str(current_selection)])
 	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
-	if orig_n > 0:
-		undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
+	undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
 	if orig_n > 1:
 		undo_redo.add_do_method(current_selection.curve, 'set_point_out', orig_n - 2, Vector2.ZERO)
 	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
@@ -298,7 +298,12 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
 	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
-
+	if "before_segment" in md_closest_point and "local_point_position" in md_closest_point:
+		if md_closest_point["before_segment"] >= svs.curve.point_count:
+			svs.curve.add_point(md_closest_point["local_point_position"])
+		else:
+			svs.curve.add_point(md_closest_point["local_point_position"],
+					Vector2.ZERO, Vector2.ZERO, md_closest_point["before_segment"])
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
