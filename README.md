@@ -194,6 +194,7 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [ ] Add an Enable Edit/Disable Edit toggle to dock
 - [ ] Add a Show/Hide GUI hints toggle to dock
 - [ ] Update SVG importer settings
+- [ ] Updated manual in README
 
 
 ### Could have
