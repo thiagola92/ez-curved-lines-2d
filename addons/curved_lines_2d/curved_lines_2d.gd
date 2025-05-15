@@ -294,6 +294,13 @@ func _remove_cp_out_from_curve(current_selection : ScalableVectorShape2D, idx : 
 	undo_redo.commit_action()
 
 
+func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
+	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
+		return
+	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+
+
+
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
 
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
@@ -315,8 +322,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 				if event.double_click:
-					#_add_point_on_curve_segment(current_selection)
-					print("double click: place point mode")
+					_add_point_on_curve_segment(current_selection)
 				elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					print("mouse down: curve drag mode")
 				return true
