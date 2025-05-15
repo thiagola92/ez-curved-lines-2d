@@ -4,6 +4,7 @@ extends EditorPlugin
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
 const META_NAME_HOVER_CP_OUT_IDX := "_hover_cp_out_idx_"
+const META_NAME_HOVER_CLOSEST_POINT := "_hover_closest_point_on_curve_"
 const META_NAME_SELECT_HINT := "_select_hint_"
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
@@ -140,7 +141,8 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			viewport_control.draw_string(default_font, _vp_transform(handle['point_position']), str(i))
 
 
-func _set_handle_hover(mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
+func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
+	var mouse_pos := _vp_transform(g_mouse_pos)
 	var handles = svs.get_curve_handles()
 	svs.remove_meta(META_NAME_HOVER_POINT_IDX)
 	svs.remove_meta(META_NAME_HOVER_CP_IN_IDX)
@@ -153,6 +155,9 @@ func _set_handle_hover(mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void
 			svs.set_meta(META_NAME_HOVER_CP_IN_IDX, i)
 		elif mouse_pos.distance_to(_vp_transform(handle['out_position'])) < 10:
 			svs.set_meta(META_NAME_HOVER_CP_OUT_IDX, i)
+	var closest_point_on_curve := svs.get_closest_point_on_curve(g_mouse_pos)
+	if mouse_pos.distance_to(_vp_transform(closest_point_on_curve)) < 15:
+		svs.set_meta(META_NAME_HOVER_CLOSEST_POINT, closest_point_on_curve)
 
 
 func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
@@ -167,6 +172,19 @@ func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> voi
 		viewport_control.draw_line(last_p, points[0], color, 1.0, true)
 
 
+func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
+		var p := _vp_transform(svs.get_meta(META_NAME_HOVER_CLOSEST_POINT))
+		viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WEB_GRAY, 2)
+		viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WEB_GRAY,2)
+		viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WEB_GRAY, 2)
+		viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WEB_GRAY, 2)
+		viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WHITE)
+		viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WHITE)
+		viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WHITE)
+		viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WHITE)
+
+
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return
@@ -177,6 +195,8 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 					VIEWPORT_ORANGE, 2.0)
 			_draw_curve(viewport_control, result)
 			_draw_handles(viewport_control, result)
+			if not _handle_has_hover(result):
+				_draw_closest_point_on_curve(viewport_control, result)
 		elif result.has_meta(META_NAME_SELECT_HINT):
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					Color.WEB_GRAY, 1.0)
@@ -270,6 +290,7 @@ func _remove_cp_out_from_curve(current_selection : ScalableVectorShape2D, idx : 
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
+
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
 		return false
 
@@ -313,6 +334,8 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 		for result in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D"):
 			result.remove_meta(META_NAME_SELECT_HINT)
+		if _is_svs_valid(current_selection):
+			current_selection.remove_meta(META_NAME_HOVER_CLOSEST_POINT)
 
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and _is_svs_valid(current_selection):
 			if _handle_has_hover(current_selection):
@@ -336,7 +359,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 				result.set_meta(META_NAME_SELECT_HINT, true)
 
 			if _is_svs_valid(current_selection):
-				_set_handle_hover(_vp_transform(mouse_pos), current_selection)
+				_set_handle_hover(mouse_pos, current_selection)
 
 		update_overlays()
 

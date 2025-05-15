@@ -182,7 +182,7 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Make handles interactable with mouse, closed shapes should merge begin- and endpoint (like inkscape does)
 - [x] BUG FIXES: missing / empty curve
 - [x] Right click removes a (control-) point from the selected shape
-- [ ] Show a hint on closest point on curve if distance to that point is smaller that N pixels [Curve2D#get_closest_point](https://docs.godotengine.org/en/stable/classes/class_curve2d.html#class-curve2d-method-get-closest-point)
+- [x] Show a hint on closest point on curve if distance to that point is smaller that N pixels (N=15)
 - [ ] Double click adds a point to the selected shape's curve at either on-segment hint-point (if present) or mouse position
 - [ ] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 - [ ] Update SVG importer settings
