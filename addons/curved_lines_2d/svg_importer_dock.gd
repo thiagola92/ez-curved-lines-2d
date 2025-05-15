@@ -484,7 +484,7 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		add_fill_to_path(new_path, style, scene_root, gradients, gradient_point_parent)
 
 	# FIXME: Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
-	if (import_collision_polygons and 
+	if (import_collision_polygons and
 			("fill" in style or import_collision_polygons_for_all_shapes)):
 		var poly := CollisionPolygon2D.new()
 		new_path.add_child(poly, true)

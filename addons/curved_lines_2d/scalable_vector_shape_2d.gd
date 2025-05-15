@@ -43,14 +43,14 @@ signal assigned_node_changed()
 ## Controls the paramaters used to divide up the line  in segments.
 ## These settings are prefilled with the default values.
 @export_group("Tesselation settings")
-## Controls how many subdivisions a curve segment may face before it is considered approximate enough. 
-## Each subdivision splits the segment in half, so the default 5 stages may mean up to 32 subdivisions 
+## Controls how many subdivisions a curve segment may face before it is considered approximate enough.
+## Each subdivision splits the segment in half, so the default 5 stages may mean up to 32 subdivisions
 ## per curve segment. Increase with care!
 @export_range(1, 10) var max_stages : int = 5:
 	set(_max_stages):
 		max_stages = _max_stages
 		assigned_node_changed.emit()
-## Controls how many degrees the midpoint of a segment may deviate from the real curve, before the 
+## Controls how many degrees the midpoint of a segment may deviate from the real curve, before the
 ## segment has to be subdivided.
 @export_range(0.0, 180.0) var tolerance_degrees := 4.0:
 	set(_tolerance_degrees):
@@ -111,7 +111,7 @@ func _on_assigned_node_changed():
 ## Redraw the line based on the new curve, using its tesselate method
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
-			and not is_instance_valid(collision_polygon) 
+			and not is_instance_valid(collision_polygon)
 			and not path_changed.has_connections()):
 		# guard against needlessly invoking expensive tesselate operation
 		return
@@ -119,7 +119,7 @@ func curve_changed():
 	var new_points := curve.tessellate(max_stages, tolerance_degrees)
 	# Fixes cases start- and end-node are so close to each other that
 	# polygons won't fill and closed lines won't cap nicely
-	if new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
+	if new_points.size() > 0 and new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
 		new_points.remove_at(new_points.size() - 1)
 	if is_instance_valid(line):
 		line.points = new_points
@@ -136,7 +136,7 @@ func get_bounding_rect() -> Rect2:
 		return Rect2(Vector2.ZERO, Vector2.ZERO)
 	var points := curve.tessellate(max_stages, tolerance_degrees)
 	if points.size() < 1:
-		# Cannot calculate a center for 0 points 
+		# Cannot calculate a center for 0 points
 		return Rect2(Vector2.ZERO, Vector2.ZERO)
 	var minx := INF
 	var miny := INF
@@ -239,3 +239,10 @@ func set_global_curve_cp_in_position(global_pos : Vector2, point_idx : int) -> v
 func set_global_curve_cp_out_position(global_pos : Vector2, point_idx : int) -> void:
 	if curve.point_count > point_idx:
 		curve.set_point_out(point_idx, to_local(global_pos) - curve.get_point_position(point_idx))
+
+
+func replace_curve_points(curve_in : Curve2D) -> void:
+	curve.clear_points()
+	for i in range(curve_in.point_count):
+		curve.add_point(curve_in.get_point_position(i),
+				curve_in.get_point_in(i), curve_in.get_point_out(i))

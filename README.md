@@ -181,9 +181,9 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Draw handles for ScalableVectorShape2D bezier manipulation (like inkscape)
 - [x] Make handles interactable with mouse, closed shapes should merge begin- and endpoint (like inkscape does)
 - [x] BUG FIXES: missing / empty curve
+- [x] Right click removes a (control-) point from the selected shape
 - [ ] Show a hint on closest point on curve if distance to that point is smaller that N pixels [Geometry2D#get_closest_point_to_segment](https://docs.godotengine.org/en/stable/classes/class_geometry2d.html#class-geometry2d-method-get-closest-point-to-segment)
 - [ ] Double click adds a point to the selected shape's curve at either on-segment hint-point (if present) or mouse position
-- [ ] Right click removes a point from the selected shape
 - [ ] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 - [ ] Update SVG importer settings
 

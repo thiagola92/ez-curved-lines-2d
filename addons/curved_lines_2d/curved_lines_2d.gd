@@ -91,8 +91,8 @@ func _is_svs_valid(svs : Object) -> bool:
 
 func _handle_has_hover(svs : ScalableVectorShape2D) -> bool:
 	return (
-		svs.has_meta(META_NAME_HOVER_POINT_IDX) or 
-		svs.has_meta(META_NAME_HOVER_CP_IN_IDX) or 
+		svs.has_meta(META_NAME_HOVER_POINT_IDX) or
+		svs.has_meta(META_NAME_HOVER_CP_IN_IDX) or
 		svs.has_meta(META_NAME_HOVER_CP_OUT_IDX)
 	)
 
@@ -102,7 +102,7 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 	if handle[prefix].length():
 		var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 		var width := 2 if is_hovered else 1
-		viewport_control.draw_line(_vp_transform(handle['point_position']), 
+		viewport_control.draw_line(_vp_transform(handle['point_position']),
 				_vp_transform(handle[prefix + '_position']), Color.WEB_GRAY, 1, true)
 		viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, Color.DIM_GRAY)
 		viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, color, false, width)
@@ -128,7 +128,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			# unmirrored handles / zero length handles
 			var p1 := _vp_transform(handle['point_position'])
 			var pts := PackedVector2Array([
-					Vector2(p1.x - 8, p1.y), Vector2(p1.x, p1.y - 8), 
+					Vector2(p1.x - 8, p1.y), Vector2(p1.x, p1.y - 8),
 					Vector2(p1.x + 8, p1.y), Vector2(p1.x, p1.y + 8)
 			])
 			viewport_control.draw_polygon(pts, [Color.DIM_GRAY])
@@ -230,6 +230,45 @@ func _set_shape_origin(current_selection : ScalableVectorShape2D, mouse_pos : Ve
 	undo_redo.commit_action()
 
 
+func _get_curve_backup(curve_in : Curve2D) -> Curve2D:
+	var curve_copy := Curve2D.new()
+	for i in range(curve_in.point_count):
+		curve_copy.add_point(curve_in.get_point_position(i),
+				curve_in.get_point_in(i), curve_in.get_point_out(i))
+	return curve_copy
+
+
+func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
+	var backup := _get_curve_backup(current_selection.curve)
+	var orig_n := current_selection.curve.point_count
+	undo_redo.create_action("Remove point %d from %s" % [idx, str(current_selection)])
+	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
+	if orig_n > 0:
+		undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
+	if orig_n > 1:
+		undo_redo.add_do_method(current_selection.curve, 'set_point_out', orig_n - 2, Vector2.ZERO)
+	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
+	undo_redo.commit_action()
+
+
+func _remove_cp_in_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
+	if idx == 0:
+		idx = current_selection.curve.point_count - 1
+	undo_redo.create_action("Remove control point in %d from %s " % [idx, str(current_selection)])
+	undo_redo.add_do_method(current_selection.curve, 'set_point_in', idx, Vector2.ZERO)
+	undo_redo.add_undo_method(current_selection.curve, 'set_point_in', idx, current_selection.curve.get_point_in(idx))
+	undo_redo.commit_action()
+
+
+func _remove_cp_out_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
+	if idx == current_selection.curve.point_count - 1:
+		idx = 0
+	undo_redo.create_action("Remove control point out %d from %s " % [idx, str(current_selection)])
+	undo_redo.add_do_method(current_selection.curve, 'set_point_out', idx, Vector2.ZERO)
+	undo_redo.add_undo_method(current_selection.curve, 'set_point_out', idx, current_selection.curve.get_point_out(idx))
+	undo_redo.commit_action()
+
+
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
 		return false
@@ -258,6 +297,17 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					EditorInterface.edit_node(result)
 					return true
 		return false
+
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
+			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+				if current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
+					_remove_point_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_POINT_IDX))
+				elif current_selection.has_meta(META_NAME_HOVER_CP_IN_IDX):
+					_remove_cp_in_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
+				elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
+					_remove_cp_out_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
+			return true
 
 	if event is InputEventMouseMotion:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
