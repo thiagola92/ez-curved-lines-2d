@@ -99,7 +99,7 @@ func _handle_has_hover(svs : ScalableVectorShape2D) -> bool:
 
 
 func _draw_control_point_handle(viewport_control : Control, svs : ScalableVectorShape2D,
-		handle : Dictionary, prefix : String, is_hovered := false) -> void:
+		handle : Dictionary, prefix : String, is_hovered : bool, self_is_hovered : bool) -> void:
 	if handle[prefix].length():
 		var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 		var width := 2 if is_hovered else 1
@@ -107,6 +107,25 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 				_vp_transform(handle[prefix + '_position']), Color.WEB_GRAY, 1, true)
 		viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, Color.DIM_GRAY)
 		viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, color, false, width)
+		if self_is_hovered:
+			var hint_txt := "Control point " + prefix
+			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				hint_txt += "\n - Drag to move\n - Right click to delete"
+				hint_txt += "\n - Hold Shift + Drag to move mirrored"
+
+			_draw_hint(viewport_control, hint_txt,
+					_vp_transform(handle[prefix + '_position']) + Vector2(15, 10))
+
+
+func _draw_hint(viewport_control : Control, txt : String, txt_pos : Vector2) -> void:
+	var lines := txt.split("\n")
+	for i in range(lines.size()):
+		var text := lines[i]
+		var pos := txt_pos + Vector2.DOWN * (i * (ThemeDB.fallback_font_size + ThemeDB.fallback_font_size * .2))
+		viewport_control.draw_string_outline(ThemeDB.fallback_font, pos, text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, ThemeDB.fallback_font_size, 3, Color.BLACK)
+		viewport_control.draw_string(ThemeDB.fallback_font, pos, text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, ThemeDB.fallback_font_size, Color.WHITE_SMOKE)
 
 
 func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
@@ -118,8 +137,10 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 		var cp_out_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_OUT_IDX, -1) == i
 		var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 		var width := 2 if is_hovered else 1
-		_draw_control_point_handle(viewport_control, svs, handle, 'in', is_hovered or cp_in_is_hovered)
-		_draw_control_point_handle(viewport_control, svs, handle, 'out', is_hovered or cp_out_is_hovered)
+		_draw_control_point_handle(viewport_control, svs, handle, 'in',
+				is_hovered or cp_in_is_hovered, cp_in_is_hovered)
+		_draw_control_point_handle(viewport_control, svs, handle, 'out',
+				is_hovered or cp_out_is_hovered, cp_out_is_hovered)
 		if handle['mirrored']:
 			# mirrored handles
 			var rect := Rect2(_vp_transform(handle['point_position']) - Vector2(5, 5), Vector2(10, 10))
@@ -136,9 +157,22 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			pts.append(Vector2(p1.x - 8, p1.y))
 			viewport_control.draw_polyline(pts, color, width)
 		if is_hovered:
-			var default_font = ThemeDB.fallback_font
-			var default_font_size = ThemeDB.fallback_font_size
-			viewport_control.draw_string(default_font, _vp_transform(handle['point_position']), str(i))
+			var hint_txt := "Point: " + str(i)
+			hint_txt += handle['is_closed']
+			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				if Input.is_key_pressed(KEY_SHIFT):
+					hint_txt += " - Release mouse to set curve handles"
+			else:
+				hint_txt += "\n - Drag to move"
+				if handle['is_closed'].length() > 0:
+					hint_txt += "\n - Double click to break loop"
+				else:
+					hint_txt += "\n - Right click to delete"
+					if (i == 0 or i == handles.size() - 1) and not svs.is_curve_closed():
+						hint_txt += "\n - Double click to close loop"
+				hint_txt += "\n - Hold Shift + Drag to create curve handles"
+			_draw_hint(viewport_control, hint_txt,
+					_vp_transform(handle['point_position']) + Vector2(15, 10))
 
 
 func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
@@ -163,16 +197,19 @@ func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> vo
 		svs.set_meta(META_NAME_HOVER_CLOSEST_POINT, closest_point_on_curve)
 
 
-func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D,
+		is_selected := true) -> void:
 	var points = svs.get_poly_points().map(_vp_transform)
 	var color := svs.shape_hint_color if svs.shape_hint_color else Color.LIME_GREEN
+	if not is_selected:
+		color = Color.WEB_GRAY
 	var last_p := Vector2.INF
 	for p : Vector2 in points:
 		if last_p != Vector2.INF:
-			viewport_control.draw_line(last_p, p, color, 1.0, true)
+			viewport_control.draw_line(last_p, p, color, 1.0, is_selected)
 		last_p = p
 	if is_instance_valid(svs.line) and svs.line.closed and points.size() > 1:
-		viewport_control.draw_line(last_p, points[0], color, 1.0, true)
+		viewport_control.draw_dashed_line(last_p, points[0], color, 1, 5.0, true, true)
 
 
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
@@ -187,6 +224,8 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 		viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WHITE)
 		viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WHITE)
 		viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WHITE)
+		_draw_hint(viewport_control, "Double click to add point here",
+				p + Vector2(15, 8))
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
@@ -204,6 +243,9 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 		elif result.has_meta(META_NAME_SELECT_HINT):
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					Color.WEB_GRAY, 1.0)
+
+		if not(result.line or result.collision_polygon or result.polygon):
+			_draw_curve(viewport_control, result, false)
 
 
 func _update_curve_point_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
@@ -263,10 +305,14 @@ func _get_curve_backup(curve_in : Curve2D) -> Curve2D:
 
 
 func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
-	var backup := _get_curve_backup(current_selection.curve)
 	var orig_n := current_selection.curve.point_count
+	if current_selection.is_curve_closed() and idx == 0 or idx == orig_n -1:
+		_toggle_loop_if_applies(current_selection, idx)
+		return
+
 	if orig_n <= 1:
 		return
+	var backup := _get_curve_backup(current_selection.curve)
 	undo_redo.create_action("Remove point %d from %s" % [idx, str(current_selection)])
 	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
 	undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
@@ -306,30 +352,37 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 					Vector2.ZERO, Vector2.ZERO, md_closest_point["before_segment"])
 
 
-func _forward_canvas_gui_input(event: InputEvent) -> bool:
+func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
+	if svs.curve.point_count < 3:
+		return
+	if idx == 0 or idx == svs.curve.point_count - 1:
+		if svs.is_curve_closed():
+			svs.curve.set_point_position(svs.curve.point_count - 1,
+					svs.curve.get_point_position(0) + Vector2.LEFT * 10)
+		else:
+			svs.curve.set_point_position(svs.curve.point_count - 1,
+					svs.curve.get_point_position(0))
 
+
+func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
 		return false
-
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return false
-
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
-
 		if _is_change_pivot_button_active():
 			if _is_svs_valid(current_selection):
 				_set_shape_origin(current_selection, mouse_pos)
 		else:
 			if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
+				if event.double_click and current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
+					_toggle_loop_if_applies(current_selection, current_selection.get_meta(META_NAME_HOVER_POINT_IDX))
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 				if event.double_click:
 					_add_point_on_curve_segment(current_selection)
-				elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-					print("mouse down: curve drag mode")
 				return true
 			else:
 				var results := find_scalable_vector_shape_2d_nodes_at(mouse_pos)

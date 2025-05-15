@@ -1,7 +1,7 @@
-## A custom node that uses a Curve2D to control shapes like Line2D, Polygon2D with
-## Original adapted code: https://www.hedberggames.com/blog/rendering-curves-in-godot
 @tool
 extends Node2D
+## A custom node that uses a Curve2D to control shapes like Line2D, Polygon2D with
+## Original adapted code: https://www.hedberggames.com/blog/rendering-curves-in-godot
 class_name ScalableVectorShape2D
 
 ## Emitted when a new set of points was calculated for a connected Line2D, Polygon2D, or CollisionPolygon2D
@@ -150,7 +150,6 @@ func get_bounding_rect() -> Rect2:
 	return Rect2(minx, miny, maxx - minx, maxy - miny)
 
 
-
 func has_point(global_pos : Vector2) -> bool:
 	return get_bounding_rect().grow(
 		line.width / 2.0 if is_instance_valid(line) else 0
@@ -221,7 +220,8 @@ func get_curve_handles() -> Array:
 			'out': c_o,
 			'mirrored': c_i.length() and c_i.distance_to(-c_o) < 0.01,
 			'in_position': to_global(p + c_i),
-			'out_position': to_global(p + c_o)
+			'out_position': to_global(p + c_o),
+			'is_closed': (" ∞ " + str(n - 1) if i == 0 and is_closed else "")
 		})
 	return result
 

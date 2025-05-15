@@ -185,7 +185,10 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Show a hint on closest point on curve if distance to that point is smaller that N pixels (N=15)
 - [x] Determine on which curve segment that point resides
 - [x] Double click adds a point to the selected shape's curve at either on-segment hint-point (if present) or mouse position
-- [ ] Show gui-hints next to mouse pointer ("double click adds node, hold shift does X, etc")
+- [x] Show closed curve start and end index as follows: (0 ∞ N)
+- [x] Show gui-hints next to mouse pointer ("double click adds node, hold shift does X, etc")
+- [x] Draw unselected curve
+- [x] Toggle closed curve on double click
 - [ ] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 - [ ] Rename dock to "Scalable Shapes 2D"
 - [ ] Add an Enable Edit/Disable Edit toggle to dock

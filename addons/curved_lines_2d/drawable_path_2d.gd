@@ -1,7 +1,10 @@
 ## A custom node that extends Path2D so it can be drawn as a Line2D
 ## Original adapted code: https://www.hedberggames.com/blog/rendering-curves-in-godot
+## @deprecated: Use [ScalableVectorShape2D] instead.
+
 @tool
 extends Path2D
+
 class_name  DrawablePath2D
 
 ## Emitted when a new set of points was calculated for a connected Line2D, Polygon2D, or CollisionPolygon2D
