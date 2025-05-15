@@ -156,7 +156,10 @@ func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> vo
 		elif mouse_pos.distance_to(_vp_transform(handle['out_position'])) < 10:
 			svs.set_meta(META_NAME_HOVER_CP_OUT_IDX, i)
 	var closest_point_on_curve := svs.get_closest_point_on_curve(g_mouse_pos)
-	if mouse_pos.distance_to(_vp_transform(closest_point_on_curve)) < 15:
+
+	if ("point_position" in closest_point_on_curve and
+			mouse_pos.distance_to(_vp_transform(closest_point_on_curve["point_position"])) < 15
+	):
 		svs.set_meta(META_NAME_HOVER_CLOSEST_POINT, closest_point_on_curve)
 
 
@@ -174,7 +177,9 @@ func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> voi
 
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
-		var p := _vp_transform(svs.get_meta(META_NAME_HOVER_CLOSEST_POINT))
+		var md_p := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+		print(md_p)
+		var p = _vp_transform(md_p["point_position"])
 		viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WEB_GRAY, 2)
 		viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WEB_GRAY,2)
 		viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WEB_GRAY, 2)
@@ -301,11 +306,19 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
+
 		if _is_change_pivot_button_active():
 			if _is_svs_valid(current_selection):
 				_set_shape_origin(current_selection, mouse_pos)
 		else:
 			if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
+				return true
+			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
+				if event.double_click:
+					#_add_point_on_curve_segment(current_selection)
+					print("double click: place point mode")
+				elif Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					print("mouse down: curve drag mode")
 				return true
 			else:
 				var results := find_scalable_vector_shape_2d_nodes_at(mouse_pos)
