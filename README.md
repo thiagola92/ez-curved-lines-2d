@@ -183,6 +183,7 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] BUG FIXES: missing / empty curve
 - [x] Right click removes a (control-) point from the selected shape
 - [x] Show a hint on closest point on curve if distance to that point is smaller that N pixels (N=15)
+- [ ] Determine on which curve segment that point resides
 - [ ] Double click adds a point to the selected shape's curve at either on-segment hint-point (if present) or mouse position
 - [ ] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 - [ ] Update SVG importer settings
