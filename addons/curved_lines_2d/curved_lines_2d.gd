@@ -149,6 +149,8 @@ func _draw_hint(viewport_control : Control, txt : String, txt_pos : Vector2) -> 
 
 
 func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+	if not _get_select_mode_button().button_pressed:
+		return
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
 		var handle = handles[i]
@@ -260,8 +262,8 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 	for result : ScalableVectorShape2D in _find_scalable_vector_shape_2d_nodes().filter(_is_svs_valid):
 		if result == current_selection:
-			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
-					VIEWPORT_ORANGE, 2.0)
+			#viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
+					#VIEWPORT_ORANGE, 2.0)
 			_draw_curve(viewport_control, result)
 			_draw_handles(viewport_control, result)
 			if not _handle_has_hover(result):

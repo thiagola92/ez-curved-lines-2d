@@ -195,15 +195,15 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Rename dock to "Scalable Vector Shapes 2D"
 - [x] Add a Show/Hide GUI hints toggle in edit dock
 - [x] Enable/Disable editing toggle in edit dock
-- [ ] New icon for ScalableVectorShape2D
-- [ ] New Icon (and name?) for the plugin
+- [x] Create Rect and Ellipse in editor tab in dock
+- [ ] New icon for ScalableVectorShape2D node
+- [ ] New name for the plugin
 - [ ] Updated manual in README
 
 
 ### Could have
 - [ ] Curve local to scene in edit dock
 - [ ] More options in edit tab of dock (fill props/gradient? stroke props?)
-- [ ] Create Shape tab in dock
 - [ ] Import inkscape pivot point to override the centered position with
 - [ ] Expand bottom dock to supply primitive shapes: rect and circle
 - [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
