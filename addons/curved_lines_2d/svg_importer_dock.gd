@@ -52,6 +52,7 @@ func _enter_tree() -> void:
 	EditorInterface.get_base_control().add_child(import_file_dialog)
 	warning_dialog = AcceptDialog.new()
 	EditorInterface.get_base_control().add_child(warning_dialog)
+	find_child(EDIT_TAB_NAME).warning_dialog = warning_dialog
 
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:

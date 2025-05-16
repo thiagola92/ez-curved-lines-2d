@@ -19,6 +19,7 @@ var ellipse_ry_input : EditorSpinSlider
 var ellipse_stroke_width_input : EditorSpinSlider
 var ellipse_stroke_color_button : ColorPickerButton
 var ellipse_fill_color_button : ColorPickerButton
+var warning_dialog : AcceptDialog = null
 
 
 func _enter_tree() -> void:
@@ -34,7 +35,6 @@ func _enter_tree() -> void:
 	find_child("XRadiusSliderContainer").add_child(rect_rx_input)
 	find_child("YRadiusSliderContainer").add_child(rect_ry_input)
 	find_child("StrokeWidthContainer").add_child(rect_stroke_width_input)
-
 	ellipse_rx_input = _make_int_input("Horizontal Radius (RX)", 50, 1, 500, "px")
 	ellipse_ry_input = _make_int_input("Vertical Radius (RY)", 50, 1, 500, "px")
 	ellipse_stroke_width_input = _make_int_input("Stroke Width", 1, 0, 100, "px")
@@ -58,10 +58,15 @@ func _make_int_input(lbl : String, value : int, min_value : int, max_value : int
 func _on_create_rect_button_pressed() -> void:
 	var scene_root := EditorInterface.get_edited_scene_root()
 	if not is_instance_valid(scene_root):
+		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+		warning_dialog.popup_centered()
 		return
 
 	if not scene_root is Node2D:
+		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+		warning_dialog.popup_centered()
 		return
+
 	var curve := Curve2D.new()
 	if rect_rx_input.value == 0 and rect_ry_input.value == 0:
 		curve.add_point(Vector2.ZERO)
@@ -84,7 +89,13 @@ func _on_create_rect_button_pressed() -> void:
 func _on_create_circle_button_pressed() -> void:
 	var scene_root := EditorInterface.get_edited_scene_root()
 	if not is_instance_valid(scene_root):
+		warning_dialog.dialog_text = "Can only create a Shape in an open 2D scene"
 		return
+	if not scene_root is Node2D:
+		warning_dialog.dialog_text = "Can only create a Shape in an open 2D scene"
+		warning_dialog.popup_centered()
+		return
+
 	var curve := Curve2D.new()
 	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2.ZERO, Vector2(0, ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
 	curve.add_point(Vector2(0, ellipse_ry_input.value), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
