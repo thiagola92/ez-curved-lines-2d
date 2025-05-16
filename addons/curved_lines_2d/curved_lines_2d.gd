@@ -30,9 +30,10 @@ func _enter_tree():
 		preload("res://addons/curved_lines_2d/DrawablePath2D.svg")
 	)
 	undo_redo = get_undo_redo()
-	add_control_to_bottom_panel(svg_importer_dock as Control, "EZ SVG Importer")
+	add_control_to_bottom_panel(svg_importer_dock as Control, "Scalable Vector Shapes 2D")
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
 	undo_redo.version_changed.connect(update_overlays)
+	make_bottom_panel_item_visible(svg_importer_dock)
 
 
 func _on_selection_changed():
@@ -44,6 +45,10 @@ func _on_selection_changed():
 		if (not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 				and EditorInterface.get_selection().get_selected_nodes().is_empty()):
 			EditorInterface.edit_node(scene_root)
+		var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+		if _is_svs_valid(current_selection):
+			make_bottom_panel_item_visible(svg_importer_dock)
+			svg_importer_dock.find_child("Scalable Vector Shapes").show()
 	update_overlays()
 
 

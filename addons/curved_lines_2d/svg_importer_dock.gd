@@ -74,6 +74,7 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 
 
 func _drop_data(at_position: Vector2, data: Variant) -> void:
+	find_child("Import SVG File").show()
 	if _can_drop_data(at_position, data):
 		var svg_root = _load_svg(data["files"][0])
 

@@ -191,12 +191,12 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Toggle closed curve on double click
 - [x] Drag to change segment curve using quadratic bezier
 - [x] Convert DrawablePath2D's to ScalableVectorShape2D's with button
-- [ ] Rename dock to "Scalable Vector Shapes 2D"
-- [ ] Add an Enable Edit/Disable Edit toggle to dock
+- [x] Update SVG importer settings
+- [x] Rename dock to "Scalable Vector Shapes 2D"
 - [ ] Add a Show/Hide GUI hints toggle to dock
-- [ ] Update SVG importer settings
-- [ ] Updated manual in README
 - [ ] New icon for ScalableVectorShape2D
+- [ ] New Icon (and name?) for the plugin
+- [ ] Updated manual in README
 
 
 ### Could have
