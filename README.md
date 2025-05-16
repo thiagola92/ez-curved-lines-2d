@@ -200,6 +200,8 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 
 
 ### Could have
+- [ ] More options in edit tab of dock (fill props/gradient? stroke props?)
+- [ ] Create Shape tab in dock
 - [ ] Import inkscape pivot point to override the centered position with
 - [ ] Expand bottom dock to supply primitive shapes: rect and circle
 - [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
