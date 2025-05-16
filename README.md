@@ -200,12 +200,12 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 
 
 ### Could have
-- [ ] Expand bottom dock to supply handle-manipulation buttons (use inkscape icons)
+- [ ] Import inkscape pivot point to override the centered position with
+- [ ] Expand bottom dock to supply primitive shapes: rect and circle
 - [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
 - [ ] Add button to editor to call center node position func
 - [ ] Helper nodes for gradient from-, stop- and to-handles
 - [ ] SVG Import log: add button to select node with problem
-- [ ] Import inkscape pivot point to override the centered position with
 - [ ] SVG Import log: show/hide different log levels, clear log
 - [ ] Import `<text>` (with embedded fonts? reference to ttf with a dialog?)
 
@@ -215,5 +215,4 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [ ] Gradient fills for Line2D strokes (would probably require a shader)
 - [ ] Gradient skew, rotate, fx/fy/fr
 - [ ] Pattern fills
-- [ ] Undo/Redo (Undo = delete SvgImport node)
-- [ ] GradientTexture2D should be correctly rotated (test case: chair)
+- [ ] Undo/Redo SVG Import (Undo = delete SvgImport node)
