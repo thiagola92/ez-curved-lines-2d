@@ -193,7 +193,9 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 - [x] Update SVG importer settings
 - [x] Rename dock to "Scalable Vector Shapes 2D"
-- [ ] Add a Show/Hide GUI hints toggle to dock
+- [ ] Make curve local to scene an importer option
+- [ ] Add a Show/Hide GUI hints toggle in edit dock
+- [ ] Curve local to scene in edit dock
 - [ ] New icon for ScalableVectorShape2D
 - [ ] New Icon (and name?) for the plugin
 - [ ] Updated manual in README
