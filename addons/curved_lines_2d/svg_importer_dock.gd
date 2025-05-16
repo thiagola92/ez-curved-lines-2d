@@ -1,6 +1,13 @@
 @tool
 extends Control
 
+class_name SvgImporterDock
+
+signal toggle_gui_editing(toggled_on : bool)
+signal toggle_gui_hints(toggled_on : bool)
+
+const IMPORT_TAB_NAME :=  "Import SVG File"
+const EDIT_TAB_NAME := "Scalable Vector Shapes"
 # Fraction of a radius for a bezier control point
 const R_TO_CP = 0.5523
 const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "stroke-opacity",
@@ -74,7 +81,7 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 
 
 func _drop_data(at_position: Vector2, data: Variant) -> void:
-	find_child("Import SVG File").show()
+	find_child(IMPORT_TAB_NAME).show()
 	if _can_drop_data(at_position, data):
 		var svg_root = _load_svg(data["files"][0])
 
@@ -722,3 +729,11 @@ func _on_antialiased_check_box_toggled(toggled_on: bool) -> void:
 
 func _on_open_file_dialog_button_pressed() -> void:
 	import_file_dialog.popup_file_dialog()
+
+
+func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
+	toggle_gui_editing.emit(toggled_on)
+
+
+func _on_enable_hints_checkbox_toggled(toggled_on: bool) -> void:
+	toggle_gui_hints.emit(toggled_on)

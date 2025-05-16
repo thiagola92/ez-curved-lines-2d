@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://drrarjj0668n"]
+[gd_scene load_steps=6 format=3 uid="uid://drrarjj0668n"]
 
 [ext_resource type="Script" uid="uid://bp5vvj23w57js" path="res://addons/curved_lines_2d/svg_importer_dock.gd" id="1_gt4al"]
 [ext_resource type="LabelSettings" uid="uid://bspk1rkq1cmhx" path="res://addons/curved_lines_2d/info_label_settings.tres" id="2_rycm0"]
+[ext_resource type="PackedScene" uid="uid://dwns40mbgt82s" path="res://addons/curved_lines_2d/scalable_vector_shape_edit_tab.tscn" id="3_0eedo"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rycm0"]
 content_margin_left = 10.0
@@ -119,10 +120,9 @@ text = " - Dag/Drop an svg-file here to start import -"
 label_settings = ExtResource("2_rycm0")
 horizontal_alignment = 1
 
-[node name="Scalable Vector Shapes" type="HFlowContainer" parent="."]
+[node name="Scalable Vector Shapes" parent="." instance=ExtResource("3_0eedo")]
 visible = false
 layout_mode = 2
-metadata/_tab_index = 1
 
 [connection signal="toggled" from="Import SVG File/VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/KeepDrawablePath2DNodeCheckBox" to="." method="_on_keep_drawable_path_2d_node_check_box_toggled"]
 [connection signal="toggled" from="Import SVG File/VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/LockShapesCheckBox" to="." method="_on_lock_shapes_check_box_toggled"]
@@ -130,3 +130,5 @@ metadata/_tab_index = 1
 [connection signal="toggled" from="Import SVG File/VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/ImportCollisionPolygonsCheckBox" to="." method="_on_import_collision_polygons_check_box_toggled"]
 [connection signal="toggled" from="Import SVG File/VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/ImportCollisionPolygonsForAllShapesCheckBox" to="." method="_on_import_collision_polygons_for_all_shapes_check_box_toggled"]
 [connection signal="pressed" from="Import SVG File/VBoxContainer2/PanelContainer/VBoxContainer2/OpenFileDialogButton" to="." method="_on_open_file_dialog_button_pressed"]
+[connection signal="toggle_editing" from="Scalable Vector Shapes" to="." method="_on_enable_editing_checkbox_toggled"]
+[connection signal="toggle_hints" from="Scalable Vector Shapes" to="." method="_on_enable_hints_checkbox_toggled"]

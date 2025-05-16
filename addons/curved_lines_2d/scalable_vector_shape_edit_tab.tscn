@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://dwns40mbgt82s"]
+
+[ext_resource type="Script" uid="uid://tl3hcapnk7lb" path="res://addons/curved_lines_2d/scalable_vector_shape_edit_tab.gd" id="1_nt5in"]
+
+[node name="ScalableVectorShapeEditTab" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_nt5in")
+metadata/_tab_index = 1
+
+[node name="EnableEditingCheckbox" type="CheckBox" parent="."]
+layout_mode = 2
+size_flags_horizontal = 0
+button_pressed = true
+text = "Enable ScalableVectorShape2D Editing in 2D Viewport"
+
+[node name="EnableHintsCheckbox" type="CheckBox" parent="."]
+layout_mode = 2
+size_flags_horizontal = 0
+button_pressed = true
+text = "Show Edit Hints in 2D Viewport"
+
+[connection signal="toggled" from="EnableEditingCheckbox" to="." method="_on_enable_editing_checkbox_toggled"]
+[connection signal="toggled" from="EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]

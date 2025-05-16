@@ -12,6 +12,8 @@ var plugin
 var svg_importer_dock
 var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
+var editing_enabled := true
+var hints_enabled := true
 
 func _enter_tree():
 	svg_importer_dock = preload("res://addons/curved_lines_2d/svg_importer_dock.tscn").instantiate()
@@ -34,11 +36,13 @@ func _enter_tree():
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
 	undo_redo.version_changed.connect(update_overlays)
 	make_bottom_panel_item_visible(svg_importer_dock)
+	svg_importer_dock.toggle_gui_editing.connect(func(flg): editing_enabled = flg)
+	svg_importer_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
 
 
 func _on_selection_changed():
 	var scene_root := EditorInterface.get_edited_scene_root()
-	if is_instance_valid(scene_root):
+	if editing_enabled and is_instance_valid(scene_root):
 
 		# inelegant fix to always keep an instance of Node selected, so
 		# _forward_canvas_gui_input will still be called upon losing focus
@@ -48,12 +52,13 @@ func _on_selection_changed():
 		var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 		if _is_svs_valid(current_selection):
 			make_bottom_panel_item_visible(svg_importer_dock)
-			svg_importer_dock.find_child("Scalable Vector Shapes").show()
+			svg_importer_dock.find_child(SvgImporterDock.EDIT_TAB_NAME).show()
 	update_overlays()
 
 
 func _handles(object: Object) -> bool:
 	return object is Node
+
 
 func _find_scalable_vector_shape_2d_nodes() -> Array[Node]:
 	var scene_root := EditorInterface.get_edited_scene_root()
@@ -63,6 +68,7 @@ func _find_scalable_vector_shape_2d_nodes() -> Array[Node]:
 			result.push_front(scene_root)
 		return result
 	return []
+
 
 func _find_scalable_vector_shape_2d_nodes_at(pos : Vector2) -> Array[Node]:
 	if is_instance_valid(EditorInterface.get_edited_scene_root()):
@@ -130,6 +136,8 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 
 
 func _draw_hint(viewport_control : Control, txt : String, txt_pos : Vector2) -> void:
+	if not hints_enabled:
+		return
 	var lines := txt.split("\n")
 	for i in range(lines.size()):
 		var text := lines[i]
@@ -245,6 +253,8 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
+	if not editing_enabled:
+		return
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
@@ -407,6 +417,8 @@ func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
+	if not editing_enabled:
+		return false
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
 		return false
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
