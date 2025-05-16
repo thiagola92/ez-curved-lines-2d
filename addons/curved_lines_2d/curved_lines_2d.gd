@@ -50,11 +50,18 @@ func _on_selection_changed():
 func _handles(object: Object) -> bool:
 	return object is Node
 
+func _find_scalable_vector_shape_2d_nodes() -> Array[Node]:
+	var scene_root := EditorInterface.get_edited_scene_root()
+	if is_instance_valid(scene_root):
+		var result := scene_root.find_children("*", "ScalableVectorShape2D")
+		if scene_root is ScalableVectorShape2D:
+			result.push_front(scene_root)
+		return result
+	return []
 
-func find_scalable_vector_shape_2d_nodes_at(pos : Vector2) -> Array[Node]:
+func _find_scalable_vector_shape_2d_nodes_at(pos : Vector2) -> Array[Node]:
 	if is_instance_valid(EditorInterface.get_edited_scene_root()):
-		return (EditorInterface.get_edited_scene_root()
-					.find_children("*", "ScalableVectorShape2D")
+		return (_find_scalable_vector_shape_2d_nodes()
 					.filter(func(x : ScalableVectorShape2D): return x.has_point(pos)))
 	return []
 
@@ -236,7 +243,7 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-	for result : ScalableVectorShape2D in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D").filter(_is_svs_valid):
+	for result : ScalableVectorShape2D in _find_scalable_vector_shape_2d_nodes().filter(_is_svs_valid):
 		if result == current_selection:
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					VIEWPORT_ORANGE, 2.0)
@@ -415,7 +422,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					_add_point_on_curve_segment(current_selection)
 				return true
 			else:
-				var results := find_scalable_vector_shape_2d_nodes_at(mouse_pos)
+				var results := _find_scalable_vector_shape_2d_nodes_at(mouse_pos)
 				var refined_result := results.rfind_custom(func(x): return x.has_fine_point(mouse_pos))
 				if refined_result > -1 and results[refined_result]:
 					EditorInterface.edit_node(results[refined_result])
@@ -439,7 +446,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 
 	if event is InputEventMouseMotion:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
-		for result in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D"):
+		for result in _find_scalable_vector_shape_2d_nodes():
 			result.remove_meta(META_NAME_SELECT_HINT)
 
 		if _is_svs_valid(current_selection) and not _handle_has_hover(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
@@ -468,7 +475,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 				update_overlays()
 				return true
 		else:
-			for result : ScalableVectorShape2D in find_scalable_vector_shape_2d_nodes_at(mouse_pos):
+			for result : ScalableVectorShape2D in _find_scalable_vector_shape_2d_nodes_at(mouse_pos):
 				result.set_meta(META_NAME_SELECT_HINT, true)
 
 			if _is_svs_valid(current_selection):
