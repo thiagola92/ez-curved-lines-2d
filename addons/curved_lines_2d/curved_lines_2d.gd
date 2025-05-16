@@ -224,8 +224,12 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 		viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WHITE)
 		viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WHITE)
 		viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WHITE)
-		_draw_hint(viewport_control, "Double click to add point here",
-				p + Vector2(15, 8))
+		var hint := ""
+		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			hint += "- Double click to add point here"
+			if md_p["before_segment"] < svs.curve.point_count:
+				hint += "\n- Drag to change curve"
+		_draw_hint(viewport_control, hint, p + Vector2(15, 8))
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
@@ -352,6 +356,32 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 					Vector2.ZERO, Vector2.ZERO, md_closest_point["before_segment"])
 
 
+func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
+	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
+		return
+	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+	if md_closest_point["before_segment"] >= svs.curve.point_count or md_closest_point["before_segment"] < 1:
+		return
+	var idx : int = md_closest_point["before_segment"]
+	var segment_start_point := svs.curve.get_point_position(idx - 1)
+	var segment_end_point := svs.curve.get_point_position(idx)
+	var halfway_point := (segment_start_point + segment_end_point) / 2
+	var dir := halfway_point.direction_to(svs.to_local(mouse_pos))
+	var distance := halfway_point.distance_to(svs.to_local(mouse_pos))
+	var quadratic_bezier_control_point := halfway_point + distance * 2 * dir
+	var new_point_out := (quadratic_bezier_control_point - segment_start_point) * (2.0 / 3.0)
+	var new_point_in := (quadratic_bezier_control_point - segment_end_point) * (2.0 / 3.0)
+	undo_redo.create_action("Change curve segment %d->%d for %s" % [idx - 1, idx, str(svs)])
+	undo_redo.add_do_method(svs.curve, 'set_point_out', idx - 1, new_point_out)
+	undo_redo.add_do_method(svs.curve, 'set_point_in', idx, new_point_in)
+	undo_redo.add_undo_method(svs.curve, 'set_point_in', idx, svs.curve.get_point_in(idx))
+	undo_redo.add_undo_method(svs.curve, 'set_point_out', idx - 1, svs.curve.get_point_out(idx - 1))
+	undo_redo.commit_action()
+	md_closest_point["point_position"] = mouse_pos
+	svs.set_meta(META_NAME_HOVER_CLOSEST_POINT, md_closest_point)
+	update_overlays()
+
+
 func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 	if svs.curve.point_count < 3:
 		return
@@ -411,6 +441,12 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 		for result in EditorInterface.get_edited_scene_root().find_children("*", "ScalableVectorShape2D"):
 			result.remove_meta(META_NAME_SELECT_HINT)
+
+		if _is_svs_valid(current_selection) and not _handle_has_hover(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
+			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				_drag_curve_segment(current_selection, mouse_pos)
+				return true
+
 		if _is_svs_valid(current_selection):
 			current_selection.remove_meta(META_NAME_HOVER_CLOSEST_POINT)
 

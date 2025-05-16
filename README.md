@@ -189,6 +189,7 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [x] Show gui-hints next to mouse pointer ("double click adds node, hold shift does X, etc")
 - [x] Draw unselected curve
 - [x] Toggle closed curve on double click
+- [x] Drag to change segment curve using quadratic bezier
 - [ ] Convert DrawablePath2D's to ScalableVectorShape2D's with button
 - [ ] Rename dock to "Scalable Shapes 2D"
 - [ ] Add an Enable Edit/Disable Edit toggle to dock
