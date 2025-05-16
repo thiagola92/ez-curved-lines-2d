@@ -13,17 +13,86 @@ size_flags_vertical = 3
 script = ExtResource("1_nt5in")
 metadata/_tab_index = 1
 
-[node name="EnableEditingCheckbox" type="CheckBox" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="EnableEditingCheckbox" type="CheckBox" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 button_pressed = true
 text = "Enable ScalableVectorShape2D Editing in 2D Viewport"
 
-[node name="EnableHintsCheckbox" type="CheckBox" parent="."]
+[node name="EnableHintsCheckbox" type="CheckBox" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 button_pressed = true
 text = "Show Edit Hints in 2D Viewport"
 
-[connection signal="toggled" from="EnableEditingCheckbox" to="." method="_on_enable_editing_checkbox_toggled"]
-[connection signal="toggled" from="EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
+[node name="HSeparator2" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="RectBuilderContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RectBuilderContainer"]
+layout_mode = 2
+text = "Create Rectangle"
+
+[node name="WidthSliderContainer" type="PanelContainer" parent="RectBuilderContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HeightSliderContainer" type="PanelContainer" parent="RectBuilderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="XRadiusSliderContainer" type="PanelContainer" parent="RectBuilderContainer"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="YRadiusSliderContainer" type="PanelContainer" parent="RectBuilderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StrokeWidthContainer" type="PanelContainer" parent="RectBuilderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RectBuilderContainer2" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="FillLabel" type="Label" parent="RectBuilderContainer2"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "Fill:"
+
+[node name="FillPickerButton" type="ColorPickerButton" parent="RectBuilderContainer2"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Fill"
+
+[node name="StrokeLabel" type="Label" parent="RectBuilderContainer2"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Stroke"
+
+[node name="StrokePickerButton" type="ColorPickerButton" parent="RectBuilderContainer2"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Fill"
+color = Color(1, 1, 1, 1)
+
+[node name="CreateRectButton" type="Button" parent="RectBuilderContainer2"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Create"
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[connection signal="toggled" from="HBoxContainer/EnableEditingCheckbox" to="." method="_on_enable_editing_checkbox_toggled"]
+[connection signal="toggled" from="HBoxContainer/EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
+[connection signal="pressed" from="RectBuilderContainer2/CreateRectButton" to="." method="_on_create_rect_button_pressed"]

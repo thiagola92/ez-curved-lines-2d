@@ -55,7 +55,7 @@ func _enter_tree() -> void:
 
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
-	if not (typeof(data) == TYPE_DICTIONARY and "type" in data and data["type"] == "files"):
+	if not typeof(data) == TYPE_DICTIONARY and "type" in data and data["type"] == "files":
 		return false
 	for file : String in data["files"]:
 		if file.ends_with(".svg"):
