@@ -1,6 +1,5 @@
 @tool
 extends Path2D
-
 ## A custom node that extends Path2D so it can be drawn as a Line2D
 ## Original adapted code: https://www.hedberggames.com/blog/rendering-curves-in-godot
 ## @deprecated: Use [ScalableVectorShape2D] instead.
