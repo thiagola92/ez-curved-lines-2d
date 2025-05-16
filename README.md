@@ -196,6 +196,7 @@ My humble invitation to you is to try it out, give feedback, suggest improvement
 - [ ] Add a Show/Hide GUI hints toggle to dock
 - [ ] Update SVG importer settings
 - [ ] Updated manual in README
+- [ ] New icon for ScalableVectorShape2D
 
 
 ### Could have
