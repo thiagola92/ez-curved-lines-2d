@@ -59,7 +59,7 @@ You can then add an `AnimationPlayer` node to your scene, create a new animation
 ## Performance impact
 Animating curve points at runtime does, however, impact performance of your game, because calculating segments is an expensive operation.
 
-Also, the old [OpenGL / Compatibility]() rendering engine seems to perform noticably better for these operations in 2D than the [Vulkan / Forward+]() mode.
+Also, the old [OpenGL / Compatibility](https://docs.godotengine.org/en/stable/contributing/development/core_and_modules/internal_rendering_architecture.html#compatibility) rendering engine seems to perform noticably better for these operations in 2D than the [Vulkan / Forward+](https://docs.godotengine.org/en/stable/contributing/development/core_and_modules/internal_rendering_architecture.html#forward) mode.
 
 Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance Degrees` to reduce curve smoothness and increase performance.
 
