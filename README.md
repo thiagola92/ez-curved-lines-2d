@@ -126,9 +126,10 @@ I tend to keep a personal list of checkboxes on the bottom of my readme's to hel
 - [x] Add a Show/Hide GUI hints toggle in edit dock
 - [x] Enable/Disable editing toggle in edit dock
 - [x] Create Rect and Ellipse in editor tab in dock
-- [ ] Ditch old examples
-- [ ] New name for the plugin: Scalable Vector Shapes 2D
+- [x] Ditch old examples
 - [ ] Updated manual in README
+- [ ] Record new explainers (keep them short this time! let them read the docs, fgs :D)
+- [ ] New name for the plugin: Scalable Vector Shapes 2D
 
 
 ## Could have
@@ -141,10 +142,10 @@ I tend to keep a personal list of checkboxes on the bottom of my readme's to hel
 - [ ] Helper nodes for gradient from-, stop- and to-handles
 - [ ] SVG Import log: add button to select node with problem
 - [ ] SVG Import log: show/hide different log levels, clear log
-- [ ] Import `<text>` (with embedded fonts? reference to ttf with a dialog?)
 
 ## Would be nice (if I learn how to)
 - [ ] New icon for ScalableVectorShape2D node
+- [ ] Import `<text>` (with embedded fonts? reference to ttf with a dialog?)
 - [ ] Arcs to cubic bezier curve conversion
 - [ ] Gradient fills for Line2D strokes (would probably require a shader)
 - [ ] Fix certain gradient transforms (skew, rotate, fx/fy/fr) [see: chair.svg](./addons/curved_lines_2d/tests/chair.svg)

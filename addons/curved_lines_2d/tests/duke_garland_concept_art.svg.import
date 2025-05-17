@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b0vnnkhd3we5p"
-path="res://.godot/imported/gradients-with-transforms.svg-7c6baf734de868c037fe8849b6ccbd7f.ctex"
+uid="uid://b4q22fxmtipdq"
+path="res://.godot/imported/duke_garland_concept_art.svg-86da725562fc5966968e0c9a94373080.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/curved_lines_2d/tests/gradients-with-transforms.svg"
-dest_files=["res://.godot/imported/gradients-with-transforms.svg-7c6baf734de868c037fe8849b6ccbd7f.ctex"]
+source_file="res://addons/curved_lines_2d/tests/duke_garland_concept_art.svg"
+dest_files=["res://.godot/imported/duke_garland_concept_art.svg-86da725562fc5966968e0c9a94373080.ctex"]
 
 [params]
 

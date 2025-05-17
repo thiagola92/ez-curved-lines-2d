@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://vce2w4hb3v1p"
-path="res://.godot/imported/body.fill.svg-bce2ce0498e7000cbe168a0f94960a7a.ctex"
+uid="uid://7xujlrtyddy8"
+path="res://.godot/imported/rat_concept_art.svg-db47a77fe3befb30c4238037c97ee30d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/curved_lines_2d/examples/rat/svg/body.fill.svg"
-dest_files=["res://.godot/imported/body.fill.svg-bce2ce0498e7000cbe168a0f94960a7a.ctex"]
+source_file="res://addons/curved_lines_2d/tests/rat_concept_art.svg"
+dest_files=["res://.godot/imported/rat_concept_art.svg-db47a77fe3befb30c4238037c97ee30d.ctex"]
 
 [params]
 
@@ -21,7 +21,7 @@ compress/lossy_quality=0.7
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
