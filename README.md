@@ -94,7 +94,7 @@ After adding at least 2 points you can use the `Inspector` panel to generate a `
 
 ### More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`
 
-Using the `Generate ...` buttons in the inspector simply adds a new node as a child to `ScalableVectorShape2D` but is does __not need to be__ a child. The important bit is that the new node is _assigned_ to it via its properties: `polygon`, `line` and `collision_polygon`:
+Using the `Generate ...` buttons in the inspector simply adds a new node as a child to `ScalableVectorShape2D` but it does __not need to be__ a child. The important bit is that the new node is _assigned_ to it via its properties: `polygon`, `line` and `collision_polygon`:
 
 #### The assigned shapes are now siblings
 
@@ -115,6 +115,10 @@ It's probably easier to start out with a basic primitive shape (like you would i
 The second tab in the `Scalable Vector Shapes` panel gives you some basic choices:
 
 ![the bottom panel](./addons/curved_lines_2d/screenshots/06-scalable-vector-shapes-panel.png)
+
+This youtube short shows what adding a circle looks like:
+
+[![thumb](./addons/curved_lines_2d/screenshots/yt_short_thumb.png)](https://youtu.be/WdXfcnx-I9w?feature=shared&t=41)
 
 ## Using the `.svg` importer
 
