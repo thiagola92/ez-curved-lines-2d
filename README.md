@@ -192,7 +192,7 @@ You can delete points and control points by using right click.
 
 ## Setting the pivot of your shape
 
-You can use the `Change pivot` more to change the origin of your shape, just like you would a `Sprite2D`. In this case, the 'pivot' will actually be the `position` property of you `ScalableVectorShape2D` node.
+You can use the `Change pivot` mode to change the origin of your shape, just like you would a `Sprite2D`. In this case, the 'pivot' will actually be the `position` property of you `ScalableVectorShape2D` node.
 
 This rat will want to rotate it's head elsewhere:
 
