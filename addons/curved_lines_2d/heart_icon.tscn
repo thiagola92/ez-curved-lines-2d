@@ -43,7 +43,6 @@ script = ExtResource("1_0qe1d")
 curve = SubResource("Curve2D_jr52a")
 polygon = NodePath("Fill")
 line = NodePath("Stroke")
-metadata/_select_hint_ = true
 
 [node name="Fill" type="Polygon2D" parent="."]
 show_behind_parent = true

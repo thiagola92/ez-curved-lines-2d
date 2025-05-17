@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="EZ Curved Lines 2D"
-run/main_scene="uid://cq23qum6iti3g"
+run/main_scene="uid://ci0m6thpeshix"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="uid://b5yxa1e62b0hb"
 
