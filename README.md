@@ -2,14 +2,16 @@
 
 Scalable Vector Shapes 2D lets you do 2 things:
 1. Draw seamless vector shapes using a Path Editor inspired by the awesome [Inkscape](https://inkscape.org/)
-2. Import [.svg](https://inkscape.org/) files as seamless vector shapes in stead of as raster images
+2. Import [.svg](https://www.w3.org/TR/SVG/) files as seamless vector shapes in stead of as raster images
 
 *__Important sidenote__: _This plugin only supports a small - yet relevant - subset of the huge [SVG Specification](https://www.w3.org/TR/SVG/struct.html)_
 
 ![a blue heart in a godot scene](./addons/curved_lines_2d/screenshots/01-heart-scene.png)
 
 ## Looking for EZ Curved Lines 2D?
-The renamed plugin deprecates the old `DrawablePath2D` custom node in favor of `ScalableVectorShape2D`. A Conversion button is provided.
+The renamed plugin deprecates the old `DrawablePath2D` custom node in favor of `ScalableVectorShape2D`. A Conversion button is provided:
+
+![converter button](./addons/curved_lines_2d/screenshots/00-converter.png)
 
 The reason is that `ScalableVectorShape2D` inherits directly from `Node2D` giving much more control to the plugin over how you can draw.
 
@@ -21,7 +23,7 @@ If you have feedback on this project, feel free to post an [issue](https://githu
 
 If you'd like to improve on the code yourself, ideally use a fork and make a pull request.
 
-This stuff makes me zero money, so you can always branch of in your own direction if you're in a hurry.
+This stuff makes me zero money, so you can always branch off in your own direction if you're in a hurry.
 
 # Table of Contents
 
@@ -33,6 +35,10 @@ This stuff makes me zero money, so you can always branch of in your own directio
 	- [Adding a `ScalableVectorShape2D` node to your scene](#adding-a-scalablevectorshape2d-node-to-your-scene)
 		- [Double click to add points](#double-click-to-add-points)
 		- [Adding a `Line2D` as stroke and a `Polygon2D` as fill](#adding-a-line2d-as-stroke-and-a-polygon2d-as-fill)
+		- [More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`](#more-about-assigned-line2d-polygon2d-and-collisionpolygon2d)
+			- [The assigned shapes are now siblings](#the-assigned-shapes-are-now-siblings)
+			- [Yet they still respond to changes to your `ScalableVectorShape2D`](#yet-they-still-respond-to-changes-to-your-scalablevectorshape2d)
+			- [Because you assigned them to it using the inspector](#because-you-assigned-them-to-it-using-the-inspector)
 	- [Generating a Circle, Ellipse or Rectangle using the bottom panel item](#generating-a-circle-ellipse-or-rectangle-using-the-bottom-panel-item)
 	- [Using the `.svg` importer](#using-the-svg-importer)
 - [Manipulating shapes](#manipulating-shapes)
@@ -85,6 +91,22 @@ After adding at least 2 points you can use the `Inspector` panel to generate a `
 
 [Skip to further reading about manipulating shapes](#manipulating-shapes)
 
+### More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`
+
+Using the `Generate ...` buttons in the inspector simply adds a new node as a child to `ScalableVectorShape2D` but is does __not need to be__ a child. The important bit is that the new node is _assigned_ to it via its properties: `polygon`, `line` and `collision_polygon`:
+
+#### The assigned shapes are now siblings
+
+![assigned tree](./addons/curved_lines_2d/screenshots/12a-assigned.png)
+
+#### Yet they still respond to changes to your `ScalableVectorShape2D`
+
+![assigned viewport](./addons/curved_lines_2d/screenshots/12b-assigned.png)
+
+#### Because you assigned them to it using the inspector
+
+![assigned inspector](./addons/curved_lines_2d/screenshots/12c-assigned.png)
+
 ## Generating a Circle, Ellipse or Rectangle using the bottom panel item
 
 It's probably easier to start out with a basic primitive shape (like you would in Inkscape <3)
@@ -95,6 +117,21 @@ The second tab in the `Scalable Vector Shapes` panel gives you some basic choice
 
 ## Using the `.svg` importer
 
+As mentioned in the introduction, the `.svg` import supports a small - _yet relevant_ - subset of the [W3C specification](https://www.w3.org/TR/SVG/).
+
+That being said, it's still pretty cool and serves my purposes quite well. You can drag any `.svg` resource file into the first tab of the bottom dock to see if it works for you too:
+
+![svg importer dock](./addons/curved_lines_2d/screenshots/13-svg-importer-dock.png)
+
+On the left side of this panel is a form with a couple of options you can experiment with. On the right side is an import log, which will show warnings of known problems, usually unsupported stuff:
+
+![svg importer log](./addons/curved_lines_2d/screenshots/14-import-warnings.png)
+
+As the link in the log suggest, you can report [issues](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues) on github; be sure to check if something is already listed.
+
+Don't let that stop you, though, your future infinite zoomer and key-frame animator will love you for it:
+
+![rat loves you](./addons/curved_lines_2d/screenshots/15-imported-rat.png)
 
 # Manipulating shapes
 
