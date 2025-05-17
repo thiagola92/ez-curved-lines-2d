@@ -48,6 +48,7 @@ This stuff makes me zero money, so you can always branch off in your own directi
 	- [Closing the loop and breaking the loop](#closing-the-loop-and-breaking-the-loop)
 	- [Using `closed` on `Line2D`](#using-closed-on-line2d)
 	- [Deleting points and control points](#deleting-points-and-control-points)
+	- [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
 - [Animating / Changing shapes at runtime](#animating--changing-shapes-at-runtime)
 	- [Update curve at Runtime](#update-curve-at-runtime)
 	- [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
@@ -184,6 +185,19 @@ Setting the `closed` property on an assigned `Line2D` will display a dotted line
 
 You can delete points and control points by using right click.
 
+
+## Setting the pivot of your shape
+
+You can use the `Change pivot` more to change the origin of your shape, just like you would a `Sprite2D`. In this case, the 'pivot' will actually be the `position` property of you `ScalableVectorShape2D` node.
+
+This rat will want to rotate it's head elsewhere:
+
+![set origin](./addons/curved_lines_2d/screenshots/16-set-origin.png)
+
+Like this:
+
+![set origin 2](./addons/curved_lines_2d/screenshots/16a-set_origin.png)
+
 # Animating / Changing shapes at runtime
 
 The shapes you create will work fine with basic key-frame operations. You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning. Moreover, you probably should in 95% of the cases
@@ -284,8 +298,10 @@ I tend to keep a personal list of checkboxes on the bottom of my readme's to hel
 - [x] Enable/Disable editing toggle in edit dock
 - [x] Create Rect and Ellipse in editor tab in dock
 - [x] Ditch old examples
-- [ ] Updated manual in README
+- [x] Updated manual in README
+- [ ] Make sure the README in the addon dir is updated as well, and the config file
 - [ ] Record new explainers (keep them short this time! let them read the docs, fgs :D)
+- [ ] Link to explainers in readme and in the bottom panel
 - [ ] New name for the plugin: Scalable Vector Shapes 2D
 
 
