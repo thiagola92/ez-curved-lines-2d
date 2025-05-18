@@ -248,7 +248,7 @@ I felt the installation started to become too cluttered, so I pruned them in thi
 
 # Attributions
 
-Lot's of thanks go out to those who helped me out getting started:
+Lots of thanks go out to those who helped me out getting started:
 - This plugin was first inspired by [Mark Hedberg's blog on rendering curves in Godot](https://www.hedberggames.com/blog/rendering-curves-in-godot).
 - The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
 - The SVG Importer code was adapted from the script hosted on github in the [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot) repository
