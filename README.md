@@ -32,6 +32,7 @@ This stuff makes me zero money, so you can always branch off in your own directi
 	- [Reaching out / Contributing](#reaching-out--contributing)
 - [Table of Contents](#table-of-contents)
 - [Drawing Shapes in the Godot 2D Viewport](#drawing-shapes-in-the-godot-2d-viewport)
+	- [Basic Drawing Explainer on youtube](#basic-drawing-explainer-on-youtube)
 	- [Adding a `ScalableVectorShape2D` node to your scene](#adding-a-scalablevectorshape2d-node-to-your-scene)
 		- [Double click to add points](#double-click-to-add-points)
 		- [Adding a `Line2D` as stroke and a `Polygon2D` as fill](#adding-a-line2d-as-stroke-and-a-polygon2d-as-fill)
@@ -64,12 +65,16 @@ This stuff makes me zero money, so you can always branch off in your own directi
 
 # Drawing Shapes in the Godot 2D Viewport
 
+## Basic Drawing Explainer on youtube
+
+[![Explainer basic drawing on youtube](./addons/curved_lines_2d/screenshots/basic-drawing-youtube-thumnail.png)](https://youtu.be/q_NaZq1zZdY?feature=shared)
+
 After activating this plugin a new bottom panel item appears, called "Scalable Vector Graphics".
 
 There are 3 ways to start drawing:
 1. [Add a `ScalableVectorShape2D` node to your scene](#adding-a-scalablevectorshape2d-node-to-your-scene)
-2.  [Generating a Circle or Rectangle using the bottom panel item](#generating-a-circle-or-rectangle-using-the-bottom-panel-item)
-3.  [Using the `.svg` importer](#using-the-svg-importer)
+2. [Generating a Circle or Rectangle using the bottom panel item](#generating-a-circle-or-rectangle-using-the-bottom-panel-item)
+3. [Using the `.svg` importer](#using-the-svg-importer)
 
 ## Adding a `ScalableVectorShape2D` node to your scene
 
@@ -303,9 +308,9 @@ I tend to keep a personal list of checkboxes on the bottom of my readme's to hel
 - [x] Create Rect and Ellipse in editor tab in dock
 - [x] Ditch old examples
 - [x] Updated manual in README
-- [ ] Make sure the README in the addon dir is updated as well, and the config file
 - [ ] Record new explainers (keep them short this time! let them read the docs, fgs :D)
 - [ ] Link to explainers in readme and in the bottom panel
+- [ ] Make sure the README in the addon dir is updated as well, and the config file
 - [ ] New name for the plugin: Scalable Vector Shapes 2D
 
 
