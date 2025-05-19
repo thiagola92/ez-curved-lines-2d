@@ -115,10 +115,17 @@ theme_override_constants/separation = -5
 
 [node name="Label" type="Label" parent="Import SVG File/VBoxContainer/ScrollContainer/ImportLogContainer"]
 layout_mode = 2
-size_flags_vertical = 6
+size_flags_vertical = 10
 text = " - Dag/Drop an svg-file here to start import -"
 label_settings = ExtResource("2_rycm0")
 horizontal_alignment = 1
+
+[node name="LinkButton" type="LinkButton" parent="Import SVG File/VBoxContainer/ScrollContainer/ImportLogContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 2
+text = "Watch an explainer on Youtube"
+uri = "https://youtu.be/3j_OEfU8qbo?feature=shared"
 
 [node name="Scalable Vector Shapes" parent="." instance=ExtResource("3_0eedo")]
 visible = false

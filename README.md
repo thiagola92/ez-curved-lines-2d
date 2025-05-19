@@ -34,14 +34,14 @@ This stuff makes me zero money, so you can always branch off in your own directi
 - [Drawing Shapes in the Godot 2D Viewport](#drawing-shapes-in-the-godot-2d-viewport)
 	- [Basic Drawing Explainer on youtube](#basic-drawing-explainer-on-youtube)
 	- [Adding a `ScalableVectorShape2D` node to your scene](#adding-a-scalablevectorshape2d-node-to-your-scene)
-		- [Double click to add points](#double-click-to-add-points)
-		- [Adding a `Line2D` as stroke and a `Polygon2D` as fill](#adding-a-line2d-as-stroke-and-a-polygon2d-as-fill)
+	- [Double click to add points](#double-click-to-add-points)
+	- [Add a `Line2D` as stroke and a `Polygon2D` as fill](#add-a-line2d-as-stroke-and-a-polygon2d-as-fill)
 		- [More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`](#more-about-assigned-line2d-polygon2d-and-collisionpolygon2d)
 			- [The assigned shapes are now siblings](#the-assigned-shapes-are-now-siblings)
 			- [Yet they still respond to changes to your `ScalableVectorShape2D`](#yet-they-still-respond-to-changes-to-your-scalablevectorshape2d)
 			- [Because you assigned them to it using the inspector](#because-you-assigned-them-to-it-using-the-inspector)
-	- [Generating a Circle, Ellipse or Rectangle using the bottom panel item](#generating-a-circle-ellipse-or-rectangle-using-the-bottom-panel-item)
-	- [Using the `.svg` importer](#using-the-svg-importer)
+- [Generating a Circle, Ellipse or Rectangle using the bottom panel item](#generating-a-circle-ellipse-or-rectangle-using-the-bottom-panel-item)
+- [Using the `.svg` importer](#using-the-svg-importer)
 - [Manipulating shapes](#manipulating-shapes)
 	- [Adding a point to a shape](#adding-a-point-to-a-shape)
 	- [Bending a curve](#bending-a-curve)
@@ -82,14 +82,14 @@ This works exactly the same way as adding a normal godot node, using `Ctrl-A` or
 
 ![create node](./addons/curved_lines_2d/screenshots/02-create-node.png)
 
-### Double click to add points
+## Double click to add points
 
 Once you added your new node, a hint should suggest you add points using double click (as long as you're in edit mode):
 
 ![add node double click](./addons/curved_lines_2d/screenshots/03-double-click.png)
 
 
-### Adding a `Line2D` as stroke and a `Polygon2D` as fill
+## Add a `Line2D` as stroke and a `Polygon2D` as fill
 
 After adding at least 2 points you can use the `Inspector` panel to generate a `Line2D` and/or a `Polygon2D` to serve as stroke and fill:
 
@@ -113,7 +113,7 @@ Using the `Generate ...` buttons in the inspector simply adds a new node as a ch
 
 ![assigned inspector](./addons/curved_lines_2d/screenshots/12c-assigned.png)
 
-## Generating a Circle, Ellipse or Rectangle using the bottom panel item
+# Generating a Circle, Ellipse or Rectangle using the bottom panel item
 
 It's probably easier to start out with a basic primitive shape (like you would in Inkscape <3)
 
@@ -125,7 +125,11 @@ This youtube short shows what adding a circle looks like:
 
 [![thumb](./addons/curved_lines_2d/screenshots/yt_short_thumb.png)](https://youtu.be/WdXfcnx-I9w?feature=shared&t=41)
 
-## Using the `.svg` importer
+# Using the `.svg` importer
+
+
+[![watch explainer on youtube](./addons/curved_lines_2d/screenshots/importing-svg-files-youtube-thumbnail.png)](https://youtu.be/3j_OEfU8qbo?feature=shared)
+
 
 As mentioned in the introduction, the `.svg` import supports a small - _yet relevant_ - subset of the [W3C specification](https://www.w3.org/TR/SVG/).
 
