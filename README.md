@@ -42,6 +42,7 @@ This stuff makes me zero money, so you can always branch off in your own directi
 			- [Because you assigned them to it using the inspector](#because-you-assigned-them-to-it-using-the-inspector)
 - [Generating a Circle, Ellipse or Rectangle using the bottom panel item](#generating-a-circle-ellipse-or-rectangle-using-the-bottom-panel-item)
 - [Using the `.svg` importer](#using-the-svg-importer)
+	- [Known issues explainer on Youtube:](#known-issues-explainer-on-youtube)
 - [Manipulating shapes](#manipulating-shapes)
 	- [Adding a point to a shape](#adding-a-point-to-a-shape)
 	- [Bending a curve](#bending-a-curve)
@@ -143,9 +144,11 @@ On the left side of this panel is a form with a couple of options you can experi
 
 As the link in the log suggest, you can report [issues](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues) on github; be sure to check if something is already listed.
 
-Don't let that stop you, though, your future infinite zoomer and key-frame animator will love you for it:
+Don't let that stop you, though, your future infinite zoomer and key-frame animator will love you for it.
 
-![rat loves you](./addons/curved_lines_2d/screenshots/15-imported-rat.png)
+## Known issues explainer on Youtube:
+
+[![known issues explainer on youtube](./addons/curved_lines_2d/screenshots/known-issues-youtube-thumbnail.png)](https://www.youtube.com/watch?v=nVCKVRBMnWU)
 
 # Manipulating shapes
 

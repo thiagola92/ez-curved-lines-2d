@@ -159,6 +159,14 @@ func _load_svg(file_path : String) -> Node2D:
 	link_button.text = "Click here to report issues or improvement requests on github"
 	link_button.uri = "https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues"
 	log_container.add_child(link_button)
+
+	log_message("\nClick on the link below to learn more")
+
+	var link_button2 := LinkButton.new()
+	link_button2.text = "Watch an explainer about known issues on youtube."
+	link_button2.uri = "https://www.youtube.com/watch?v=nVCKVRBMnWU"
+	log_container.add_child(link_button2)
+
 	return svg_root
 
 
