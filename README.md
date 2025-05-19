@@ -52,6 +52,7 @@ This stuff makes me zero money, so you can always branch off in your own directi
 	- [Deleting points and control points](#deleting-points-and-control-points)
 	- [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
 - [Animating / Changing shapes at runtime](#animating--changing-shapes-at-runtime)
+	- [Youtube explainer on animating](#youtube-explainer-on-animating)
 	- [Update curve at Runtime](#update-curve-at-runtime)
 	- [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
 	- [Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead](#dont-duplicate-scalablevectorshape2d-use-the-path_changed-signal-in-stead)
@@ -215,6 +216,11 @@ Like this:
 ![set origin 2](./addons/curved_lines_2d/screenshots/16a-set_origin.png)
 
 # Animating / Changing shapes at runtime
+
+## Youtube explainer on animating
+
+[![link to Youtube explainer about animating](./addons/curved_lines_2d/screenshots/animating-youtube-thumbnail.png)](https://youtu.be/elWNu3-067A?feature=shared)
+
 
 The shapes you create will work fine with basic key-frame operations. You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning. Moreover, you probably should in 95% of the cases
 
