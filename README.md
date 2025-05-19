@@ -321,10 +321,10 @@ I tend to keep a personal list of checkboxes on the bottom of my readme's to hel
 - [x] Create Rect and Ellipse in editor tab in dock
 - [x] Ditch old examples
 - [x] Updated manual in README
-- [ ] Record new explainers (keep them short this time! let them read the docs, fgs :D)
-- [ ] Link to explainers in readme and in the bottom panel
-- [ ] Make sure the README in the addon dir is updated as well, and the config file
-- [ ] New name for the plugin: Scalable Vector Shapes 2D
+- [x] Record new explainers (keep them short this time! let them read the docs, fgs :D)
+- [x] Link to explainers in readme and in the bottom panel
+- [x] Make sure the README in the addon dir is updated as well, and the config file
+- [x] New name for the plugin: Scalable Vector Shapes 2D
 
 
 ## Could have
