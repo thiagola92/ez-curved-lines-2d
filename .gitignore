@@ -4,3 +4,4 @@
 .editorconfig
 addons/godot-plugin-refresher
 .vscode
+tester.tscn
