@@ -254,9 +254,6 @@ func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2
 	if Input.is_key_pressed(KEY_CTRL):
 		_draw_crosshair(viewport_control, p)
 		_draw_hint(viewport_control, "- Click to add point here (Ctrl held) ")
-	elif svs.has_meta(META_NAME_SELECT_HINT):
-		_draw_crosshair(viewport_control, p)
-		_draw_hint(viewport_control, "- Double click to add point here\n- Hold Ctrl key to add points anywhere")
 	else:
 		_draw_hint(viewport_control, "- Hold Ctrl to add points to selected shape")
 
