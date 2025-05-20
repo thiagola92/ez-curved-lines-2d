@@ -248,6 +248,18 @@ func _draw_crosshair(viewport_control : Control, p : Vector2) -> void:
 	viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WHITE)
 
 
+func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+	var p := _vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
+	if svs.has_meta(META_NAME_SELECT_HINT):
+		_draw_crosshair(viewport_control, p)
+		_draw_hint(viewport_control, "- Double click to add point here", p + Vector2(15, 8))
+	elif Input.is_key_pressed(KEY_CTRL):
+		_draw_crosshair(viewport_control, p)
+		_draw_hint(viewport_control, "- Double click to add point here (Ctrl held) ", p + Vector2(15, 8))
+	else:
+		_draw_hint(viewport_control, "- Hold Ctrl key to add points anywhere", p + Vector2(15, 8))
+
+
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		var md_p := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
@@ -267,15 +279,18 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-	for result : ScalableVectorShape2D in _find_scalable_vector_shape_2d_nodes().filter(_is_svs_valid):
+	var all_valid_svs_nodes := _find_scalable_vector_shape_2d_nodes().filter(_is_svs_valid)
+	for result : ScalableVectorShape2D in all_valid_svs_nodes:
 		if result == current_selection:
-			#viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
-					#VIEWPORT_ORANGE, 2.0)
 			_draw_curve(viewport_control, result)
 			_draw_handles(viewport_control, result)
 			if not _handle_has_hover(result):
-				_draw_closest_point_on_curve(viewport_control, result)
-		elif result.has_meta(META_NAME_SELECT_HINT):
+				if result.has_meta(META_NAME_HOVER_CLOSEST_POINT):
+					_draw_closest_point_on_curve(viewport_control, result)
+				else:
+					_draw_add_point_hint(viewport_control, result)
+
+		if result.has_meta(META_NAME_SELECT_HINT):
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					Color.WEB_GRAY, 1.0)
 
