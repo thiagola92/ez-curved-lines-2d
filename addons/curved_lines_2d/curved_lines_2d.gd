@@ -346,10 +346,10 @@ func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : i
 
 	var backup := _get_curve_backup(current_selection.curve)
 	undo_redo.create_action("Remove point %d from %s" % [idx, str(current_selection)])
-	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
 	undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
 	if orig_n > 2:
 		undo_redo.add_do_method(current_selection.curve, 'set_point_out', orig_n - 2, Vector2.ZERO)
+	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
 	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
 	undo_redo.commit_action()
 

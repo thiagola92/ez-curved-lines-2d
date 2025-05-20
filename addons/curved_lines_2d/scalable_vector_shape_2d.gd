@@ -204,7 +204,7 @@ func is_curve_closed() -> bool:
 
 func get_curve_handles() -> Array:
 	var n = curve.point_count
-	var is_closed := n > 1 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
+	var is_closed := is_curve_closed()
 	var result := []
 	for i in range(n):
 		var p = curve.get_point_position(i)
