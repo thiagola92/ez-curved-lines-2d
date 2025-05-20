@@ -131,11 +131,13 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 				hint_txt += "\n - Drag to move\n - Right click to delete"
 				hint_txt += "\n - Hold Shift + Drag to move mirrored"
 
-			_draw_hint(viewport_control, hint_txt,
-					_vp_transform(handle[prefix + '_position']) + Vector2(15, 10))
+			_draw_hint(viewport_control, hint_txt)
 
 
-func _draw_hint(viewport_control : Control, txt : String, txt_pos : Vector2) -> void:
+func _draw_hint(viewport_control : Control, txt : String) -> void:
+	var txt_pos := (_vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
+		+ Vector2(15, 8))
+
 	if not hints_enabled:
 		return
 	var lines := txt.split("\n")
@@ -196,8 +198,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 					):
 						hint_txt += "\n - Double click to close loop"
 				hint_txt += "\n - Hold Shift + Drag to create curve handles"
-			_draw_hint(viewport_control, hint_txt,
-					_vp_transform(handle['point_position']) + Vector2(15, 10))
+			_draw_hint(viewport_control, hint_txt)
 
 
 func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
@@ -250,14 +251,14 @@ func _draw_crosshair(viewport_control : Control, p : Vector2) -> void:
 
 func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	var p := _vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
-	if svs.has_meta(META_NAME_SELECT_HINT):
+	if Input.is_key_pressed(KEY_CTRL):
 		_draw_crosshair(viewport_control, p)
-		_draw_hint(viewport_control, "- Double click to add point here", p + Vector2(15, 8))
-	elif Input.is_key_pressed(KEY_CTRL):
+		_draw_hint(viewport_control, "- Click to add point here (Ctrl held) ")
+	elif svs.has_meta(META_NAME_SELECT_HINT):
 		_draw_crosshair(viewport_control, p)
-		_draw_hint(viewport_control, "- Double click to add point here (Ctrl held) ", p + Vector2(15, 8))
+		_draw_hint(viewport_control, "- Double click to add point here\n- Hold Ctrl key to add points anywhere")
 	else:
-		_draw_hint(viewport_control, "- Hold Ctrl key to add points anywhere", p + Vector2(15, 8))
+		_draw_hint(viewport_control, "- Hold Ctrl to add points to selected shape")
 
 
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
@@ -267,10 +268,10 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 		_draw_crosshair(viewport_control, _vp_transform(md_p["point_position"]))
 		var hint := ""
 		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			hint += "- Double click to add point here"
+			hint += "- Double click to add point on the line"
 			if md_p["before_segment"] < svs.curve.point_count:
 				hint += "\n- Drag to change curve"
-		_draw_hint(viewport_control, hint, p + Vector2(15, 8))
+		_draw_hint(viewport_control, hint)
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
@@ -282,6 +283,8 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 	var all_valid_svs_nodes := _find_scalable_vector_shape_2d_nodes().filter(_is_svs_valid)
 	for result : ScalableVectorShape2D in all_valid_svs_nodes:
 		if result == current_selection:
+			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
+					VIEWPORT_ORANGE, 2.0)
 			_draw_curve(viewport_control, result)
 			_draw_handles(viewport_control, result)
 			if not _handle_has_hover(result):
@@ -290,7 +293,7 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 				else:
 					_draw_add_point_hint(viewport_control, result)
 
-		if result.has_meta(META_NAME_SELECT_HINT):
+		elif result.has_meta(META_NAME_SELECT_HINT):
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					Color.WEB_GRAY, 1.0)
 
