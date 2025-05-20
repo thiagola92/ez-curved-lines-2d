@@ -190,7 +190,10 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 					hint_txt += "\n - Double click to break loop"
 				else:
 					hint_txt += "\n - Right click to delete"
-					if (i == 0 or i == handles.size() - 1) and not svs.is_curve_closed():
+					if not svs.is_curve_closed() and (
+						(i == 0 and handles.size() > 2) or
+						(i == handles.size() - 1 and i > 1)
+					):
 						hint_txt += "\n - Double click to close loop"
 				hint_txt += "\n - Hold Shift + Drag to create curve handles"
 			_draw_hint(viewport_control, hint_txt,
@@ -338,20 +341,18 @@ func _get_curve_backup(curve_in : Curve2D) -> Curve2D:
 
 func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
 	var orig_n := current_selection.curve.point_count
-	if current_selection.is_curve_closed() and idx == 0 or idx == orig_n -1:
-		_toggle_loop_if_applies(current_selection, idx)
-		return
+	if current_selection.is_curve_closed() and idx == 0:
+		idx = orig_n - 1
 
-	if orig_n <= 1:
-		return
 	var backup := _get_curve_backup(current_selection.curve)
 	undo_redo.create_action("Remove point %d from %s" % [idx, str(current_selection)])
 	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
 	undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
-	if orig_n > 1:
+	if orig_n > 2:
 		undo_redo.add_do_method(current_selection.curve, 'set_point_out', orig_n - 2, Vector2.ZERO)
 	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
 	undo_redo.commit_action()
+
 
 
 func _remove_cp_in_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
@@ -430,6 +431,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return false
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 		if _is_change_pivot_button_active():

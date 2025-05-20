@@ -199,7 +199,7 @@ func get_poly_points() -> Array:
 
 func is_curve_closed() -> bool:
 	var n = curve.point_count
-	return n > 1 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
+	return n > 2 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
 
 
 func get_curve_handles() -> Array:
