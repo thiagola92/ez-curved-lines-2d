@@ -14,7 +14,13 @@ var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
 var editing_enabled := true
 var hints_enabled := true
-
+var in_undo_redo_transaction := false
+enum UndoRedoEntry { UNDOS, DOS, NAME }
+var undo_redo_transaction : Dictionary = {
+	UndoRedoEntry.NAME: "",
+	UndoRedoEntry.DOS: [],
+	UndoRedoEntry.UNDOS: []
+}
 func _enter_tree():
 	svg_importer_dock = preload("res://addons/curved_lines_2d/svg_importer_dock.tscn").instantiate()
 	plugin = preload("res://addons/curved_lines_2d/line_2d_generator_inspector_plugin.gd").new()
@@ -316,45 +322,93 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 			_draw_curve(viewport_control, result, false)
 
 
+
+func _start_undo_redo_transaction(name := "") -> void:
+	in_undo_redo_transaction = true
+	undo_redo_transaction = {
+		UndoRedoEntry.NAME: name,
+		UndoRedoEntry.DOS: [],
+		UndoRedoEntry.UNDOS: []
+	}
+
+func _commit_undo_redo_transaction() -> void:
+	in_undo_redo_transaction = false
+	undo_redo.create_action(undo_redo_transaction[UndoRedoEntry.NAME])
+	for undo_method in undo_redo_transaction[UndoRedoEntry.UNDOS]:
+		undo_redo.callv('add_undo_method', undo_method)
+	for do_method in undo_redo_transaction[UndoRedoEntry.DOS]:
+		undo_redo.callv('add_do_method', do_method)
+	undo_redo.commit_action(false)
+	undo_redo_transaction = {
+		UndoRedoEntry.NAME: name,
+		UndoRedoEntry.DOS: [],
+		UndoRedoEntry.UNDOS: []
+	}
+
+
 func _update_curve_point_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
-	undo_redo.create_action("Move point on " + str(current_selection))
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Move point on " + str(current_selection))
+		if idx == 0 and current_selection.is_curve_closed():
+			var idx_1 = current_selection.curve.point_count - 1
+			undo_redo_transaction[UndoRedoEntry.UNDOS].append([
+				current_selection.curve, 'set_point_position', idx_1, current_selection.curve.get_point_position(idx_1)
+			])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([
+			current_selection.curve, 'set_point_position', idx, current_selection.curve.get_point_position(idx)
+		])
+
+	undo_redo_transaction[UndoRedoEntry.DOS] = []
 	if idx == 0 and current_selection.is_curve_closed():
 		var idx_1 = current_selection.curve.point_count - 1
-		undo_redo.add_do_method(current_selection, 'set_global_curve_point_position', mouse_pos, idx_1)
-		undo_redo.add_undo_method(current_selection.curve, 'set_point_position', idx_1, current_selection.curve.get_point_position(idx_1))
-	undo_redo.add_do_method(current_selection, 'set_global_curve_point_position', mouse_pos, idx)
-	undo_redo.add_undo_method(current_selection.curve, 'set_point_position', idx, current_selection.curve.get_point_position(idx))
-	undo_redo.commit_action()
+		undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection, 'set_global_curve_point_position', mouse_pos, idx_1])
+		current_selection.set_global_curve_point_position(mouse_pos, idx_1)
+	undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection, 'set_global_curve_point_position', mouse_pos, idx])
+	current_selection.set_global_curve_point_position(mouse_pos, idx)
 
 
 func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
 	if idx == 0:
 		idx = current_selection.curve.point_count - 1
-	undo_redo.create_action("Move control point in %d on %s" % [idx, current_selection])
-	undo_redo.add_do_method(current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx)
-	undo_redo.add_undo_method(current_selection.curve, 'set_point_in', idx, current_selection.curve.get_point_in(idx))
+
+	var cp_in_is_cp_out_of_loop_start := (Input.is_key_pressed(KEY_SHIFT) and
+			not(idx == current_selection.curve.point_count - 1
+					and not current_selection.is_curve_closed())
+	)
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Move control point in %d on %s" % [idx, current_selection])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_in', idx, current_selection.curve.get_point_in(idx)])
+		if cp_in_is_cp_out_of_loop_start:
+			var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
+			undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_out', idx_1, current_selection.curve.get_point_out(idx_1)])
+
 	current_selection.set_global_curve_cp_in_position(mouse_pos, idx)
-	if Input.is_key_pressed(KEY_SHIFT) and not(idx == current_selection.curve.point_count - 1 and not current_selection.is_curve_closed()):
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx]]
+	if cp_in_is_cp_out_of_loop_start:
 		var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
-		undo_redo.add_do_method(current_selection.curve, 'set_point_out', idx_1, -current_selection.curve.get_point_in(idx))
-		undo_redo.add_undo_method(current_selection.curve, 'set_point_out', idx_1, current_selection.curve.get_point_out(idx_1))
 		current_selection.curve.set_point_out(idx_1, -current_selection.curve.get_point_in(idx))
-	undo_redo.commit_action(false)
+		undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection.curve, 'set_point_out', idx_1, -current_selection.curve.get_point_in(idx)])
 
 
 func _update_curve_cp_out_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
 	if idx == current_selection.curve.point_count - 1:
 		idx = 0
-	undo_redo.create_action("Move control point out %d on %s" % [idx, current_selection])
-	undo_redo.add_do_method(current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx)
-	undo_redo.add_undo_method(current_selection.curve, 'set_point_out', idx, current_selection.curve.get_point_out(idx))
+
+	var cp_out_is_cp_in_of_loop_end := (Input.is_key_pressed(KEY_SHIFT)
+			and not(idx == 0 and not current_selection.is_curve_closed()))
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Move control point out %d on %s" % [idx, current_selection])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_out', idx, current_selection.curve.get_point_out(idx)])
+		if cp_out_is_cp_in_of_loop_end:
+			var idx_1 = current_selection.curve.point_count - 1 if idx == 0 else idx
+			undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_in', idx_1, current_selection.curve.get_point_in(idx_1)])
+
 	current_selection.set_global_curve_cp_out_position(mouse_pos, idx)
-	if Input.is_key_pressed(KEY_SHIFT) and not(idx == 0 and not current_selection.is_curve_closed()):
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx]]
+	if cp_out_is_cp_in_of_loop_end:
 		var idx_1 = current_selection.curve.point_count - 1 if idx == 0 else idx
-		undo_redo.add_do_method(current_selection.curve, 'set_point_in', idx_1, -current_selection.curve.get_point_out(idx))
-		undo_redo.add_undo_method(current_selection.curve, 'set_point_in', idx_1, current_selection.curve.get_point_in(idx_1))
 		current_selection.curve.set_point_in(idx_1, -current_selection.curve.get_point_out(idx))
-	undo_redo.commit_action(false)
+		undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection.curve, 'set_point_in', idx_1, -current_selection.curve.get_point_out(idx)])
 
 
 func _set_shape_origin(current_selection : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
@@ -385,7 +439,6 @@ func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : i
 	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
 	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
 	undo_redo.commit_action()
-
 
 
 func _remove_cp_in_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
@@ -436,6 +489,8 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 	if md_closest_point["before_segment"] >= svs.curve.point_count or md_closest_point["before_segment"] < 1:
 		return
+	# Compute control points based on mouse position to align middle of segment curve to it
+	# using the quadratic Bézier control point
 	var idx : int = md_closest_point["before_segment"]
 	var segment_start_point := svs.curve.get_point_position(idx - 1)
 	var segment_end_point := svs.curve.get_point_position(idx)
@@ -445,12 +500,15 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 	var quadratic_bezier_control_point := halfway_point + distance * 2 * dir
 	var new_point_out := (quadratic_bezier_control_point - segment_start_point) * (2.0 / 3.0)
 	var new_point_in := (quadratic_bezier_control_point - segment_end_point) * (2.0 / 3.0)
-	undo_redo.create_action("Change curve segment %d->%d for %s" % [idx - 1, idx, str(svs)])
-	undo_redo.add_do_method(svs.curve, 'set_point_out', idx - 1, new_point_out)
-	undo_redo.add_do_method(svs.curve, 'set_point_in', idx, new_point_in)
-	undo_redo.add_undo_method(svs.curve, 'set_point_in', idx, svs.curve.get_point_in(idx))
-	undo_redo.add_undo_method(svs.curve, 'set_point_out', idx - 1, svs.curve.get_point_out(idx - 1))
-	undo_redo.commit_action()
+
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Change curve segment %d->%d for %s" % [idx - 1, idx, str(svs)])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([svs.curve, 'set_point_in', idx, svs.curve.get_point_in(idx)])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([svs.curve, 'set_point_out', idx - 1, svs.curve.get_point_out(idx - 1)])
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[svs.curve, 'set_point_out', idx - 1, new_point_out]]
+	undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve, 'set_point_in', idx, new_point_in])
+	svs.curve.set_point_out(idx - 1, new_point_out)
+	svs.curve.set_point_in(idx, new_point_in)
 	md_closest_point["point_position"] = mouse_pos
 	svs.set_meta(META_NAME_HOVER_CLOSEST_POINT, md_closest_point)
 	update_overlays()
@@ -468,6 +526,11 @@ func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
+	if (in_undo_redo_transaction and event is InputEventMouseButton
+			and event.button_index == MOUSE_BUTTON_LEFT
+			and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)):
+		_commit_undo_redo_transaction()
+
 	if not editing_enabled:
 		return false
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
