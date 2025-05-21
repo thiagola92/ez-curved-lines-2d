@@ -263,6 +263,9 @@ func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2
 
 
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+	if Input.is_key_pressed(KEY_CTRL):
+		_draw_add_point_hint(viewport_control, svs)
+		return
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		var md_p := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 		var p = _vp_transform(md_p["point_position"])
@@ -395,15 +398,25 @@ func _remove_cp_out_from_curve(current_selection : ScalableVectorShape2D, idx : 
 	undo_redo.commit_action()
 
 
+func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
+		cp_in := Vector2.ZERO, cp_out := Vector2.ZERO, idx := -1) -> void:
+
+	svs.curve.add_point(local_pos, cp_in, cp_out, idx)
+
+
+func _add_point_on_position(svs : ScalableVectorShape2D, pos : Vector2) -> void:
+	_add_point_to_curve(svs, svs.to_local(pos))
+
+
 func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
 	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 	if "before_segment" in md_closest_point and "local_point_position" in md_closest_point:
 		if md_closest_point["before_segment"] >= svs.curve.point_count:
-			svs.curve.add_point(md_closest_point["local_point_position"])
+			_add_point_to_curve(svs, md_closest_point["local_point_position"])
 		else:
-			svs.curve.add_point(md_closest_point["local_point_position"],
+			_add_point_to_curve(svs, md_closest_point["local_point_position"],
 					Vector2.ZERO, Vector2.ZERO, md_closest_point["before_segment"])
 
 
@@ -463,6 +476,10 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
 				if event.double_click and current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
 					_toggle_loop_if_applies(current_selection, current_selection.get_meta(META_NAME_HOVER_POINT_IDX))
+				return true
+			elif _is_svs_valid(current_selection) and Input.is_key_pressed(KEY_CTRL):
+				if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					_add_point_on_position(current_selection, mouse_pos)
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 				if event.double_click:
