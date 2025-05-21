@@ -15,7 +15,12 @@ var undo_redo : EditorUndoRedoManager
 var editing_enabled := true
 var hints_enabled := true
 var in_undo_redo_transaction := false
-
+enum UndoRedoEntry { UNDOS, DOS, NAME }
+var undo_redo_transaction : Dictionary = {
+	UndoRedoEntry.NAME: "",
+	UndoRedoEntry.DOS: [],
+	UndoRedoEntry.UNDOS: []
+}
 func _enter_tree():
 	svg_importer_dock = preload("res://addons/curved_lines_2d/svg_importer_dock.tscn").instantiate()
 	plugin = preload("res://addons/curved_lines_2d/line_2d_generator_inspector_plugin.gd").new()
@@ -317,21 +322,49 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 			_draw_curve(viewport_control, result, false)
 
 
+
+func _start_undo_redo_transaction(name := "") -> void:
+	in_undo_redo_transaction = true
+	undo_redo_transaction = {
+		UndoRedoEntry.NAME: name,
+		UndoRedoEntry.DOS: [],
+		UndoRedoEntry.UNDOS: []
+	}
+
+func _commit_undo_redo_transaction() -> void:
+	in_undo_redo_transaction = false
+	undo_redo.create_action(undo_redo_transaction[UndoRedoEntry.NAME])
+	for undo_method in undo_redo_transaction[UndoRedoEntry.UNDOS]:
+		undo_redo.callv('add_undo_method', undo_method)
+	for do_method in undo_redo_transaction[UndoRedoEntry.DOS]:
+		undo_redo.callv('add_do_method', do_method)
+	undo_redo.commit_action(false)
+	undo_redo_transaction = {
+		UndoRedoEntry.NAME: name,
+		UndoRedoEntry.DOS: [],
+		UndoRedoEntry.UNDOS: []
+	}
+
 # Marked
 func _update_curve_point_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
-	undo_redo.create_action("Move point on " + str(current_selection))
 	if not in_undo_redo_transaction:
-		in_undo_redo_transaction = true
+		_start_undo_redo_transaction("Move point on " + str(current_selection))
+		if idx == 0 and current_selection.is_curve_closed():
+			var idx_1 = current_selection.curve.point_count - 1
+			undo_redo_transaction[UndoRedoEntry.UNDOS].append([
+				current_selection.curve, 'set_point_position', idx_1, current_selection.curve.get_point_position(idx_1)
+			])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([
+			current_selection.curve, 'set_point_position', idx, current_selection.curve.get_point_position(idx)
+		])
 
+	undo_redo_transaction[UndoRedoEntry.DOS] = []
 	if idx == 0 and current_selection.is_curve_closed():
 		var idx_1 = current_selection.curve.point_count - 1
-		undo_redo.add_do_method(current_selection, 'set_global_curve_point_position', mouse_pos, idx_1)
-		undo_redo.add_undo_method(current_selection.curve, 'set_point_position', idx_1, current_selection.curve.get_point_position(idx_1))
-	undo_redo.add_do_method(current_selection, 'set_global_curve_point_position', mouse_pos, idx)
-	undo_redo.add_undo_method(current_selection.curve, 'set_point_position', idx, current_selection.curve.get_point_position(idx))
-
-	undo_redo.commit_action()
-
+		undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection, 'set_global_curve_point_position', mouse_pos, idx_1])
+		current_selection.set_global_curve_point_position(mouse_pos, idx_1)
+	undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection, 'set_global_curve_point_position', mouse_pos, idx])
+	current_selection.set_global_curve_point_position(mouse_pos, idx)
 
 # Marked
 func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
@@ -483,8 +516,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if (in_undo_redo_transaction and event is InputEventMouseButton
 			and event.button_index == MOUSE_BUTTON_LEFT
 			and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)):
-		print("TODO: create full transaction here")
-		in_undo_redo_transaction = false
+		_commit_undo_redo_transaction()
 
 	if not editing_enabled:
 		return false
