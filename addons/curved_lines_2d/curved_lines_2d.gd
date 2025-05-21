@@ -489,8 +489,8 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 	if md_closest_point["before_segment"] >= svs.curve.point_count or md_closest_point["before_segment"] < 1:
 		return
-	if not in_undo_redo_transaction:
-		in_undo_redo_transaction = true
+	# Compute control points based on mouse position to align middle of segment curve to it
+	# using the quadratic Bézier control point
 	var idx : int = md_closest_point["before_segment"]
 	var segment_start_point := svs.curve.get_point_position(idx - 1)
 	var segment_end_point := svs.curve.get_point_position(idx)
@@ -500,12 +500,15 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 	var quadratic_bezier_control_point := halfway_point + distance * 2 * dir
 	var new_point_out := (quadratic_bezier_control_point - segment_start_point) * (2.0 / 3.0)
 	var new_point_in := (quadratic_bezier_control_point - segment_end_point) * (2.0 / 3.0)
-	undo_redo.create_action("Change curve segment %d->%d for %s" % [idx - 1, idx, str(svs)])
-	undo_redo.add_do_method(svs.curve, 'set_point_out', idx - 1, new_point_out)
-	undo_redo.add_do_method(svs.curve, 'set_point_in', idx, new_point_in)
-	undo_redo.add_undo_method(svs.curve, 'set_point_in', idx, svs.curve.get_point_in(idx))
-	undo_redo.add_undo_method(svs.curve, 'set_point_out', idx - 1, svs.curve.get_point_out(idx - 1))
-	undo_redo.commit_action()
+
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Change curve segment %d->%d for %s" % [idx - 1, idx, str(svs)])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([svs.curve, 'set_point_in', idx, svs.curve.get_point_in(idx)])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([svs.curve, 'set_point_out', idx - 1, svs.curve.get_point_out(idx - 1)])
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[svs.curve, 'set_point_out', idx - 1, new_point_out]]
+	undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve, 'set_point_in', idx, new_point_in])
+	svs.curve.set_point_out(idx - 1, new_point_out)
+	svs.curve.set_point_in(idx, new_point_in)
 	md_closest_point["point_position"] = mouse_pos
 	svs.set_meta(META_NAME_HOVER_CLOSEST_POINT, md_closest_point)
 	update_overlays()
