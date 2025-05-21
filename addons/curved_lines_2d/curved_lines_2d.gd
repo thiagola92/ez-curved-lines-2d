@@ -131,13 +131,17 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 				hint_txt += "\n - Drag to move\n - Right click to delete"
 				hint_txt += "\n - Hold Shift + Drag to move mirrored"
 
-			_draw_hint(viewport_control, hint_txt,
-					_vp_transform(handle[prefix + '_position']) + Vector2(15, 10))
+			_draw_hint(viewport_control, hint_txt)
 
 
-func _draw_hint(viewport_control : Control, txt : String, txt_pos : Vector2) -> void:
+func _draw_hint(viewport_control : Control, txt : String) -> void:
+	if not _get_select_mode_button().button_pressed:
+		return
 	if not hints_enabled:
 		return
+
+	var txt_pos := (_vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
+		+ Vector2(15, 8))
 	var lines := txt.split("\n")
 	for i in range(lines.size()):
 		var text := lines[i]
@@ -151,6 +155,7 @@ func _draw_hint(viewport_control : Control, txt : String, txt_pos : Vector2) -> 
 func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
+	var hint_txt := ""
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
 		var handle = handles[i]
@@ -179,7 +184,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			pts.append(Vector2(p1.x - 8, p1.y))
 			viewport_control.draw_polyline(pts, color, width)
 		if is_hovered:
-			var hint_txt := "Point: " + str(i)
+			hint_txt = "Point: " + str(i)
 			hint_txt += handle['is_closed']
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				if Input.is_key_pressed(KEY_SHIFT):
@@ -190,11 +195,14 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 					hint_txt += "\n - Double click to break loop"
 				else:
 					hint_txt += "\n - Right click to delete"
-					if (i == 0 or i == handles.size() - 1) and not svs.is_curve_closed():
+					if not svs.is_curve_closed() and (
+						(i == 0 and handles.size() > 2) or
+						(i == handles.size() - 1 and i > 1)
+					):
 						hint_txt += "\n - Double click to close loop"
 				hint_txt += "\n - Hold Shift + Drag to create curve handles"
-			_draw_hint(viewport_control, hint_txt,
-					_vp_transform(handle['point_position']) + Vector2(15, 10))
+	if not hint_txt.is_empty():
+		_draw_hint(viewport_control, hint_txt)
 
 
 func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
@@ -234,24 +242,46 @@ func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D,
 		viewport_control.draw_dashed_line(last_p, points[0], color, 1, 5.0, true, true)
 
 
+func _draw_crosshair(viewport_control : Control, p : Vector2) -> void:
+	if not _get_select_mode_button().button_pressed:
+		return
+	viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WEB_GRAY, 2)
+	viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WEB_GRAY,2)
+	viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WEB_GRAY, 2)
+	viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WEB_GRAY, 2)
+	viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WHITE)
+	viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WHITE)
+	viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WHITE)
+	viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WHITE)
+
+
+func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+	var p := _vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
+	if Input.is_key_pressed(KEY_CTRL):
+		_draw_crosshair(viewport_control, p)
+		_draw_hint(viewport_control, "- Click to add point here (Ctrl held) ")
+	else:
+		_draw_hint(viewport_control, "- Hold Ctrl to add points to selected shape")
+
+
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+	if Input.is_key_pressed(KEY_CTRL):
+		_draw_add_point_hint(viewport_control, svs)
+		return
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		var md_p := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 		var p = _vp_transform(md_p["point_position"])
-		viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WEB_GRAY, 2)
-		viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WEB_GRAY,2)
-		viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WEB_GRAY, 2)
-		viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WEB_GRAY, 2)
-		viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WHITE)
-		viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WHITE)
-		viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WHITE)
-		viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WHITE)
+		_draw_crosshair(viewport_control, _vp_transform(md_p["point_position"]))
 		var hint := ""
 		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			hint += "- Double click to add point here"
-			if md_p["before_segment"] < svs.curve.point_count:
-				hint += "\n- Drag to change curve"
-		_draw_hint(viewport_control, hint, p + Vector2(15, 8))
+			if svs.curve.point_count > 1:
+				hint += "- Double click to add point on the line"
+				if md_p["before_segment"] < svs.curve.point_count:
+					hint += "\n- Drag to change curve"
+			else:
+				_draw_add_point_hint(viewport_control, svs)
+		if not hint.is_empty():
+			_draw_hint(viewport_control, hint)
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
@@ -260,14 +290,19 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-	for result : ScalableVectorShape2D in _find_scalable_vector_shape_2d_nodes().filter(_is_svs_valid):
+	var all_valid_svs_nodes := _find_scalable_vector_shape_2d_nodes().filter(_is_svs_valid)
+	for result : ScalableVectorShape2D in all_valid_svs_nodes:
 		if result == current_selection:
-			#viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
-					#VIEWPORT_ORANGE, 2.0)
+			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
+					VIEWPORT_ORANGE, 2.0)
 			_draw_curve(viewport_control, result)
 			_draw_handles(viewport_control, result)
 			if not _handle_has_hover(result):
-				_draw_closest_point_on_curve(viewport_control, result)
+				if result.has_meta(META_NAME_HOVER_CLOSEST_POINT):
+					_draw_closest_point_on_curve(viewport_control, result)
+				else:
+					_draw_add_point_hint(viewport_control, result)
+
 		elif result.has_meta(META_NAME_SELECT_HINT):
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
 					Color.WEB_GRAY, 1.0)
@@ -334,20 +369,18 @@ func _get_curve_backup(curve_in : Curve2D) -> Curve2D:
 
 func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
 	var orig_n := current_selection.curve.point_count
-	if current_selection.is_curve_closed() and idx == 0 or idx == orig_n -1:
-		_toggle_loop_if_applies(current_selection, idx)
-		return
+	if current_selection.is_curve_closed() and idx == 0:
+		idx = orig_n - 1
 
-	if orig_n <= 1:
-		return
 	var backup := _get_curve_backup(current_selection.curve)
 	undo_redo.create_action("Remove point %d from %s" % [idx, str(current_selection)])
-	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
 	undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
-	if orig_n > 1:
+	if orig_n > 2:
 		undo_redo.add_do_method(current_selection.curve, 'set_point_out', orig_n - 2, Vector2.ZERO)
+	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
 	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
 	undo_redo.commit_action()
+
 
 
 func _remove_cp_in_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
@@ -368,15 +401,27 @@ func _remove_cp_out_from_curve(current_selection : ScalableVectorShape2D, idx : 
 	undo_redo.commit_action()
 
 
+func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
+		cp_in := Vector2.ZERO, cp_out := Vector2.ZERO, idx := -1) -> void:
+	undo_redo.create_action("Add point at %s to %s " % [str(local_pos), str(svs)])
+	undo_redo.add_do_method(svs.curve, 'add_point', local_pos, cp_in, cp_out, idx)
+	undo_redo.add_undo_method(svs.curve, 'remove_point', svs.curve.point_count)
+	undo_redo.commit_action()
+
+
+func _add_point_on_position(svs : ScalableVectorShape2D, pos : Vector2) -> void:
+	_add_point_to_curve(svs, svs.to_local(pos))
+
+
 func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
 	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 	if "before_segment" in md_closest_point and "local_point_position" in md_closest_point:
 		if md_closest_point["before_segment"] >= svs.curve.point_count:
-			svs.curve.add_point(md_closest_point["local_point_position"])
+			_add_point_to_curve(svs, md_closest_point["local_point_position"])
 		else:
-			svs.curve.add_point(md_closest_point["local_point_position"],
+			_add_point_to_curve(svs, md_closest_point["local_point_position"],
 					Vector2.ZERO, Vector2.ZERO, md_closest_point["before_segment"])
 
 
@@ -410,12 +455,11 @@ func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 	if svs.curve.point_count < 3:
 		return
 	if idx == 0 or idx == svs.curve.point_count - 1:
-		if svs.is_curve_closed():
-			svs.curve.set_point_position(svs.curve.point_count - 1,
-					svs.curve.get_point_position(0) + Vector2.LEFT * 10)
-		else:
-			svs.curve.set_point_position(svs.curve.point_count - 1,
-					svs.curve.get_point_position(0))
+		var updated_local_position := (
+			svs.curve.get_point_position(0) + Vector2.LEFT * 10 if svs.is_curve_closed() else
+			svs.curve.get_point_position(0)
+		)
+		_update_curve_point_position(svs, svs.to_global(updated_local_position), svs.curve.point_count - 1)
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
@@ -426,6 +470,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return false
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 		if _is_change_pivot_button_active():
@@ -435,6 +480,10 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
 				if event.double_click and current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
 					_toggle_loop_if_applies(current_selection, current_selection.get_meta(META_NAME_HOVER_POINT_IDX))
+				return true
+			elif _is_svs_valid(current_selection) and Input.is_key_pressed(KEY_CTRL):
+				if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+					_add_point_on_position(current_selection, mouse_pos)
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 				if event.double_click:
