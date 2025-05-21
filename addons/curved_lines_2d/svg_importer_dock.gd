@@ -5,6 +5,7 @@ class_name SvgImporterDock
 
 signal toggle_gui_editing(toggled_on : bool)
 signal toggle_gui_hints(toggled_on : bool)
+signal shape_added(new_shape : Node2D)
 
 const IMPORT_TAB_NAME :=  "Import SVG File"
 const EDIT_TAB_NAME := "Scalable Vector Shapes"
@@ -16,7 +17,6 @@ const SVG_ROOT_META_NAME := "svg_root"
 const SVG_STYLE_META_NAME := "svg_style"
 
 enum LogLevel { DEBUG, INFO, WARN, ERROR }
-var undo_redo : EditorUndoRedoManager = null
 var log_scroll_container : ScrollContainer = null
 var log_container : VBoxContainer = null
 var error_label_settings : LabelSettings = null
@@ -34,6 +34,9 @@ var lock_shapes := true
 var antialiased_shapes := false
 var import_file_dialog : EditorFileDialog = null
 var warning_dialog : AcceptDialog = null
+var edit_tab : ScalableVectorShapeEditTab = null
+var undo_redo : EditorUndoRedoManager = null
+
 
 func _enter_tree() -> void:
 	log_scroll_container = find_child("ScrollContainer")
@@ -52,7 +55,10 @@ func _enter_tree() -> void:
 	EditorInterface.get_base_control().add_child(import_file_dialog)
 	warning_dialog = AcceptDialog.new()
 	EditorInterface.get_base_control().add_child(warning_dialog)
-	find_child(EDIT_TAB_NAME).warning_dialog = warning_dialog
+	edit_tab = find_child(EDIT_TAB_NAME)
+	edit_tab.warning_dialog = warning_dialog
+	edit_tab.shape_added.connect(shape_added.emit)
+	undo_redo = EditorInterface.get_editor_undo_redo()
 
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
@@ -84,10 +90,17 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 func _drop_data(at_position: Vector2, data: Variant) -> void:
 	find_child(IMPORT_TAB_NAME).show()
 	if _can_drop_data(at_position, data):
-		var svg_root = _load_svg(data["files"][0])
+		_load_svg(data["files"][0])
 
 
-func _load_svg(file_path : String) -> Node2D:
+func _get_viewport_center() -> Vector2:
+	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
+	var og := tr.get_origin()
+	var sz := Vector2(EditorInterface.get_editor_viewport_2d().size)
+	return (sz / 2) / tr.get_scale() - og / tr.get_scale()
+
+
+func _load_svg(file_path : String) -> void:
 	for child in log_container.get_children():
 		child.queue_free()
 	var xml_data = XMLParser.new()
@@ -95,17 +108,19 @@ func _load_svg(file_path : String) -> Node2D:
 
 	if not scene_root is Node2D:
 		log_message("ERROR: Can only import into 2D scene", LogLevel.ERROR)
-		return null
+		return
 	if xml_data.open(file_path) != OK:
 		log_message("ERROR: Failed to open %s for reading" % file_path, LogLevel.ERROR)
-		return null
+		return
 
 	log_message("Importing SVG file: %s" % file_path, LogLevel.INFO)
 	var svg_root := Node2D.new()
 	svg_root.name = file_path.get_file().replace(".svg", "").capitalize()
+	undo_redo.create_action("Import SVG file as Nodes: %s" % svg_root.name)
+	svg_root.position = _get_viewport_center()
 	svg_root.set_meta(SVG_ROOT_META_NAME, true)
-	scene_root.add_child(svg_root, true)
-	svg_root.set_owner(scene_root)
+	_managed_add_child_and_set_owner(scene_root, svg_root, scene_root)
+
 	var current_node := svg_root
 	var svg_gradients : Array[Dictionary] = []
 
@@ -166,8 +181,8 @@ func _load_svg(file_path : String) -> Node2D:
 	link_button2.text = "Watch an explainer about known issues on youtube."
 	link_button2.uri = "https://www.youtube.com/watch?v=nVCKVRBMnWU"
 	log_container.add_child(link_button2)
-
-	return svg_root
+	undo_redo.commit_action(false)
+	shape_added.emit(svg_root)
 
 
 func get_gradient_by_href(href : String, gradients : Array[Dictionary]) -> Dictionary:
@@ -201,8 +216,7 @@ func process_group(element:XMLParser, current_node : Node2D, scene_root : Node2D
 	var new_group = Node2D.new()
 	new_group.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Group"
 	new_group.transform = get_svg_transform(element)
-	current_node.add_child(new_group, true)
-	new_group.set_owner(scene_root)
+	_managed_add_child_and_set_owner(current_node, new_group, scene_root)
 	new_group.set_meta(SVG_STYLE_META_NAME, get_svg_style(element))
 	return new_group
 
@@ -469,25 +483,22 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		ancestor = ancestor.get_parent()
 	var gradient_point_parent : Node2D = parent
 	if transform == Transform2D.IDENTITY:
-		parent.add_child(new_path, true)
+		_managed_add_child_and_set_owner(parent, new_path, scene_root)
 	else:
 		var transform_node := Node2D.new()
 		transform_node.name = path_name + "Transform"
 		transform_node.transform = transform
-		parent.add_child(transform_node, true)
-		transform_node.add_child(new_path, true)
-		transform_node.set_owner(scene_root)
+		_managed_add_child_and_set_owner(parent, transform_node, scene_root)
+		_managed_add_child_and_set_owner(transform_node, new_path, scene_root)
 		gradient_point_parent = transform_node
-	new_path.set_owner(scene_root)
+
 	if style.has("opacity"):
 		new_path.modulate.a = float(style["opacity"])
 	if style.is_empty():
 		var line := Line2D.new()
 		line.name = "Stroke"
 		line.antialiased = antialiased_shapes
-		new_path.add_child(line, true)
-		line.set_owner(scene_root)
-		new_path.line = line
+		_managed_add_child_and_set_owner(new_path, line, scene_root, 'line')
 		line.width = 1.0
 		line.closed = is_closed
 	elif "fill" not in style and "stroke" not in style:
@@ -504,9 +515,7 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	if (import_collision_polygons and
 			("fill" in style or import_collision_polygons_for_all_shapes)):
 		var poly := CollisionPolygon2D.new()
-		new_path.add_child(poly, true)
-		poly.set_owner(scene_root)
-		new_path.collision_polygon = poly
+		_managed_add_child_and_set_owner(new_path, poly, scene_root, 'collision_polygon')
 
 	if not keep_drawable_path_node:
 		var bare_node := Node2D.new()
@@ -532,8 +541,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 		var line := Line2D.new()
 		line.name = "Stroke"
 		line.antialiased = antialiased_shapes
-		new_path.add_child(line, true)
-		line.set_owner(scene_root)
+		_managed_add_child_and_set_owner(new_path, line, scene_root, 'line')
 		if style["stroke"].begins_with("url"):
 			log_message("⚠️ Unsupported stroke style: " + style["stroke"])
 		else:
@@ -542,7 +550,6 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 			line.width = float(style['stroke-width'])
 		if style.has("stroke-opacity"):
 			line.self_modulate.a = float(style["stroke-opacity"])
-		new_path.line = line
 		line.end_cap_mode = Line2D.LINE_CAP_ROUND
 		line.begin_cap_mode = Line2D.LINE_CAP_ROUND
 		line.joint_mode = Line2D.LINE_JOINT_ROUND
@@ -556,8 +563,7 @@ func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
 		polygon.antialiased = antialiased_shapes
-		new_path.add_child(polygon, true)
-		polygon.set_owner(scene_root)
+		_managed_add_child_and_set_owner(new_path, polygon, scene_root, 'polygon')
 		if style["fill"].begins_with("url"):
 			var href : String = style["fill"].replace("url(", "").replace(")", "")
 			var svg_gradient = get_gradient_by_href(href, gradients)
@@ -569,7 +575,6 @@ func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene
 			polygon.color = Color(style["fill"])
 		if style.has("fill-opacity"):
 			polygon.self_modulate.a = float(style["fill-opacity"])
-		new_path.polygon = polygon
 
 
 func add_gradient_to_fill(new_path : ScalableVectorShape2D, svg_gradient: Dictionary, polygon : Polygon2D,
@@ -703,6 +708,19 @@ func get_svg_style(element:XMLParser) -> Dictionary:
 			style[style_prop] = element.get_named_attribute_value(style_prop)
 
 	return style
+
+
+func _managed_add_child_and_set_owner(parent : Node, child : Node,
+		scene_root : Node, as_property := ""):
+	parent.add_child(child, true)
+	child.set_owner(scene_root)
+	undo_redo.add_do_method(parent, 'add_child', child, true)
+	undo_redo.add_do_method(child, 'set_owner', scene_root)
+	undo_redo.add_do_reference(child)
+	undo_redo.add_undo_method(parent, 'remove_child', child)
+	if not as_property.is_empty():
+		parent.call("set", as_property, child)
+		undo_redo.add_do_property(parent, as_property, child)
 
 
 static func parse_attribute_string(raw_attribute_str : String) -> String:

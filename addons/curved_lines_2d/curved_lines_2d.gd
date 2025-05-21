@@ -38,6 +38,11 @@ func _enter_tree():
 	make_bottom_panel_item_visible(svg_importer_dock)
 	svg_importer_dock.toggle_gui_editing.connect(func(flg): editing_enabled = flg)
 	svg_importer_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
+	svg_importer_dock.shape_added.connect(_on_shape_added)
+
+
+func _on_shape_added(new_shape : Node2D):
+	EditorInterface.edit_node(new_shape)
 
 
 func _on_selection_changed():
