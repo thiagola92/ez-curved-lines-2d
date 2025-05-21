@@ -161,8 +161,6 @@ size_flags_vertical = 3
 
 [node name="LinkButton" parent="CenterContainer" instance=ExtResource("2_xxhaf")]
 layout_mode = 2
-tooltip_text = "This link will open a webpage in your browser: https://www.youtube.com/watch?v=q_NaZq1zZdY
-Right click to copy this link"
 
 [connection signal="toggled" from="HBoxContainer/EnableEditingCheckbox" to="." method="_on_enable_editing_checkbox_toggled"]
 [connection signal="toggled" from="HBoxContainer/EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
