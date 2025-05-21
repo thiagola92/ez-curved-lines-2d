@@ -116,7 +116,7 @@ theme_override_constants/separation = -5
 [node name="Label" type="Label" parent="Import SVG File/VBoxContainer/ScrollContainer/ImportLogContainer"]
 layout_mode = 2
 size_flags_vertical = 10
-text = " - Dag/Drop an svg-file here to start import -"
+text = " - Drag/Drop an svg-file here to start import -"
 label_settings = ExtResource("2_rycm0")
 horizontal_alignment = 1
 
