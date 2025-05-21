@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://drrarjj0668n"]
+[gd_scene load_steps=7 format=3 uid="uid://drrarjj0668n"]
 
 [ext_resource type="Script" uid="uid://bp5vvj23w57js" path="res://addons/curved_lines_2d/svg_importer_dock.gd" id="1_gt4al"]
 [ext_resource type="LabelSettings" uid="uid://bspk1rkq1cmhx" path="res://addons/curved_lines_2d/info_label_settings.tres" id="2_rycm0"]
 [ext_resource type="PackedScene" uid="uid://dwns40mbgt82s" path="res://addons/curved_lines_2d/scalable_vector_shape_edit_tab.tscn" id="3_0eedo"]
+[ext_resource type="PackedScene" uid="uid://cmoxkoulpd7so" path="res://addons/curved_lines_2d/link_button_with_copy_hint.tscn" id="3_x3y3h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rycm0"]
 content_margin_left = 10.0
@@ -120,7 +121,7 @@ text = " - Drag/Drop an svg-file here to start import -"
 label_settings = ExtResource("2_rycm0")
 horizontal_alignment = 1
 
-[node name="LinkButton" type="LinkButton" parent="Import SVG File/VBoxContainer/ScrollContainer/ImportLogContainer"]
+[node name="LinkButton2" parent="Import SVG File/VBoxContainer/ScrollContainer/ImportLogContainer" instance=ExtResource("3_x3y3h")]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 2
