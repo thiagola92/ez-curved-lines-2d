@@ -280,7 +280,8 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 					hint += "\n- Drag to change curve"
 			else:
 				_draw_add_point_hint(viewport_control, svs)
-		_draw_hint(viewport_control, hint)
+		if not hint.is_empty():
+			_draw_hint(viewport_control, hint)
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
