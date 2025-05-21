@@ -106,16 +106,21 @@ func _on_create_circle_button_pressed() -> void:
 	_create_new_shape(curve, scene_root, node_name, ellipse_stroke_width_input.value,
 			ellipse_stroke_color_button.color, ellipse_fill_color_button.color)
 
+func _get_viewport_center() -> Vector2:
+	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
+	var og := tr.get_origin()
+	var sz := Vector2(EditorInterface.get_editor_viewport_2d().size)
+	return (sz / 2) / tr.get_scale() - og / tr.get_scale()
+
+
 func _create_new_shape(curve : Curve2D, scene_root : Node2D, node_name : String,
 			stroke_width : int, stroke_color : Color, fill_color : Color) -> void:
 	var undo_redo := EditorInterface.get_editor_undo_redo()
 	var new_shape := ScalableVectorShape2D.new()
-	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
-	var og := tr.get_origin()
-	var sz := Vector2(EditorInterface.get_editor_viewport_2d().size)
+
 	new_shape.name = node_name
+	new_shape.position = _get_viewport_center()
 	new_shape.curve = curve
-	new_shape.position = (sz / 2) / tr.get_scale() - og / tr.get_scale()
 
 	undo_redo.create_action("Add a %s to the scene " % node_name)
 	undo_redo.add_do_method(scene_root, 'add_child', new_shape, true)

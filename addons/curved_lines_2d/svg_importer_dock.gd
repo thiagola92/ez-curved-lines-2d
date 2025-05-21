@@ -36,6 +36,7 @@ var import_file_dialog : EditorFileDialog = null
 var warning_dialog : AcceptDialog = null
 var edit_tab : ScalableVectorShapeEditTab = null
 
+
 func _enter_tree() -> void:
 	log_scroll_container = find_child("ScrollContainer")
 	log_container = find_child("ImportLogContainer")
@@ -87,10 +88,17 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 func _drop_data(at_position: Vector2, data: Variant) -> void:
 	find_child(IMPORT_TAB_NAME).show()
 	if _can_drop_data(at_position, data):
-		var svg_root = _load_svg(data["files"][0])
+		_load_svg(data["files"][0])
 
 
-func _load_svg(file_path : String) -> Node2D:
+func _get_viewport_center() -> Vector2:
+	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
+	var og := tr.get_origin()
+	var sz := Vector2(EditorInterface.get_editor_viewport_2d().size)
+	return (sz / 2) / tr.get_scale() - og / tr.get_scale()
+
+
+func _load_svg(file_path : String) -> void:
 	for child in log_container.get_children():
 		child.queue_free()
 	var xml_data = XMLParser.new()
@@ -98,14 +106,15 @@ func _load_svg(file_path : String) -> Node2D:
 
 	if not scene_root is Node2D:
 		log_message("ERROR: Can only import into 2D scene", LogLevel.ERROR)
-		return null
+		return
 	if xml_data.open(file_path) != OK:
 		log_message("ERROR: Failed to open %s for reading" % file_path, LogLevel.ERROR)
-		return null
+		return
 
 	log_message("Importing SVG file: %s" % file_path, LogLevel.INFO)
 	var svg_root := Node2D.new()
 	svg_root.name = file_path.get_file().replace(".svg", "").capitalize()
+	svg_root.position = _get_viewport_center()
 	svg_root.set_meta(SVG_ROOT_META_NAME, true)
 	scene_root.add_child(svg_root, true)
 	svg_root.set_owner(scene_root)
@@ -169,8 +178,7 @@ func _load_svg(file_path : String) -> Node2D:
 	link_button2.text = "Watch an explainer about known issues on youtube."
 	link_button2.uri = "https://www.youtube.com/watch?v=nVCKVRBMnWU"
 	log_container.add_child(link_button2)
-
-	return svg_root
+	shape_added.emit(svg_root)
 
 
 func get_gradient_by_href(href : String, gradients : Array[Dictionary]) -> Dictionary:
