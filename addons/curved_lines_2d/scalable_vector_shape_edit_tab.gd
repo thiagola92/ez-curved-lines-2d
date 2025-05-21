@@ -5,6 +5,7 @@ class_name ScalableVectorShapeEditTab
 
 signal toggle_editing(flg : bool)
 signal toggle_hints(flg : bool)
+signal shape_added(shape : Node2D)
 
 var rect_width_input : EditorSpinSlider
 var rect_height_input : EditorSpinSlider
@@ -20,7 +21,6 @@ var ellipse_stroke_width_input : EditorSpinSlider
 var ellipse_stroke_color_button : ColorPickerButton
 var ellipse_fill_color_button : ColorPickerButton
 var warning_dialog : AcceptDialog = null
-
 
 func _enter_tree() -> void:
 	rect_width_input = _make_int_input("Width", 100, 2, 1000, "px")
@@ -106,28 +106,48 @@ func _on_create_circle_button_pressed() -> void:
 	_create_new_shape(curve, scene_root, node_name, ellipse_stroke_width_input.value,
 			ellipse_stroke_color_button.color, ellipse_fill_color_button.color)
 
-
 func _create_new_shape(curve : Curve2D, scene_root : Node2D, node_name : String,
 			stroke_width : int, stroke_color : Color, fill_color : Color) -> void:
-	var new_rect := ScalableVectorShape2D.new()
-	new_rect.name = node_name
-	new_rect.curve = curve
-	scene_root.add_child(new_rect, true)
-	new_rect.set_owner(scene_root)
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	var new_shape := ScalableVectorShape2D.new()
+	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
+	var og := tr.get_origin()
+	var sz := Vector2(EditorInterface.get_editor_viewport_2d().size)
+	new_shape.name = node_name
+	new_shape.curve = curve
+	new_shape.position = (sz / 2) / tr.get_scale() - og / tr.get_scale()
+
+	undo_redo.create_action("Add a %s to the scene " % node_name)
+	undo_redo.add_do_method(scene_root, 'add_child', new_shape, true)
+	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
+	undo_redo.add_do_reference(new_shape)
+	undo_redo.add_undo_method(scene_root, 'remove_child', new_shape)
+
+
 	var polygon := Polygon2D.new()
 	polygon.name = "Fill"
-	new_rect.add_child(polygon, true)
-	polygon.set_owner(scene_root)
-	new_rect.polygon = polygon
-	new_rect.polygon.color = fill_color
+	polygon.color = fill_color
+
+	undo_redo.add_do_property(new_shape, 'polygon', polygon)
+	undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
+	undo_redo.add_do_method(polygon, 'set_owner', scene_root)
+	undo_redo.add_do_reference(polygon)
+	undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
+
 	var line := Line2D.new()
 	line.name = "Stroke"
-	new_rect.add_child(line, true)
-	line.set_owner(scene_root)
 	line.closed = true
-	new_rect.line = line
-	new_rect.line.default_color = stroke_color
-	new_rect.line.width = stroke_width
+	line.default_color = stroke_color
+	line.width = stroke_width
+
+	# undo/redo stuff
+	undo_redo.add_do_property(new_shape, 'line', line)
+	undo_redo.add_do_method(new_shape, 'add_child', line, true)
+	undo_redo.add_do_method(line, 'set_owner', scene_root)
+	undo_redo.add_do_reference(line)
+	undo_redo.add_undo_method(new_shape, 'remove_child', line)
+	undo_redo.commit_action()
+	shape_added.emit(new_shape)
 
 
 func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:

@@ -5,6 +5,7 @@ class_name SvgImporterDock
 
 signal toggle_gui_editing(toggled_on : bool)
 signal toggle_gui_hints(toggled_on : bool)
+signal shape_added(new_shape : Node2D)
 
 const IMPORT_TAB_NAME :=  "Import SVG File"
 const EDIT_TAB_NAME := "Scalable Vector Shapes"
@@ -16,7 +17,6 @@ const SVG_ROOT_META_NAME := "svg_root"
 const SVG_STYLE_META_NAME := "svg_style"
 
 enum LogLevel { DEBUG, INFO, WARN, ERROR }
-var undo_redo : EditorUndoRedoManager = null
 var log_scroll_container : ScrollContainer = null
 var log_container : VBoxContainer = null
 var error_label_settings : LabelSettings = null
@@ -34,6 +34,7 @@ var lock_shapes := true
 var antialiased_shapes := false
 var import_file_dialog : EditorFileDialog = null
 var warning_dialog : AcceptDialog = null
+var edit_tab : ScalableVectorShapeEditTab = null
 
 func _enter_tree() -> void:
 	log_scroll_container = find_child("ScrollContainer")
@@ -52,7 +53,9 @@ func _enter_tree() -> void:
 	EditorInterface.get_base_control().add_child(import_file_dialog)
 	warning_dialog = AcceptDialog.new()
 	EditorInterface.get_base_control().add_child(warning_dialog)
-	find_child(EDIT_TAB_NAME).warning_dialog = warning_dialog
+	edit_tab = find_child(EDIT_TAB_NAME)
+	edit_tab.warning_dialog = warning_dialog
+	edit_tab.shape_added.connect(shape_added.emit)
 
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
