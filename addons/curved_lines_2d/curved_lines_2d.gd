@@ -400,8 +400,10 @@ func _remove_cp_out_from_curve(current_selection : ScalableVectorShape2D, idx : 
 
 func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
 		cp_in := Vector2.ZERO, cp_out := Vector2.ZERO, idx := -1) -> void:
-
-	svs.curve.add_point(local_pos, cp_in, cp_out, idx)
+	undo_redo.create_action("Add point at %s to %s " % [str(local_pos), str(svs)])
+	undo_redo.add_do_method(svs.curve, 'add_point', local_pos, cp_in, cp_out, idx)
+	undo_redo.add_undo_method(svs.curve, 'remove_point', svs.curve.point_count)
+	undo_redo.commit_action()
 
 
 func _add_point_on_position(svs : ScalableVectorShape2D, pos : Vector2) -> void:
