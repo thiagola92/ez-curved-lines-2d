@@ -482,7 +482,7 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 			_add_point_to_curve(svs, md_closest_point["local_point_position"],
 					Vector2.ZERO, Vector2.ZERO, md_closest_point["before_segment"])
 
-# Marked
+
 func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
