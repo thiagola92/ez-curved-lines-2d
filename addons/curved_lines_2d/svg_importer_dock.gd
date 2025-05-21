@@ -58,7 +58,8 @@ func _enter_tree() -> void:
 	EditorInterface.get_base_control().add_child(warning_dialog)
 	edit_tab = find_child(EDIT_TAB_NAME)
 	edit_tab.warning_dialog = warning_dialog
-	edit_tab.shape_added.connect(shape_added.emit)
+	if not edit_tab.shape_added.is_connected(shape_added.emit):
+		edit_tab.shape_added.connect(shape_added.emit)
 	undo_redo = EditorInterface.get_editor_undo_redo()
 
 
