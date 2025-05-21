@@ -345,7 +345,7 @@ func _commit_undo_redo_transaction() -> void:
 		UndoRedoEntry.UNDOS: []
 	}
 
-# Marked
+
 func _update_curve_point_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
 	if not in_undo_redo_transaction:
 		_start_undo_redo_transaction("Move point on " + str(current_selection))
@@ -368,20 +368,22 @@ func _update_curve_point_position(current_selection : ScalableVectorShape2D, mou
 
 # Marked
 func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
-	if not in_undo_redo_transaction:
-		in_undo_redo_transaction = true
 	if idx == 0:
 		idx = current_selection.curve.point_count - 1
-	undo_redo.create_action("Move control point in %d on %s" % [idx, current_selection])
-	undo_redo.add_do_method(current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx)
-	undo_redo.add_undo_method(current_selection.curve, 'set_point_in', idx, current_selection.curve.get_point_in(idx))
+
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Move control point in %d on %s" % [idx, current_selection])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_in', idx, current_selection.curve.get_point_in(idx)])
+		if Input.is_key_pressed(KEY_SHIFT) and not(idx == current_selection.curve.point_count - 1 and not current_selection.is_curve_closed()):
+			var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
+			undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_out', idx_1, current_selection.curve.get_point_out(idx_1)])
+
 	current_selection.set_global_curve_cp_in_position(mouse_pos, idx)
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx]]
 	if Input.is_key_pressed(KEY_SHIFT) and not(idx == current_selection.curve.point_count - 1 and not current_selection.is_curve_closed()):
 		var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
-		undo_redo.add_do_method(current_selection.curve, 'set_point_out', idx_1, -current_selection.curve.get_point_in(idx))
-		undo_redo.add_undo_method(current_selection.curve, 'set_point_out', idx_1, current_selection.curve.get_point_out(idx_1))
 		current_selection.curve.set_point_out(idx_1, -current_selection.curve.get_point_in(idx))
-	undo_redo.commit_action(false)
+		undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection.curve, 'set_point_out', idx_1, -current_selection.curve.get_point_in(idx)])
 
 # Marked
 func _update_curve_cp_out_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
