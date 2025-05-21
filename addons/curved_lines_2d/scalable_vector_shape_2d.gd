@@ -95,17 +95,14 @@ func _on_assigned_node_changed():
 	if is_instance_valid(line):
 		if lock_assigned_shapes:
 			line.set_meta("_edit_lock_", true)
-			line.show_behind_parent = true
 		curve_changed()
 	if is_instance_valid(polygon):
 		if lock_assigned_shapes:
 			polygon.set_meta("_edit_lock_", true)
-			polygon.show_behind_parent = true
 		curve_changed()
 	if is_instance_valid(collision_polygon):
 		if lock_assigned_shapes:
 			collision_polygon.set_meta("_edit_lock_", true)
-			collision_polygon.show_behind_parent = true
 		curve_changed()
 
 ## Redraw the line based on the new curve, using its tesselate method
