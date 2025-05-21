@@ -135,6 +135,8 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 
 
 func _draw_hint(viewport_control : Control, txt : String) -> void:
+	if not _get_select_mode_button().button_pressed:
+		return
 	var txt_pos := (_vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
 		+ Vector2(15, 8))
 
@@ -239,6 +241,8 @@ func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D,
 
 
 func _draw_crosshair(viewport_control : Control, p : Vector2) -> void:
+	if not _get_select_mode_button().button_pressed:
+		return
 	viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WEB_GRAY, 2)
 	viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WEB_GRAY,2)
 	viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WEB_GRAY, 2)
@@ -265,9 +269,12 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 		_draw_crosshair(viewport_control, _vp_transform(md_p["point_position"]))
 		var hint := ""
 		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			hint += "- Double click to add point on the line"
-			if md_p["before_segment"] < svs.curve.point_count:
-				hint += "\n- Drag to change curve"
+			if svs.curve.point_count > 1:
+				hint += "- Double click to add point on the line"
+				if md_p["before_segment"] < svs.curve.point_count:
+					hint += "\n- Drag to change curve"
+			else:
+				_draw_add_point_hint(viewport_control, svs)
 		_draw_hint(viewport_control, hint)
 
 
