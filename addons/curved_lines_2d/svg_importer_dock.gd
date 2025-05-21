@@ -723,8 +723,6 @@ func _managed_add_child_and_set_owner(parent : Node, child : Node,
 		undo_redo.add_do_property(parent, as_property, child)
 
 
-
-
 static func parse_attribute_string(raw_attribute_str : String) -> String:
 	var regex = RegEx.new()
 	regex.compile("\\S+")
