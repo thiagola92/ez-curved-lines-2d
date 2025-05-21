@@ -117,16 +117,17 @@ func _create_new_shape(curve : Curve2D, scene_root : Node2D, node_name : String,
 			stroke_width : int, stroke_color : Color, fill_color : Color) -> void:
 	var undo_redo := EditorInterface.get_editor_undo_redo()
 	var new_shape := ScalableVectorShape2D.new()
-
+	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+	var parent = current_selection if current_selection is Node2D else scene_root
 	new_shape.name = node_name
-	new_shape.position = _get_viewport_center()
+	new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
 	new_shape.curve = curve
 
 	undo_redo.create_action("Add a %s to the scene " % node_name)
-	undo_redo.add_do_method(scene_root, 'add_child', new_shape, true)
+	undo_redo.add_do_method(parent, 'add_child', new_shape, true)
 	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
 	undo_redo.add_do_reference(new_shape)
-	undo_redo.add_undo_method(scene_root, 'remove_child', new_shape)
+	undo_redo.add_undo_method(parent, 'remove_child', new_shape)
 
 
 	var polygon := Polygon2D.new()
