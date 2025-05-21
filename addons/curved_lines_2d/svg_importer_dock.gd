@@ -36,7 +36,7 @@ var import_file_dialog : EditorFileDialog = null
 var warning_dialog : AcceptDialog = null
 var edit_tab : ScalableVectorShapeEditTab = null
 var undo_redo : EditorUndoRedoManager = null
-
+var LinkButtonScene : PackedScene = null
 
 func _enter_tree() -> void:
 	log_scroll_container = find_child("ScrollContainer")
@@ -47,6 +47,7 @@ func _enter_tree() -> void:
 	warning_label_settings = preload("res://addons/curved_lines_2d/warn_label_settings.tres")
 	info_label_settings = preload("res://addons/curved_lines_2d/info_label_settings.tres")
 	debug_label_settings = preload("res://addons/curved_lines_2d/debug_label_settings.tres")
+	LinkButtonScene = preload("res://addons/curved_lines_2d/link_button_with_copy_hint.tscn")
 	log_scroll_container.get_v_scroll_bar().connect("changed", func(): log_scroll_container.scroll_vertical = log_scroll_container.get_v_scroll_bar().max_value )
 	import_file_dialog = EditorFileDialog.new()
 	import_file_dialog.add_filter("*.svg", "SVG image")
@@ -170,14 +171,14 @@ func _load_svg(file_path : String) -> void:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
 	log_message("Import finished.\n\nThe SVG importer is in a very early stage of development.")
 
-	var link_button := LinkButton.new()
+	var link_button : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
 	link_button.text = "Click here to report issues or improvement requests on github"
 	link_button.uri = "https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues"
 	log_container.add_child(link_button)
 
 	log_message("\nClick on the link below to learn more")
 
-	var link_button2 := LinkButton.new()
+	var link_button2 : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
 	link_button2.text = "Watch an explainer about known issues on youtube."
 	link_button2.uri = "https://www.youtube.com/watch?v=nVCKVRBMnWU"
 	log_container.add_child(link_button2)
