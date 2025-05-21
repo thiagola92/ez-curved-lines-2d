@@ -137,11 +137,11 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 func _draw_hint(viewport_control : Control, txt : String) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
-	var txt_pos := (_vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
-		+ Vector2(15, 8))
-
 	if not hints_enabled:
 		return
+
+	var txt_pos := (_vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
+		+ Vector2(15, 8))
 	var lines := txt.split("\n")
 	for i in range(lines.size()):
 		var text := lines[i]
@@ -155,6 +155,7 @@ func _draw_hint(viewport_control : Control, txt : String) -> void:
 func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
+	var hint_txt := ""
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
 		var handle = handles[i]
@@ -183,7 +184,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			pts.append(Vector2(p1.x - 8, p1.y))
 			viewport_control.draw_polyline(pts, color, width)
 		if is_hovered:
-			var hint_txt := "Point: " + str(i)
+			hint_txt = "Point: " + str(i)
 			hint_txt += handle['is_closed']
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				if Input.is_key_pressed(KEY_SHIFT):
@@ -200,7 +201,8 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 					):
 						hint_txt += "\n - Double click to close loop"
 				hint_txt += "\n - Hold Shift + Drag to create curve handles"
-			_draw_hint(viewport_control, hint_txt)
+	if not hint_txt.is_empty():
+		_draw_hint(viewport_control, hint_txt)
 
 
 func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
@@ -452,12 +454,11 @@ func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 	if svs.curve.point_count < 3:
 		return
 	if idx == 0 or idx == svs.curve.point_count - 1:
-		if svs.is_curve_closed():
-			svs.curve.set_point_position(svs.curve.point_count - 1,
-					svs.curve.get_point_position(0) + Vector2.LEFT * 10)
-		else:
-			svs.curve.set_point_position(svs.curve.point_count - 1,
-					svs.curve.get_point_position(0))
+		var updated_local_position := (
+			svs.curve.get_point_position(0) + Vector2.LEFT * 10 if svs.is_curve_closed() else
+			svs.curve.get_point_position(0)
+		)
+		_update_curve_point_position(svs, svs.to_global(updated_local_position), svs.curve.point_count - 1)
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
