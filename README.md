@@ -34,7 +34,7 @@ This stuff makes me zero money, so you can always branch off in your own directi
 - [Drawing Shapes in the Godot 2D Viewport](#drawing-shapes-in-the-godot-2d-viewport)
 	- [Basic Drawing Explainer on youtube](#basic-drawing-explainer-on-youtube)
 	- [Adding a `ScalableVectorShape2D` node to your scene](#adding-a-scalablevectorshape2d-node-to-your-scene)
-	- [Double click to add points](#double-click-to-add-points)
+	- [Ctrl + click to add points](#ctrl--click-to-add-points)
 	- [Add a `Line2D` as stroke and a `Polygon2D` as fill](#add-a-line2d-as-stroke-and-a-polygon2d-as-fill)
 		- [More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`](#more-about-assigned-line2d-polygon2d-and-collisionpolygon2d)
 			- [The assigned shapes are now siblings](#the-assigned-shapes-are-now-siblings)
@@ -84,11 +84,13 @@ This works exactly the same way as adding a normal godot node, using `Ctrl-A` or
 
 ![create node](./addons/curved_lines_2d/screenshots/02-create-node.png)
 
-## Double click to add points
+## Ctrl + click to add points
 
-Once you added your new node, a hint should suggest you add points using double click (as long as you're in edit mode):
+Once you added your new node, a hint should suggest you can start adding points by holding down the `Ctrl` key:
 
-![add node double click](./addons/curved_lines_2d/screenshots/03-double-click.png)
+![hold ctrl to start adding points](./addons/curved_lines_2d/screenshots/17-hold-ctrl-to-start-adding.png)
+
+And once your are holding `Ctrl` down you can use `Left Click` to add points
 
 
 ## Add a `Line2D` as stroke and a `Polygon2D` as fill
@@ -157,9 +159,11 @@ The hints in the 2D viewport should have you covered, but this section lists all
 
 ## Adding a point to a shape
 
-Using double click you can add a point. Be aware that after adding the second point, you are expected to add new points __within__ the resulting polygon:
+Using `Ctrl` + `Left Click` you can add a point anywhere in the 2D viewport, while your shape is selected.
 
-![add with double click again](./addons/curved_lines_2d/screenshots/04-double-click2.png)
+By double clicking on a line segment you can add a point _inbetween_ 2 existing points:
+
+![add point to a line](./addons/curved_lines_2d/screenshots/18-add-point-to-line.png)
 
 ## Bending a curve
 
