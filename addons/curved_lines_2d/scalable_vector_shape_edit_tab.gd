@@ -7,19 +7,19 @@ signal toggle_editing(flg : bool)
 signal toggle_hints(flg : bool)
 signal shape_added(shape : Node2D)
 
+
+var stroke_width_input : EditorSpinSlider
+var stroke_color_button : ColorPickerButton
+var fill_color_button : ColorPickerButton
+
 var rect_width_input : EditorSpinSlider
 var rect_height_input : EditorSpinSlider
 var rect_rx_input : EditorSpinSlider
 var rect_ry_input : EditorSpinSlider
-var rect_stroke_width_input : EditorSpinSlider
-var rect_stroke_color_button : ColorPickerButton
-var rect_fill_color_button : ColorPickerButton
 
 var ellipse_rx_input : EditorSpinSlider
 var ellipse_ry_input : EditorSpinSlider
-var ellipse_stroke_width_input : EditorSpinSlider
-var ellipse_stroke_color_button : ColorPickerButton
-var ellipse_fill_color_button : ColorPickerButton
+
 var warning_dialog : AcceptDialog = null
 
 func _enter_tree() -> void:
@@ -27,22 +27,18 @@ func _enter_tree() -> void:
 	rect_height_input = _make_int_input("Height", 100, 2, 1000, "px")
 	rect_rx_input = _make_int_input("Corner Radius X", 0, 0, 500, "px")
 	rect_ry_input = _make_int_input("Corner Radius Y", 0, 0, 500, "px")
-	rect_stroke_color_button = find_child("StrokePickerButton")
-	rect_fill_color_button = find_child("FillPickerButton")
-	rect_stroke_width_input = _make_int_input("Stroke Width", 1, 0, 100, "px")
+	stroke_color_button = find_child("StrokePickerButton")
+	fill_color_button = find_child("FillPickerButton")
+	stroke_width_input = _make_int_input("Stroke Width", 1, 0, 100, "px")
 	find_child("WidthSliderContainer").add_child(rect_width_input)
 	find_child("HeightSliderContainer").add_child(rect_height_input)
 	find_child("XRadiusSliderContainer").add_child(rect_rx_input)
 	find_child("YRadiusSliderContainer").add_child(rect_ry_input)
-	find_child("StrokeWidthContainer").add_child(rect_stroke_width_input)
+	find_child("StrokeWidthContainer").add_child(stroke_width_input)
 	ellipse_rx_input = _make_int_input("Horizontal Radius (RX)", 50, 1, 500, "px")
 	ellipse_ry_input = _make_int_input("Vertical Radius (RY)", 50, 1, 500, "px")
-	ellipse_stroke_width_input = _make_int_input("Stroke Width", 1, 0, 100, "px")
-	ellipse_stroke_color_button = find_child("EllipseStrokePickerButton")
-	ellipse_fill_color_button = find_child("EllipseFillPickerButton")
 	find_child("EllipseXRadiusSliderContainer").add_child(ellipse_rx_input)
 	find_child("EllipseYRadiusSliderContainer").add_child(ellipse_ry_input)
-	find_child("EllipseStrokeWidthContainer").add_child(ellipse_stroke_width_input)
 
 
 func _make_int_input(lbl : String, value : int, min_value : int, max_value : int, suffix : String) -> EditorSpinSlider:
@@ -82,8 +78,8 @@ func _on_create_rect_button_pressed() -> void:
 		curve.add_point(Vector2(0, rect_height_input.value - rect_ry_input.value), Vector2(0, rect_ry_input.value * SvgImporterDock.R_TO_CP))
 		curve.add_point(Vector2(0, rect_ry_input.value), Vector2.ZERO, Vector2(0, -rect_ry_input.value *  SvgImporterDock.R_TO_CP))
 		curve.add_point(Vector2(rect_rx_input.value, 0), Vector2(-rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-	_create_new_shape(curve, scene_root, "Rectangle", rect_stroke_width_input.value,
-			rect_stroke_color_button.color, rect_fill_color_button.color)
+	_create_new_shape(curve, scene_root, "Rectangle", stroke_width_input.value,
+			stroke_color_button.color, fill_color_button.color)
 
 
 func _on_create_circle_button_pressed() -> void:
@@ -103,8 +99,9 @@ func _on_create_circle_button_pressed() -> void:
 	curve.add_point(Vector2(0, -ellipse_ry_input.value), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
 	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
 	var node_name := "Circle" if ellipse_rx_input.value == ellipse_ry_input.value else "Ellipse"
-	_create_new_shape(curve, scene_root, node_name, ellipse_stroke_width_input.value,
-			ellipse_stroke_color_button.color, ellipse_fill_color_button.color)
+	_create_new_shape(curve, scene_root, node_name, stroke_width_input.value,
+			stroke_color_button.color, fill_color_button.color)
+
 
 func _get_viewport_center() -> Vector2:
 	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
