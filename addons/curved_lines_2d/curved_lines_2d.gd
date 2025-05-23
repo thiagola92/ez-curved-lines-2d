@@ -582,25 +582,14 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 	update_overlays()
 
 
-func _toggle_line_closed_if_applies(svs : ScalableVectorShape2D, do_closed : bool) -> void:
-	if is_instance_valid(svs.line):
-		if not in_undo_redo_transaction:
-			printerr("Illegal state: close line should happen within an undo_redo transaction")
-		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS].append([svs.line, 'closed', not do_closed])
-		undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [[svs.line, 'closed', do_closed]]
-		svs.line.closed = do_closed
-
-
 func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 	if svs.curve.point_count < 3:
 		return
 	if idx == 0 or idx == svs.curve.point_count - 1:
-		var updated_local_position := (
-			svs.curve.get_point_position(0) + Vector2.LEFT * 10 if svs.is_curve_closed() else
-			svs.curve.get_point_position(0)
-		)
-		_update_curve_point_position(svs, svs.to_global(updated_local_position), svs.curve.point_count - 1)
-		_toggle_line_closed_if_applies(svs, svs.is_curve_closed())
+		if svs.is_curve_closed():
+			_remove_point_from_curve(svs, svs.curve.point_count - 1)
+		else:
+			_add_point_to_curve(svs, svs.curve.get_point_position(0))
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
