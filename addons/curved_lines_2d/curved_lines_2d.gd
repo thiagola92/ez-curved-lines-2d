@@ -47,12 +47,57 @@ func _enter_tree():
 	make_bottom_panel_item_visible(svg_importer_dock)
 	svg_importer_dock.toggle_gui_editing.connect(func(flg): editing_enabled = flg)
 	svg_importer_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
-	if not svg_importer_dock.shape_added.is_connected(_on_shape_added):
-		svg_importer_dock.shape_added.connect(_on_shape_added)
+	if not svg_importer_dock.shape_added.is_connected(select_node_reversibly):
+		svg_importer_dock.shape_added.connect(select_node_reversibly)
+	if not svg_importer_dock.shape_created.is_connected(_on_shape_created):
+		svg_importer_dock.shape_created.connect(_on_shape_created)
 
 
-func _on_shape_added(new_shape : Node2D):
-	EditorInterface.edit_node(new_shape)
+func select_node_reversibly(target_node : Node) -> void:
+	if is_instance_valid(target_node):
+		EditorInterface.edit_node(target_node)
+
+
+func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
+			stroke_width : int, stroke_color : Color, fill_color : Color) -> void:
+
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	var new_shape := ScalableVectorShape2D.new()
+	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+	var parent = current_selection if current_selection is Node2D else scene_root
+	new_shape.name = node_name
+	new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
+	new_shape.curve = curve
+	undo_redo.create_action("Add a %s to the scene " % node_name)
+	undo_redo.add_do_method(parent, 'add_child', new_shape, true)
+	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
+	undo_redo.add_do_reference(new_shape)
+	undo_redo.add_undo_method(parent, 'remove_child', new_shape)
+
+	var polygon := Polygon2D.new()
+	polygon.name = "Fill"
+	polygon.color = fill_color
+	undo_redo.add_do_property(new_shape, 'polygon', polygon)
+	undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
+	undo_redo.add_do_method(polygon, 'set_owner', scene_root)
+	undo_redo.add_do_reference(polygon)
+	undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
+
+	var line := Line2D.new()
+	line.name = "Stroke"
+	line.closed = true
+	line.default_color = stroke_color
+	line.width = stroke_width
+	undo_redo.add_do_property(new_shape, 'line', line)
+	undo_redo.add_do_method(new_shape, 'add_child', line, true)
+	undo_redo.add_do_method(line, 'set_owner', scene_root)
+	undo_redo.add_do_reference(line)
+	undo_redo.add_undo_method(new_shape, 'remove_child', line)
+
+	undo_redo.add_do_method(self, 'select_node_reversibly', new_shape)
+	undo_redo.add_undo_method(self, 'select_node_reversibly', parent)
+	undo_redo.commit_action()
+
 
 
 func _on_selection_changed():
@@ -111,6 +156,13 @@ func _get_select_mode_button() -> Button:
 					.find_child("*Button*", true, false)
 		)
 		return select_mode_button
+
+
+func _get_viewport_center() -> Vector2:
+	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
+	var og := tr.get_origin()
+	var sz := Vector2(EditorInterface.get_editor_viewport_2d().size)
+	return (sz / 2) / tr.get_scale() - og / tr.get_scale()
 
 
 func _vp_transform(p : Vector2) -> Vector2:

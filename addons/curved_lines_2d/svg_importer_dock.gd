@@ -6,6 +6,8 @@ class_name SvgImporterDock
 signal toggle_gui_editing(toggled_on : bool)
 signal toggle_gui_hints(toggled_on : bool)
 signal shape_added(new_shape : Node2D)
+signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
+			stroke_width : int, stroke_color : Color, fill_color : Color)
 
 const IMPORT_TAB_NAME :=  "Import SVG File"
 const EDIT_TAB_NAME := "Scalable Vector Shapes"
@@ -58,8 +60,8 @@ func _enter_tree() -> void:
 	EditorInterface.get_base_control().add_child(warning_dialog)
 	edit_tab = find_child(EDIT_TAB_NAME)
 	edit_tab.warning_dialog = warning_dialog
-	if not edit_tab.shape_added.is_connected(shape_added.emit):
-		edit_tab.shape_added.connect(shape_added.emit)
+	if not edit_tab.shape_created.is_connected(shape_created.emit):
+		edit_tab.shape_created.connect(shape_created.emit)
 	undo_redo = EditorInterface.get_editor_undo_redo()
 
 
