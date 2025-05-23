@@ -533,7 +533,7 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 func _toggle_line_closed_if_applies(svs : ScalableVectorShape2D, do_closed : bool) -> void:
 	if is_instance_valid(svs.line):
 		if not in_undo_redo_transaction:
-			printerr("Illegal state: close line should happin within an undo_redo transaction")
+			printerr("Illegal state: close line should happen within an undo_redo transaction")
 		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS].append([svs.line, 'closed', not do_closed])
 		undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [[svs.line, 'closed', do_closed]]
 		svs.line.closed = do_closed
