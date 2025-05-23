@@ -1,5 +1,5 @@
 @tool
-extends VBoxContainer
+extends Control
 
 class_name ScalableVectorShapeEditTab
 

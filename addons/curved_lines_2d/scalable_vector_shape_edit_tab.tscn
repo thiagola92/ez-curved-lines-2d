@@ -3,152 +3,165 @@
 [ext_resource type="Script" uid="uid://tl3hcapnk7lb" path="res://addons/curved_lines_2d/scalable_vector_shape_edit_tab.gd" id="1_nt5in"]
 [ext_resource type="PackedScene" uid="uid://cmoxkoulpd7so" path="res://addons/curved_lines_2d/link_button_with_copy_hint.tscn" id="2_xxhaf"]
 
-[node name="ScalableVectorShapeEditTab" type="VBoxContainer"]
+[node name="ScalableVectorShapeEditTab" type="ScrollContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_nt5in")
+metadata/_edit_vertical_guides_ = [176.0]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 8
-script = ExtResource("1_nt5in")
 metadata/_tab_index = 1
 metadata/_edit_vertical_guides_ = [170.0]
 
-[node name="EditorSettingsContainer" type="HBoxContainer" parent="."]
+[node name="EditorSettingsContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 13
 
-[node name="Label" type="Label" parent="EditorSettingsContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/EditorSettingsContainer"]
 custom_minimum_size = Vector2(157, 0)
 layout_mode = 2
 text = "Editor Settings"
 
-[node name="EnableEditingCheckbox" type="CheckBox" parent="EditorSettingsContainer"]
+[node name="EnableEditingCheckbox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 button_pressed = true
 text = "Enable ScalableVectorShape2D Editing in 2D Viewport"
 
-[node name="EnableHintsCheckbox" type="CheckBox" parent="EditorSettingsContainer"]
+[node name="EnableHintsCheckbox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 button_pressed = true
 text = "Show Edit Hints in 2D Viewport"
 
-[node name="HSeparator2" type="HSeparator" parent="."]
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="DrawSettingsContainer" type="HBoxContainer" parent="."]
+[node name="DrawSettingsContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="DrawSettingsContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/DrawSettingsContainer"]
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 text = "Draw Settings"
 
-[node name="FillLabel" type="Label" parent="DrawSettingsContainer"]
+[node name="StrokeWidthContainer" type="PanelContainer" parent="VBoxContainer/DrawSettingsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Button" type="Button" parent="VBoxContainer/DrawSettingsContainer"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+text = "Create empty Shape"
+
+[node name="DrawSettingsContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="FillCheckBox" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
+custom_minimum_size = Vector2(241, 0)
 layout_mode = 2
 size_flags_horizontal = 8
-text = "Fill Color: "
+button_pressed = true
+text = "Fill"
+alignment = 2
 
-[node name="FillPickerButton" type="ColorPickerButton" parent="DrawSettingsContainer"]
+[node name="FillPickerButton" type="ColorPickerButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
 
-[node name="StrokeLabel" type="Label" parent="DrawSettingsContainer"]
+[node name="StrokeCheckBox" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
 size_flags_horizontal = 8
-text = "Stroke Color:"
+button_pressed = true
+text = "Stroke"
+alignment = 2
 
-[node name="StrokePickerButton" type="ColorPickerButton" parent="DrawSettingsContainer"]
+[node name="StrokePickerButton" type="ColorPickerButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
 color = Color(1, 1, 1, 1)
 
-[node name="StrokeWidthContainer" type="PanelContainer" parent="DrawSettingsContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="PaintOrderLabel" type="Label" parent="DrawSettingsContainer"]
-layout_mode = 2
-text = "Paint Order: "
-
-[node name="HSeparator4" type="HSeparator" parent="."]
+[node name="HSeparator4" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="RectBuilderContainer" type="HBoxContainer" parent="."]
+[node name="RectBuilderContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="RectBuilderContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/RectBuilderContainer"]
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 text = "Create Rectangle"
 
-[node name="WidthSliderContainer" type="PanelContainer" parent="RectBuilderContainer"]
+[node name="WidthSliderContainer" type="PanelContainer" parent="VBoxContainer/RectBuilderContainer"]
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HeightSliderContainer" type="PanelContainer" parent="RectBuilderContainer"]
+[node name="HeightSliderContainer" type="PanelContainer" parent="VBoxContainer/RectBuilderContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="XRadiusSliderContainer" type="PanelContainer" parent="RectBuilderContainer"]
+[node name="XRadiusSliderContainer" type="PanelContainer" parent="VBoxContainer/RectBuilderContainer"]
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="YRadiusSliderContainer" type="PanelContainer" parent="RectBuilderContainer"]
+[node name="YRadiusSliderContainer" type="PanelContainer" parent="VBoxContainer/RectBuilderContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CreateRectButton" type="Button" parent="RectBuilderContainer"]
+[node name="CreateRectButton" type="Button" parent="VBoxContainer/RectBuilderContainer"]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Create Rectangle"
 
-[node name="HSeparator" type="HSeparator" parent="."]
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="EllipseBuilderContainer" type="HBoxContainer" parent="."]
+[node name="EllipseBuilderContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="EllipseBuilderContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/EllipseBuilderContainer"]
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 text = "Create Circle / Ellipse"
 
-[node name="EllipseXRadiusSliderContainer" type="PanelContainer" parent="EllipseBuilderContainer"]
+[node name="EllipseXRadiusSliderContainer" type="PanelContainer" parent="VBoxContainer/EllipseBuilderContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="EllipseYRadiusSliderContainer" type="PanelContainer" parent="EllipseBuilderContainer"]
+[node name="EllipseYRadiusSliderContainer" type="PanelContainer" parent="VBoxContainer/EllipseBuilderContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CreateCircleButton" type="Button" parent="EllipseBuilderContainer"]
+[node name="CreateCircleButton" type="Button" parent="VBoxContainer/EllipseBuilderContainer"]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 text = "Create Circle / Ellipse"
 
-[node name="HSeparator3" type="HSeparator" parent="."]
+[node name="HSeparator3" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LinkButton" parent="CenterContainer" instance=ExtResource("2_xxhaf")]
+[node name="LinkButton" parent="VBoxContainer/CenterContainer" instance=ExtResource("2_xxhaf")]
 layout_mode = 2
 tooltip_text = "This link will open a webpage in your browser: https://www.youtube.com/watch?v=q_NaZq1zZdY
 Right click to copy this link"
 
-[connection signal="toggled" from="EditorSettingsContainer/EnableEditingCheckbox" to="." method="_on_enable_editing_checkbox_toggled"]
-[connection signal="toggled" from="EditorSettingsContainer/EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
-[connection signal="pressed" from="RectBuilderContainer/CreateRectButton" to="." method="_on_create_rect_button_pressed"]
-[connection signal="pressed" from="EllipseBuilderContainer/CreateCircleButton" to="." method="_on_create_circle_button_pressed"]
+[connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableEditingCheckbox" to="VBoxContainer" method="_on_enable_editing_checkbox_toggled"]
+[connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableHintsCheckbox" to="VBoxContainer" method="_on_enable_hints_checkbox_toggled"]
+[connection signal="pressed" from="VBoxContainer/RectBuilderContainer/CreateRectButton" to="." method="_on_create_rect_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/EllipseBuilderContainer/CreateCircleButton" to="." method="_on_create_circle_button_pressed"]
