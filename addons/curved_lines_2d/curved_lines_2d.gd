@@ -15,12 +15,15 @@ var undo_redo : EditorUndoRedoManager
 var editing_enabled := true
 var hints_enabled := true
 var in_undo_redo_transaction := false
-enum UndoRedoEntry { UNDOS, DOS, NAME }
+enum UndoRedoEntry { UNDOS, DOS, NAME, DO_PROPS, UNDO_PROPS }
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
 	UndoRedoEntry.DOS: [],
-	UndoRedoEntry.UNDOS: []
+	UndoRedoEntry.UNDOS: [],
+	UndoRedoEntry.DO_PROPS: [],
+	UndoRedoEntry.UNDO_PROPS: []
 }
+
 func _enter_tree():
 	svg_importer_dock = preload("res://addons/curved_lines_2d/svg_importer_dock.tscn").instantiate()
 	plugin = preload("res://addons/curved_lines_2d/line_2d_generator_inspector_plugin.gd").new()
@@ -329,7 +332,9 @@ func _start_undo_redo_transaction(name := "") -> void:
 	undo_redo_transaction = {
 		UndoRedoEntry.NAME: name,
 		UndoRedoEntry.DOS: [],
-		UndoRedoEntry.UNDOS: []
+		UndoRedoEntry.UNDOS: [],
+		UndoRedoEntry.DO_PROPS: [],
+		UndoRedoEntry.UNDO_PROPS : []
 	}
 
 func _commit_undo_redo_transaction() -> void:
@@ -337,14 +342,21 @@ func _commit_undo_redo_transaction() -> void:
 	undo_redo.create_action(undo_redo_transaction[UndoRedoEntry.NAME])
 	for undo_method in undo_redo_transaction[UndoRedoEntry.UNDOS]:
 		undo_redo.callv('add_undo_method', undo_method)
+	for undo_prop in undo_redo_transaction[UndoRedoEntry.UNDO_PROPS]:
+		undo_redo.callv('add_undo_property', undo_prop)
 	for do_method in undo_redo_transaction[UndoRedoEntry.DOS]:
 		undo_redo.callv('add_do_method', do_method)
+	for do_prop in undo_redo_transaction[UndoRedoEntry.DO_PROPS]:
+		undo_redo.callv('add_do_property', do_prop)
 	undo_redo.commit_action(false)
 	undo_redo_transaction = {
 		UndoRedoEntry.NAME: name,
 		UndoRedoEntry.DOS: [],
-		UndoRedoEntry.UNDOS: []
+		UndoRedoEntry.UNDOS: [],
+		UndoRedoEntry.UNDO_PROPS: [],
+		UndoRedoEntry.DO_PROPS: []
 	}
+
 
 
 func _update_curve_point_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
@@ -518,6 +530,15 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 	update_overlays()
 
 
+func _toggle_line_closed_if_applies(svs : ScalableVectorShape2D, do_closed : bool) -> void:
+	if is_instance_valid(svs.line):
+		if not in_undo_redo_transaction:
+			printerr("Illegal state: close line should happin within an undo_redo transaction")
+		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS].append([svs.line, 'closed', not do_closed])
+		undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [[svs.line, 'closed', do_closed]]
+		svs.line.closed = do_closed
+
+
 func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 	if svs.curve.point_count < 3:
 		return
@@ -527,6 +548,7 @@ func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 			svs.curve.get_point_position(0)
 		)
 		_update_curve_point_position(svs, svs.to_global(updated_local_position), svs.curve.point_count - 1)
+		_toggle_line_closed_if_applies(svs, svs.is_curve_closed())
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:

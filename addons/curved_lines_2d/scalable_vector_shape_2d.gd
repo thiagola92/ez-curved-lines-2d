@@ -95,6 +95,7 @@ func _on_assigned_node_changed():
 	if is_instance_valid(line):
 		if lock_assigned_shapes:
 			line.set_meta("_edit_lock_", true)
+		line.closed = is_curve_closed()
 		curve_changed()
 	if is_instance_valid(polygon):
 		if lock_assigned_shapes:
