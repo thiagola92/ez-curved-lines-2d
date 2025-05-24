@@ -413,7 +413,6 @@ func _commit_undo_redo_transaction() -> void:
 	}
 
 
-
 func _update_curve_point_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
 	if not in_undo_redo_transaction:
 		_start_undo_redo_transaction("Move point on " + str(current_selection))
@@ -492,6 +491,26 @@ func _get_curve_backup(curve_in : Curve2D) -> Curve2D:
 		curve_copy.add_point(curve_in.get_point_position(i),
 				curve_in.get_point_in(i), curve_in.get_point_out(i))
 	return curve_copy
+
+
+func _resize_shape(svs : ScalableVectorShape2D, s : float) -> void:
+
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Resize shape %s" % str(svs))
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([
+				svs, 'replace_curve_points', _get_curve_backup(svs.curve)])
+
+	undo_redo_transaction[UndoRedoEntry.DOS] = []
+	for idx in range(svs.curve.point_count):
+		svs.curve.set_point_position(idx, svs.curve.get_point_position(idx) * s)
+		svs.curve.set_point_in(idx, svs.curve.get_point_in(idx) * s)
+		svs.curve.set_point_out(idx, svs.curve.get_point_out(idx) * s)
+		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+				'set_point_position', idx, svs.curve.get_point_position(idx) * s])
+		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+				'set_point_in', idx, svs.curve.get_point_in(idx) * s])
+		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+				'set_point_out', idx, svs.curve.get_point_out(idx) * s])
 
 
 func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
@@ -600,6 +619,10 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			and event.button_index == MOUSE_BUTTON_LEFT
 			and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)):
 		_commit_undo_redo_transaction()
+	if (in_undo_redo_transaction and event is InputEventKey
+			and event.keycode == KEY_SHIFT and
+			not Input.is_key_pressed(KEY_SHIFT)):
+		_commit_undo_redo_transaction()
 
 	if not editing_enabled:
 		return false
@@ -653,7 +676,10 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if (event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT) and
 			event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]):
 		if _is_svs_valid(current_selection):
-			print("TODO handle resize")
+			if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				_resize_shape(current_selection, 0.99)
+			else:
+				_resize_shape(current_selection, 1.01)
 			return true
 
 	if event is InputEventMouseMotion:
