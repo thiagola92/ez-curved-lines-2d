@@ -326,13 +326,16 @@ func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2
 	var p := _vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
 	if Input.is_key_pressed(KEY_CTRL):
 		_draw_crosshair(viewport_control, p)
-		_draw_hint(viewport_control, "- Click to add point here (Ctrl held) ")
+		_draw_hint(viewport_control, "- Click to add point here (Ctrl held)")
+	elif Input.is_key_pressed(KEY_SHIFT):
+		_draw_hint(viewport_control, "- Use mousewheel to resize shape (Shift held)")
 	else:
-		_draw_hint(viewport_control, "- Hold Ctrl to add points to selected shape")
+		_draw_hint(viewport_control, "- Hold Ctrl to add points to selected shape
+				- Hold Shift to resize shape with mouswheel")
 
 
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
-	if Input.is_key_pressed(KEY_CTRL):
+	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_SHIFT):
 		_draw_add_point_hint(viewport_control, svs)
 		return
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
@@ -645,6 +648,12 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					_remove_cp_in_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
 				elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
 					_remove_cp_out_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
+			return true
+
+	if (event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT) and
+			event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]):
+		if _is_svs_valid(current_selection):
+			print("TODO handle resize")
 			return true
 
 	if event is InputEventMouseMotion:
