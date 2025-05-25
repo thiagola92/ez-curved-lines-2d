@@ -20,9 +20,9 @@ func _parse_begin(object: Object) -> void:
 func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: int, wide: bool) -> bool:
 	if name == "line" and (object is DrawablePath2D or object is ScalableVectorShape2D):
 		assign_stroke_inspector_form = preload("res://addons/curved_lines_2d/assign_stroke_inspector_form.tscn").instantiate()
-		add_custom_control(assign_stroke_inspector_form)
 		assign_stroke_inspector_form.scalable_vector_shape_2d = object
-
+		add_custom_control(assign_stroke_inspector_form)
+		return true
 	elif name == "polygon" and (object is DrawablePath2D or object is ScalableVectorShape2D):
 		var button : Button = Button.new()
 		button.text = "Generate New Polygon2D"
