@@ -72,24 +72,25 @@ layout_mode = 2
 [node name="Label2" type="Label" parent="ButtonContainer"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
-tooltip_text = "This will set the width of the assign Line2D node"
+tooltip_text = "This will create a new Line2D node and assign it to the line property of this ScalableVectorScape2D."
 mouse_filter = 0
-text = "Create / Remove: "
+text = "Add Stroke:"
 
 [node name="CreateStrokeButton" type="Button" parent="ButtonContainer"]
 layout_mode = 2
 tooltip_text = "This will create a new Line2D node and assign it to the line property of this ScalableVectorScape2D."
-text = "Create Stroke"
-
-[node name="RemoveStrokeButton" type="Button" parent="ButtonContainer"]
-layout_mode = 2
-tooltip_text = "This will remove the new Line2D node assigned to the line property of this ScalableVectorScape2D."
-text = "Remove Stroke"
+text = "Add Stroke"
 
 [node name="HSeparator" type="HSeparator" parent="."]
 layout_mode = 2
 
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+tooltip_text = "The stroke property is simply an instance of a Line2D node assigned to the line property of this ScalableVectorShape2D node. 
+If you remove that node, you need to unassign it here as well, before you can add a new Stroke"
+mouse_filter = 0
+text = "Edit Line2D Assignment as Stroke *"
+
 [connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
 [connection signal="color_changed" from="StrokeColorFieldContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
 [connection signal="pressed" from="ButtonContainer/CreateStrokeButton" to="." method="_on_create_stroke_button_pressed"]
-[connection signal="pressed" from="ButtonContainer/RemoveStrokeButton" to="." method="_on_remove_stroke_button_pressed"]

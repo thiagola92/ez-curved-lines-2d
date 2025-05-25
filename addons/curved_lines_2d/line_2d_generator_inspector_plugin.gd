@@ -1,6 +1,8 @@
 @tool
 extends EditorInspectorPlugin
 
+class_name  Line2DGeneratorInspectorPlugin
+
 var assign_stroke_inspector_form : Control
 
 func _can_handle(obj) -> bool:
@@ -22,7 +24,6 @@ func _parse_property(object: Object, type: Variant.Type, name: String, hint_type
 		assign_stroke_inspector_form = preload("res://addons/curved_lines_2d/assign_stroke_inspector_form.tscn").instantiate()
 		assign_stroke_inspector_form.scalable_vector_shape_2d = object
 		add_custom_control(assign_stroke_inspector_form)
-		return true
 	elif name == "polygon" and (object is DrawablePath2D or object is ScalableVectorShape2D):
 		var button : Button = Button.new()
 		button.text = "Generate New Polygon2D"

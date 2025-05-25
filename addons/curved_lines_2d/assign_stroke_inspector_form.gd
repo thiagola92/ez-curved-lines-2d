@@ -1,9 +1,10 @@
 @tool
 extends Control
 
+class_name AssignStrokeInspectorForm
+
 var scalable_vector_shape_2d : ScalableVectorShape2D
 var create_button : Button
-var remove_button : Button
 var title_button : Button
 var collapse_icon : Texture2D
 var expand_icon : Texture2D
@@ -17,12 +18,11 @@ func _enter_tree() -> void:
 	collapse_icon = preload("res://addons/curved_lines_2d/Collapse.svg")
 	expand_icon = preload("res://addons/curved_lines_2d/Expand.svg")
 	create_button = find_child("CreateStrokeButton")
-	remove_button = find_child("RemoveStrokeButton")
 	title_button = find_child("TitleButton")
 	color_button = find_child("ColorPickerButton")
 	scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	collapsible_siblings = get_children().filter(func(x): return x != title_button)
-	stroke_width_input = _make_float_input("Stroke Width", 0.0, 1.0, 100.0, "px")
+	stroke_width_input = _make_float_input("Stroke Width", 1.0, 0.0, 100.0, "px")
 	find_child("StrokeWidthFloatFieldContainer").add_child(stroke_width_input)
 	_on_svs_assignment_changed()
 	stroke_width_input.value_changed.connect(_on_stroke_width_changed)
@@ -31,12 +31,10 @@ func _enter_tree() -> void:
 func _on_svs_assignment_changed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.line):
 		create_button.disabled = true
-		remove_button.disabled = false
 		stroke_width_input.value = scalable_vector_shape_2d.line.width
 		color_button.color = scalable_vector_shape_2d.line.default_color
 	else:
 		create_button.disabled = false
-		remove_button.disabled = true
 
 
 func _on_stroke_width_changed(new_value : float) -> void:
@@ -83,25 +81,6 @@ func _on_create_stroke_button_pressed():
 	undo_redo.commit_action()
 
 
-func _on_remove_stroke_button_pressed() -> void:
-	if not is_instance_valid(scalable_vector_shape_2d):
-		return
-	if not is_instance_valid(scalable_vector_shape_2d.line):
-		return
-	var line_2d := scalable_vector_shape_2d.line
-	var undo_redo = EditorInterface.get_editor_undo_redo()
-	var root := EditorInterface.get_edited_scene_root()
-	var parent := line_2d.get_parent()
-	undo_redo.create_action("Remove Line2D from %s " % str(scalable_vector_shape_2d))
-	undo_redo.add_do_reference(line_2d)
-	undo_redo.add_do_method(parent, 'remove_child', line_2d)
-	undo_redo.add_do_property(scalable_vector_shape_2d, 'line', null)
-	undo_redo.add_undo_method(parent, 'add_child', line_2d)
-	undo_redo.add_undo_property(scalable_vector_shape_2d, 'line', line_2d)
-	undo_redo.add_undo_method(line_2d, 'set_owner', root)
-	undo_redo.commit_action()
-
-
 func _on_title_button_toggled(toggled_on: bool) -> void:
 	if toggled_on:
 		title_button.icon = collapse_icon
@@ -123,5 +102,3 @@ func _make_float_input(lbl : String, value : float, min_value : float, max_value
 	x_slider.editing_integer = false
 	x_slider.step = 0.001
 	return x_slider
-
-

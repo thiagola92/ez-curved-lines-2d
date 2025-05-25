@@ -8,7 +8,7 @@ const META_NAME_HOVER_CLOSEST_POINT := "_hover_closest_point_on_curve_"
 const META_NAME_SELECT_HINT := "_select_hint_"
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
-var plugin
+var plugin : Line2DGeneratorInspectorPlugin
 var svg_importer_dock
 var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
@@ -111,7 +111,6 @@ func _on_selection_changed():
 			EditorInterface.edit_node(scene_root)
 		var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 		if _is_svs_valid(current_selection):
-			make_bottom_panel_item_visible(svg_importer_dock)
 			svg_importer_dock.find_child(SvgImporterDock.EDIT_TAB_NAME).show()
 	update_overlays()
 
