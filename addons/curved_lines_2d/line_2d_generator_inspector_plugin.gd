@@ -58,22 +58,40 @@ func _on_convert_button_pressed(orig : DrawablePath2D):
 func _on_generate_line2d_button_pressed(drawable_path_2d):
 	var line_2d := Line2D.new()
 	var root := EditorInterface.get_edited_scene_root()
-	drawable_path_2d.add_child(line_2d, true)
-	line_2d.set_owner(root)
-	drawable_path_2d.line = line_2d
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Add Line2D to %s " % str(drawable_path_2d))
+	undo_redo.add_do_method(drawable_path_2d, 'add_child', line_2d, true)
+	undo_redo.add_do_method(line_2d, 'set_owner', root)
+	undo_redo.add_do_reference(line_2d)
+	undo_redo.add_do_property(drawable_path_2d, 'line', line_2d)
+	undo_redo.add_undo_method(drawable_path_2d, 'remove_child', line_2d)
+	undo_redo.add_undo_property(drawable_path_2d, 'line', null)
+	undo_redo.commit_action()
 
 
 func _on_generate_polygon2d_button_pressed(drawable_path_2d):
 	var polygon_2d := Polygon2D.new()
 	var root := EditorInterface.get_edited_scene_root()
-	drawable_path_2d.add_child(polygon_2d, true)
-	polygon_2d.set_owner(root)
-	drawable_path_2d.polygon = polygon_2d
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Add Line2D to %s " % str(drawable_path_2d))
+	undo_redo.add_do_method(drawable_path_2d, 'add_child', polygon_2d, true)
+	undo_redo.add_do_method(polygon_2d, 'set_owner', root)
+	undo_redo.add_do_reference(polygon_2d)
+	undo_redo.add_do_property(drawable_path_2d, 'polygon', polygon_2d)
+	undo_redo.add_undo_method(drawable_path_2d, 'remove_child', polygon_2d)
+	undo_redo.add_undo_property(drawable_path_2d, 'polygon', null)
+	undo_redo.commit_action()
 
 
 func _on_generate_collision_polygon2d_button_pressed(drawable_path_2d):
 	var collision_polygon_2d := CollisionPolygon2D.new()
 	var root := EditorInterface.get_edited_scene_root()
-	drawable_path_2d.add_child(collision_polygon_2d, true)
-	collision_polygon_2d.set_owner(root)
-	drawable_path_2d.collision_polygon = collision_polygon_2d
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Add Line2D to %s " % str(drawable_path_2d))
+	undo_redo.add_do_method(drawable_path_2d, 'add_child', collision_polygon_2d, true)
+	undo_redo.add_do_method(collision_polygon_2d, 'set_owner', root)
+	undo_redo.add_do_reference(collision_polygon_2d)
+	undo_redo.add_do_property(drawable_path_2d, 'collision_polygon', collision_polygon_2d)
+	undo_redo.add_undo_method(drawable_path_2d, 'remove_child', collision_polygon_2d)
+	undo_redo.add_undo_property(drawable_path_2d, 'collision_polygon', null)
+	undo_redo.commit_action()

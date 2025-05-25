@@ -120,6 +120,7 @@ func curve_changed():
 		new_points.remove_at(new_points.size() - 1)
 	if is_instance_valid(line):
 		line.points = new_points
+		line.closed = is_curve_closed()
 	if is_instance_valid(polygon):
 		polygon.polygon = new_points
 	if is_instance_valid(collision_polygon):

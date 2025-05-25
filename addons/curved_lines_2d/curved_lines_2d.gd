@@ -15,12 +15,15 @@ var undo_redo : EditorUndoRedoManager
 var editing_enabled := true
 var hints_enabled := true
 var in_undo_redo_transaction := false
-enum UndoRedoEntry { UNDOS, DOS, NAME }
+enum UndoRedoEntry { UNDOS, DOS, NAME, DO_PROPS, UNDO_PROPS }
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
 	UndoRedoEntry.DOS: [],
-	UndoRedoEntry.UNDOS: []
+	UndoRedoEntry.UNDOS: [],
+	UndoRedoEntry.DO_PROPS: [],
+	UndoRedoEntry.UNDO_PROPS: []
 }
+
 func _enter_tree():
 	svg_importer_dock = preload("res://addons/curved_lines_2d/svg_importer_dock.tscn").instantiate()
 	plugin = preload("res://addons/curved_lines_2d/line_2d_generator_inspector_plugin.gd").new()
@@ -44,12 +47,57 @@ func _enter_tree():
 	make_bottom_panel_item_visible(svg_importer_dock)
 	svg_importer_dock.toggle_gui_editing.connect(func(flg): editing_enabled = flg)
 	svg_importer_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
-	if not svg_importer_dock.shape_added.is_connected(_on_shape_added):
-		svg_importer_dock.shape_added.connect(_on_shape_added)
+	if not svg_importer_dock.shape_added.is_connected(select_node_reversibly):
+		svg_importer_dock.shape_added.connect(select_node_reversibly)
+	if not svg_importer_dock.shape_created.is_connected(_on_shape_created):
+		svg_importer_dock.shape_created.connect(_on_shape_created)
 
 
-func _on_shape_added(new_shape : Node2D):
-	EditorInterface.edit_node(new_shape)
+func select_node_reversibly(target_node : Node) -> void:
+	if is_instance_valid(target_node):
+		EditorInterface.edit_node(target_node)
+
+
+func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
+			stroke_width : int, stroke_color : Color, fill_color : Color) -> void:
+
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	var new_shape := ScalableVectorShape2D.new()
+	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+	var parent = current_selection if current_selection is Node2D else scene_root
+	new_shape.name = node_name
+	new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
+	new_shape.curve = curve
+	undo_redo.create_action("Add a %s to the scene " % node_name)
+	undo_redo.add_do_method(parent, 'add_child', new_shape, true)
+	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
+	undo_redo.add_do_reference(new_shape)
+	undo_redo.add_undo_method(parent, 'remove_child', new_shape)
+
+	var polygon := Polygon2D.new()
+	polygon.name = "Fill"
+	polygon.color = fill_color
+	undo_redo.add_do_property(new_shape, 'polygon', polygon)
+	undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
+	undo_redo.add_do_method(polygon, 'set_owner', scene_root)
+	undo_redo.add_do_reference(polygon)
+	undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
+
+	var line := Line2D.new()
+	line.name = "Stroke"
+	line.closed = true
+	line.default_color = stroke_color
+	line.width = stroke_width
+	undo_redo.add_do_property(new_shape, 'line', line)
+	undo_redo.add_do_method(new_shape, 'add_child', line, true)
+	undo_redo.add_do_method(line, 'set_owner', scene_root)
+	undo_redo.add_do_reference(line)
+	undo_redo.add_undo_method(new_shape, 'remove_child', line)
+
+	undo_redo.add_do_method(self, 'select_node_reversibly', new_shape)
+	undo_redo.add_undo_method(self, 'select_node_reversibly', parent)
+	undo_redo.commit_action()
+
 
 
 func _on_selection_changed():
@@ -108,6 +156,13 @@ func _get_select_mode_button() -> Button:
 					.find_child("*Button*", true, false)
 		)
 		return select_mode_button
+
+
+func _get_viewport_center() -> Vector2:
+	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
+	var og := tr.get_origin()
+	var sz := Vector2(EditorInterface.get_editor_viewport_2d().size)
+	return (sz / 2) / tr.get_scale() - og / tr.get_scale()
 
 
 func _vp_transform(p : Vector2) -> Vector2:
@@ -271,13 +326,16 @@ func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2
 	var p := _vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
 	if Input.is_key_pressed(KEY_CTRL):
 		_draw_crosshair(viewport_control, p)
-		_draw_hint(viewport_control, "- Click to add point here (Ctrl held) ")
+		_draw_hint(viewport_control, "- Click to add point here (Ctrl held)")
+	elif Input.is_key_pressed(KEY_SHIFT):
+		_draw_hint(viewport_control, "- Use mousewheel to resize shape (Shift held)")
 	else:
-		_draw_hint(viewport_control, "- Hold Ctrl to add points to selected shape")
+		_draw_hint(viewport_control, "- Hold Ctrl to add points to selected shape
+				- Hold Shift to resize shape with mouswheel")
 
 
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
-	if Input.is_key_pressed(KEY_CTRL):
+	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_SHIFT):
 		_draw_add_point_hint(viewport_control, svs)
 		return
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
@@ -329,7 +387,9 @@ func _start_undo_redo_transaction(name := "") -> void:
 	undo_redo_transaction = {
 		UndoRedoEntry.NAME: name,
 		UndoRedoEntry.DOS: [],
-		UndoRedoEntry.UNDOS: []
+		UndoRedoEntry.UNDOS: [],
+		UndoRedoEntry.DO_PROPS: [],
+		UndoRedoEntry.UNDO_PROPS : []
 	}
 
 func _commit_undo_redo_transaction() -> void:
@@ -337,13 +397,19 @@ func _commit_undo_redo_transaction() -> void:
 	undo_redo.create_action(undo_redo_transaction[UndoRedoEntry.NAME])
 	for undo_method in undo_redo_transaction[UndoRedoEntry.UNDOS]:
 		undo_redo.callv('add_undo_method', undo_method)
+	for undo_prop in undo_redo_transaction[UndoRedoEntry.UNDO_PROPS]:
+		undo_redo.callv('add_undo_property', undo_prop)
 	for do_method in undo_redo_transaction[UndoRedoEntry.DOS]:
 		undo_redo.callv('add_do_method', do_method)
+	for do_prop in undo_redo_transaction[UndoRedoEntry.DO_PROPS]:
+		undo_redo.callv('add_do_property', do_prop)
 	undo_redo.commit_action(false)
 	undo_redo_transaction = {
 		UndoRedoEntry.NAME: name,
 		UndoRedoEntry.DOS: [],
-		UndoRedoEntry.UNDOS: []
+		UndoRedoEntry.UNDOS: [],
+		UndoRedoEntry.UNDO_PROPS: [],
+		UndoRedoEntry.DO_PROPS: []
 	}
 
 
@@ -427,6 +493,26 @@ func _get_curve_backup(curve_in : Curve2D) -> Curve2D:
 	return curve_copy
 
 
+func _resize_shape(svs : ScalableVectorShape2D, s : float) -> void:
+
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Resize shape %s" % str(svs))
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([
+				svs, 'replace_curve_points', _get_curve_backup(svs.curve)])
+
+	undo_redo_transaction[UndoRedoEntry.DOS] = []
+	for idx in range(svs.curve.point_count):
+		svs.curve.set_point_position(idx, svs.curve.get_point_position(idx) * s)
+		svs.curve.set_point_in(idx, svs.curve.get_point_in(idx) * s)
+		svs.curve.set_point_out(idx, svs.curve.get_point_out(idx) * s)
+		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+				'set_point_position', idx, svs.curve.get_point_position(idx) * s])
+		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+				'set_point_in', idx, svs.curve.get_point_in(idx) * s])
+		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+				'set_point_out', idx, svs.curve.get_point_out(idx) * s])
+
+
 func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:
 	var orig_n := current_selection.curve.point_count
 	if current_selection.is_curve_closed() and idx == 0:
@@ -464,7 +550,10 @@ func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
 		cp_in := Vector2.ZERO, cp_out := Vector2.ZERO, idx := -1) -> void:
 	undo_redo.create_action("Add point at %s to %s " % [str(local_pos), str(svs)])
 	undo_redo.add_do_method(svs.curve, 'add_point', local_pos, cp_in, cp_out, idx)
-	undo_redo.add_undo_method(svs.curve, 'remove_point', svs.curve.point_count)
+	if idx < 0:
+		undo_redo.add_undo_method(svs.curve, 'remove_point', svs.curve.point_count)
+	else:
+		undo_redo.add_undo_method(svs.curve, 'remove_point', idx)
 	undo_redo.commit_action()
 
 
@@ -519,17 +608,20 @@ func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 	if svs.curve.point_count < 3:
 		return
 	if idx == 0 or idx == svs.curve.point_count - 1:
-		var updated_local_position := (
-			svs.curve.get_point_position(0) + Vector2.LEFT * 10 if svs.is_curve_closed() else
-			svs.curve.get_point_position(0)
-		)
-		_update_curve_point_position(svs, svs.to_global(updated_local_position), svs.curve.point_count - 1)
+		if svs.is_curve_closed():
+			_remove_point_from_curve(svs, svs.curve.point_count - 1)
+		else:
+			_add_point_to_curve(svs, svs.curve.get_point_position(0))
 
 
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if (in_undo_redo_transaction and event is InputEventMouseButton
 			and event.button_index == MOUSE_BUTTON_LEFT
 			and not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)):
+		_commit_undo_redo_transaction()
+	if (in_undo_redo_transaction and event is InputEventKey
+			and event.keycode == KEY_SHIFT and
+			not Input.is_key_pressed(KEY_SHIFT)):
 		_commit_undo_redo_transaction()
 
 	if not editing_enabled:
@@ -579,6 +671,15 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					_remove_cp_in_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
 				elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
 					_remove_cp_out_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
+			return true
+
+	if (event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT) and
+			event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]):
+		if _is_svs_valid(current_selection):
+			if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				_resize_shape(current_selection, 0.99)
+			else:
+				_resize_shape(current_selection, 1.01)
 			return true
 
 	if event is InputEventMouseMotion:

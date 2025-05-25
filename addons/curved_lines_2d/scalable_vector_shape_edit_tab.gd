@@ -5,7 +5,8 @@ class_name ScalableVectorShapeEditTab
 
 signal toggle_editing(flg : bool)
 signal toggle_hints(flg : bool)
-signal shape_added(shape : Node2D)
+signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
+			stroke_width : int, stroke_color : Color, fill_color : Color)
 
 
 var stroke_width_input : EditorSpinSlider
@@ -69,6 +70,7 @@ func _on_create_rect_button_pressed() -> void:
 		curve.add_point(Vector2(rect_width_input.value, 0))
 		curve.add_point(Vector2(rect_width_input.value, rect_height_input.value))
 		curve.add_point(Vector2(0, rect_height_input.value))
+		curve.add_point(Vector2.ZERO)
 	else:
 		curve.add_point(Vector2(rect_width_input.value - rect_rx_input.value, 0), Vector2.ZERO, Vector2(rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
 		curve.add_point(Vector2(rect_width_input.value, rect_ry_input.value), Vector2(0, -rect_ry_input.value * SvgImporterDock.R_TO_CP))
@@ -78,8 +80,14 @@ func _on_create_rect_button_pressed() -> void:
 		curve.add_point(Vector2(0, rect_height_input.value - rect_ry_input.value), Vector2(0, rect_ry_input.value * SvgImporterDock.R_TO_CP))
 		curve.add_point(Vector2(0, rect_ry_input.value), Vector2.ZERO, Vector2(0, -rect_ry_input.value *  SvgImporterDock.R_TO_CP))
 		curve.add_point(Vector2(rect_rx_input.value, 0), Vector2(-rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
+<<<<<<< HEAD
 	_create_new_shape(curve, scene_root, "Rectangle", stroke_width_input.value,
 			stroke_color_button.color, fill_color_button.color)
+=======
+		curve.add_point(Vector2(rect_width_input.value - rect_rx_input.value, 0), Vector2.ZERO, Vector2(rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
+	shape_created.emit(curve, scene_root, "Rectangle", rect_stroke_width_input.value,
+			rect_stroke_color_button.color, rect_fill_color_button.color)
+>>>>>>> 510f52774e0c2e6792230bd3c4a8c54ff2481ecc
 
 
 func _on_create_circle_button_pressed() -> void:
@@ -99,58 +107,14 @@ func _on_create_circle_button_pressed() -> void:
 	curve.add_point(Vector2(0, -ellipse_ry_input.value), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
 	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
 	var node_name := "Circle" if ellipse_rx_input.value == ellipse_ry_input.value else "Ellipse"
+<<<<<<< HEAD
 	_create_new_shape(curve, scene_root, node_name, stroke_width_input.value,
 			stroke_color_button.color, fill_color_button.color)
 
-
-func _get_viewport_center() -> Vector2:
-	var tr := EditorInterface.get_editor_viewport_2d().global_canvas_transform
-	var og := tr.get_origin()
-	var sz := Vector2(EditorInterface.get_editor_viewport_2d().size)
-	return (sz / 2) / tr.get_scale() - og / tr.get_scale()
-
-
-func _create_new_shape(curve : Curve2D, scene_root : Node2D, node_name : String,
-			stroke_width : int, stroke_color : Color, fill_color : Color) -> void:
-	var undo_redo := EditorInterface.get_editor_undo_redo()
-	var new_shape := ScalableVectorShape2D.new()
-	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-	var parent = current_selection if current_selection is Node2D else scene_root
-	new_shape.name = node_name
-	new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
-	new_shape.curve = curve
-
-	undo_redo.create_action("Add a %s to the scene " % node_name)
-	undo_redo.add_do_method(parent, 'add_child', new_shape, true)
-	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
-	undo_redo.add_do_reference(new_shape)
-	undo_redo.add_undo_method(parent, 'remove_child', new_shape)
-
-
-	var polygon := Polygon2D.new()
-	polygon.name = "Fill"
-	polygon.color = fill_color
-
-	undo_redo.add_do_property(new_shape, 'polygon', polygon)
-	undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
-	undo_redo.add_do_method(polygon, 'set_owner', scene_root)
-	undo_redo.add_do_reference(polygon)
-	undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
-
-	var line := Line2D.new()
-	line.name = "Stroke"
-	line.closed = true
-	line.default_color = stroke_color
-	line.width = stroke_width
-
-	# undo/redo stuff
-	undo_redo.add_do_property(new_shape, 'line', line)
-	undo_redo.add_do_method(new_shape, 'add_child', line, true)
-	undo_redo.add_do_method(line, 'set_owner', scene_root)
-	undo_redo.add_do_reference(line)
-	undo_redo.add_undo_method(new_shape, 'remove_child', line)
-	undo_redo.commit_action()
-	shape_added.emit(new_shape)
+=======
+	shape_created.emit(curve, scene_root, node_name, ellipse_stroke_width_input.value,
+			ellipse_stroke_color_button.color, ellipse_fill_color_button.color)
+>>>>>>> 510f52774e0c2e6792230bd3c4a8c54ff2481ecc
 
 
 func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
