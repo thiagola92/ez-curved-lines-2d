@@ -81,8 +81,7 @@ func _on_create_rect_button_pressed() -> void:
 		curve.add_point(Vector2(0, rect_ry_input.value), Vector2.ZERO, Vector2(0, -rect_ry_input.value *  SvgImporterDock.R_TO_CP))
 		curve.add_point(Vector2(rect_rx_input.value, 0), Vector2(-rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
 		curve.add_point(Vector2(rect_width_input.value - rect_rx_input.value, 0), Vector2.ZERO, Vector2(rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-	shape_created.emit(curve, scene_root, "Rectangle", rect_stroke_width_input.value,
-			rect_stroke_color_button.color, rect_fill_color_button.color)
+	shape_created.emit(curve, scene_root, "Rectangle", stroke_width_input.value, stroke_color_button.color, fill_color_button.color)
 
 
 func _on_create_circle_button_pressed() -> void:
@@ -102,8 +101,7 @@ func _on_create_circle_button_pressed() -> void:
 	curve.add_point(Vector2(0, -ellipse_ry_input.value), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
 	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
 	var node_name := "Circle" if ellipse_rx_input.value == ellipse_ry_input.value else "Ellipse"
-	shape_created.emit(curve, scene_root, node_name, ellipse_stroke_width_input.value,
-			ellipse_stroke_color_button.color, ellipse_fill_color_button.color)
+	shape_created.emit(curve, scene_root, node_name, stroke_width_input.value, stroke_color_button.color, fill_color_button.color)
 
 
 func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
