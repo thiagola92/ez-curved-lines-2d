@@ -21,7 +21,7 @@ func _enter_tree() -> void:
 	title_button = find_child("TitleButton")
 	color_button = find_child("ColorPickerButton")
 	scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
-	collapsible_siblings = get_children().filter(func(x): return x != title_button)
+	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
 	stroke_width_input = _make_float_input("Stroke Width", 1.0, 0.0, 100.0, "px")
 	find_child("StrokeWidthFloatFieldContainer").add_child(stroke_width_input)
 	_on_svs_assignment_changed()

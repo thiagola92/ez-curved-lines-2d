@@ -1,0 +1,75 @@
+[gd_scene load_steps=3 format=3 uid="uid://53oqf8j7uyuu"]
+
+[ext_resource type="Texture2D" uid="uid://cc8salyqmquir" path="res://addons/curved_lines_2d/Collapse.svg" id="1_2eiat"]
+
+[sub_resource type="FontVariation" id="FontVariation_ogtsd"]
+variation_embolden = 0.8
+
+[node name="AssignFillInspectorForm" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleButton" type="Button" parent="."]
+layout_mode = 2
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 0
+theme_override_fonts/font = SubResource("FontVariation_ogtsd")
+toggle_mode = true
+text = "Fill"
+icon = ExtResource("1_2eiat")
+alignment = 0
+
+[node name="FillColorFieldContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="FillColorFieldContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "This will set the color of the assigned Polygon2D."
+mouse_filter = 0
+text = "Fill Color:"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="FillColorFieldContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+tooltip_text = "This will set the color of the assigned Polygon2D."
+text = "Fill"
+color = Color(1, 1, 1, 1)
+
+[node name="ButtonContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="ButtonContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+tooltip_text = "This will create a new Polygon2D node and assign it to the polygon property of this ScalableVectorScape2D."
+mouse_filter = 0
+text = "Add Fill:"
+
+[node name="CreateFillButton" type="Button" parent="ButtonContainer"]
+layout_mode = 2
+tooltip_text = "This will create a new Polygon2D node and assign it to the polygon property of this ScalableVectorScape2D."
+text = "Add Fill"
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+tooltip_text = "The fill property is simply an instance of a Polygon2D node assigned to the polygon property of this ScalableVectorShape2D node. 
+If you remove that node, you need to unassign it here as well, before you can add a new Fill"
+mouse_filter = 0
+text = "Edit Polygon2D Assignment as Fill *"
