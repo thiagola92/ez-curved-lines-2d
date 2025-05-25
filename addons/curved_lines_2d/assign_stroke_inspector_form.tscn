@@ -1,0 +1,63 @@
+[gd_scene load_steps=2 format=3 uid="uid://bm31gemem22uc"]
+
+[ext_resource type="Script" uid="uid://bv0hffvudv51d" path="res://addons/curved_lines_2d/assign_stroke_inspector_form.gd" id="1_j8wjx"]
+
+[node name="AssignStrokeInspectorForm" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_j8wjx")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "This will set the default_color of the assigned Line2D."
+mouse_filter = 0
+text = "Stroke Color:"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 2
+tooltip_text = "This will set the default_color of the assigned Line2D."
+text = "Stroke"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer2"]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+tooltip_text = "This will set the width of the assign Line2D node"
+mouse_filter = 0
+text = "Stroke Width:"
+
+[node name="StrokeWidthIntFieldContainer" type="PanelContainer" parent="HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "This will set the width of the assign Line2D node"
+
+[node name="CreateStrokeButton" type="Button" parent="."]
+layout_mode = 2
+tooltip_text = "This will create a new Line2D node and assign it to the line property of this ScalableVectorScape2D."
+text = "Create Stroke"
+
+[node name="RemoveStrokeButton" type="Button" parent="."]
+layout_mode = 2
+tooltip_text = "This will remove the new Line2D node assigned to the line property of this ScalableVectorScape2D."
+text = "Remove Stroke"
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Assign an existing Line2D node as Stroke"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="CreateStrokeButton" to="." method="_on_create_stroke_button_pressed"]

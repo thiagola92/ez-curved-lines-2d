@@ -1,6 +1,8 @@
 @tool
 extends EditorInspectorPlugin
 
+var assign_stroke_inspector_form : Control
+
 func _can_handle(obj) -> bool:
 	return obj is DrawablePath2D or obj is ScalableVectorShape2D
 
@@ -17,10 +19,10 @@ func _parse_begin(object: Object) -> void:
 
 func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: int, wide: bool) -> bool:
 	if name == "line" and (object is DrawablePath2D or object is ScalableVectorShape2D):
-		var button : Button = Button.new()
-		button.text = "Generate New Line2D"
-		add_custom_control(button)
-		button.pressed.connect(func(): _on_generate_line2d_button_pressed(object))
+		assign_stroke_inspector_form = preload("res://addons/curved_lines_2d/assign_stroke_inspector_form.tscn").instantiate()
+		add_custom_control(assign_stroke_inspector_form)
+		assign_stroke_inspector_form.scalable_vector_shape_2d = object
+
 	elif name == "polygon" and (object is DrawablePath2D or object is ScalableVectorShape2D):
 		var button : Button = Button.new()
 		button.text = "Generate New Polygon2D"
@@ -52,21 +54,6 @@ func _on_convert_button_pressed(orig : DrawablePath2D):
 		replacement.collision_polygon = orig.collision_polygon
 	orig.replace_by(replacement, true)
 	orig.queue_free()
-
-
-
-func _on_generate_line2d_button_pressed(drawable_path_2d):
-	var line_2d := Line2D.new()
-	var root := EditorInterface.get_edited_scene_root()
-	var undo_redo = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Add Line2D to %s " % str(drawable_path_2d))
-	undo_redo.add_do_method(drawable_path_2d, 'add_child', line_2d, true)
-	undo_redo.add_do_method(line_2d, 'set_owner', root)
-	undo_redo.add_do_reference(line_2d)
-	undo_redo.add_do_property(drawable_path_2d, 'line', line_2d)
-	undo_redo.add_undo_method(drawable_path_2d, 'remove_child', line_2d)
-	undo_redo.add_undo_property(drawable_path_2d, 'line', null)
-	undo_redo.commit_action()
 
 
 func _on_generate_polygon2d_button_pressed(drawable_path_2d):
