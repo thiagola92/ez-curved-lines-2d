@@ -1,7 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://bm31gemem22uc"]
+[gd_scene load_steps=4 format=3 uid="uid://bm31gemem22uc"]
 
 [ext_resource type="Script" uid="uid://bv0hffvudv51d" path="res://addons/curved_lines_2d/assign_stroke_inspector_form.gd" id="1_j8wjx"]
 [ext_resource type="Texture2D" uid="uid://cc8salyqmquir" path="res://addons/curved_lines_2d/Collapse.svg" id="2_vq8nc"]
+
+[sub_resource type="FontVariation" id="FontVariation_vq8nc"]
+variation_embolden = 0.8
 
 [node name="AssignStrokeInspectorForm" type="VBoxContainer"]
 anchors_preset = 15
@@ -13,6 +16,19 @@ script = ExtResource("1_j8wjx")
 
 [node name="TitleButton" type="Button" parent="."]
 layout_mode = 2
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 0
+theme_override_fonts/font = SubResource("FontVariation_vq8nc")
+toggle_mode = true
 text = "Stroke"
 icon = ExtResource("2_vq8nc")
 alignment = 0
@@ -45,7 +61,7 @@ tooltip_text = "This will set the width of the assign Line2D node"
 mouse_filter = 0
 text = "Stroke Width:"
 
-[node name="StrokeWidthIntFieldContainer" type="PanelContainer" parent="StrokeWidthFieldContainer"]
+[node name="StrokeWidthFloatFieldContainer" type="PanelContainer" parent="StrokeWidthFieldContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "This will set the width of the assign Line2D node"
@@ -73,4 +89,7 @@ text = "Remove Stroke"
 [node name="HSeparator" type="HSeparator" parent="."]
 layout_mode = 2
 
+[connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
+[connection signal="color_changed" from="StrokeColorFieldContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
 [connection signal="pressed" from="ButtonContainer/CreateStrokeButton" to="." method="_on_create_stroke_button_pressed"]
+[connection signal="pressed" from="ButtonContainer/RemoveStrokeButton" to="." method="_on_remove_stroke_button_pressed"]
