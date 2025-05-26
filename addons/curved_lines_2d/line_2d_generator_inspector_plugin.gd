@@ -37,7 +37,6 @@ func _parse_property(object: Object, type: Variant.Type, name: String, hint_type
 
 func _on_convert_button_pressed(orig : DrawablePath2D):
 	var replacement := ScalableVectorShape2D.new()
-	replacement.name = "ScalableVectorShape2D" if orig.name == "DrawablePath2D" else orig.name
 	replacement.transform = orig.transform
 	replacement.tolerance_degrees = orig.tolerance_degrees
 	replacement.max_stages = orig.max_stages
@@ -45,11 +44,12 @@ func _on_convert_button_pressed(orig : DrawablePath2D):
 	replacement.update_curve_at_runtime = orig.update_curve_at_runtime
 	if orig.curve:
 		replacement.curve = orig.curve
-	if orig.line:
+	if is_instance_valid(orig.line):
 		replacement.line = orig.line
-	if orig.polygon:
+	if is_instance_valid(orig.polygon):
 		replacement.polygon = orig.polygon
-	if orig.collision_polygon:
+	if is_instance_valid(orig.collision_polygon):
 		replacement.collision_polygon = orig.collision_polygon
 	orig.replace_by(replacement, true)
-	orig.queue_free()
+	replacement.name = "ScalableVectorShape2D" if orig.name == "DrawablePath2D" else orig.name
+	EditorInterface.call_deferred('edit_node', replacement)

@@ -9,7 +9,7 @@ const META_NAME_SELECT_HINT := "_select_hint_"
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
 var plugin : Line2DGeneratorInspectorPlugin
-var svg_importer_dock
+var scalable_vector_shapes_2d_dock
 var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
 var editing_enabled := true
@@ -25,7 +25,7 @@ var undo_redo_transaction : Dictionary = {
 }
 
 func _enter_tree():
-	svg_importer_dock = preload("res://addons/curved_lines_2d/svg_importer_dock.tscn").instantiate()
+	scalable_vector_shapes_2d_dock = preload("res://addons/curved_lines_2d/scalable_vector_shapes_2d_dock.tscn").instantiate()
 	plugin = preload("res://addons/curved_lines_2d/line_2d_generator_inspector_plugin.gd").new()
 	add_inspector_plugin(plugin)
 	add_custom_type(
@@ -41,16 +41,16 @@ func _enter_tree():
 		preload("res://addons/curved_lines_2d/DrawablePath2D.svg")
 	)
 	undo_redo = get_undo_redo()
-	add_control_to_bottom_panel(svg_importer_dock as Control, "Scalable Vector Shapes 2D")
+	add_control_to_bottom_panel(scalable_vector_shapes_2d_dock as Control, "Scalable Vector Shapes 2D")
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
 	undo_redo.version_changed.connect(update_overlays)
-	make_bottom_panel_item_visible(svg_importer_dock)
-	svg_importer_dock.toggle_gui_editing.connect(func(flg): editing_enabled = flg)
-	svg_importer_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
-	if not svg_importer_dock.shape_added.is_connected(select_node_reversibly):
-		svg_importer_dock.shape_added.connect(select_node_reversibly)
-	if not svg_importer_dock.shape_created.is_connected(_on_shape_created):
-		svg_importer_dock.shape_created.connect(_on_shape_created)
+	make_bottom_panel_item_visible(scalable_vector_shapes_2d_dock)
+
+	scalable_vector_shapes_2d_dock.toggle_gui_editing.connect(func(flg): editing_enabled = flg)
+	scalable_vector_shapes_2d_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
+
+	if not scalable_vector_shapes_2d_dock.shape_created.is_connected(_on_shape_created):
+		scalable_vector_shapes_2d_dock.shape_created.connect(_on_shape_created)
 
 
 
@@ -100,19 +100,16 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
 	undo_redo.commit_action()
 
 
-
 func _on_selection_changed():
 	var scene_root := EditorInterface.get_edited_scene_root()
 	if editing_enabled and is_instance_valid(scene_root):
-
 		# inelegant fix to always keep an instance of Node selected, so
 		# _forward_canvas_gui_input will still be called upon losing focus
 		if (not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 				and EditorInterface.get_selection().get_selected_nodes().is_empty()):
 			EditorInterface.edit_node(scene_root)
 		var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-		if _is_svs_valid(current_selection):
-			svg_importer_dock.find_child(SvgImporterDock.EDIT_TAB_NAME).show()
+
 	update_overlays()
 
 
@@ -728,5 +725,5 @@ func _exit_tree():
 	remove_inspector_plugin(plugin)
 	remove_custom_type("DrawablePath2D")
 	remove_custom_type("ScalableVectorShape2D")
-	remove_control_from_bottom_panel(svg_importer_dock)
-	svg_importer_dock.free()
+	remove_control_from_bottom_panel(scalable_vector_shapes_2d_dock)
+	scalable_vector_shapes_2d_dock.free()

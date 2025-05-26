@@ -3,14 +3,6 @@ extends Control
 
 class_name SvgImporterDock
 
-signal toggle_gui_editing(toggled_on : bool)
-signal toggle_gui_hints(toggled_on : bool)
-signal shape_added(new_shape : Node2D)
-signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
-			stroke_width : int, stroke_color : Color, fill_color : Color)
-
-const IMPORT_TAB_NAME :=  "Import SVG File"
-const EDIT_TAB_NAME := "Scalable Vector Shapes"
 # Fraction of a radius for a bezier control point
 const R_TO_CP = 0.5523
 const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "stroke-opacity",
@@ -36,7 +28,6 @@ var lock_shapes := true
 var antialiased_shapes := false
 var import_file_dialog : EditorFileDialog = null
 var warning_dialog : AcceptDialog = null
-var edit_tab : ScalableVectorShapeEditTab = null
 var undo_redo : EditorUndoRedoManager = null
 var LinkButtonScene : PackedScene = null
 
@@ -56,12 +47,6 @@ func _enter_tree() -> void:
 	import_file_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
 	import_file_dialog.file_selected.connect(_load_svg)
 	EditorInterface.get_base_control().add_child(import_file_dialog)
-	warning_dialog = AcceptDialog.new()
-	EditorInterface.get_base_control().add_child(warning_dialog)
-	edit_tab = find_child(EDIT_TAB_NAME)
-	edit_tab.warning_dialog = warning_dialog
-	if not edit_tab.shape_created.is_connected(shape_created.emit):
-		edit_tab.shape_created.connect(shape_created.emit)
 	undo_redo = EditorInterface.get_editor_undo_redo()
 
 
@@ -92,7 +77,6 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 
 
 func _drop_data(at_position: Vector2, data: Variant) -> void:
-	find_child(IMPORT_TAB_NAME).show()
 	if _can_drop_data(at_position, data):
 		_load_svg(data["files"][0])
 
@@ -186,7 +170,7 @@ func _load_svg(file_path : String) -> void:
 	link_button2.uri = "https://www.youtube.com/watch?v=nVCKVRBMnWU"
 	log_container.add_child(link_button2)
 	undo_redo.commit_action(false)
-	shape_added.emit(svg_root)
+	EditorInterface.call_deferred('edit_node', svg_root)
 
 
 func get_gradient_by_href(href : String, gradients : Array[Dictionary]) -> Dictionary:
@@ -760,11 +744,3 @@ func _on_antialiased_check_box_toggled(toggled_on: bool) -> void:
 
 func _on_open_file_dialog_button_pressed() -> void:
 	import_file_dialog.popup_file_dialog()
-
-
-func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
-	toggle_gui_editing.emit(toggled_on)
-
-
-func _on_enable_hints_checkbox_toggled(toggled_on: bool) -> void:
-	toggle_gui_hints.emit(toggled_on)
