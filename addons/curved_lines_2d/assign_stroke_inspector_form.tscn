@@ -20,6 +20,7 @@ theme_override_constants/separation = 0
 
 [node name="TitleButton" type="Button" parent="."]
 layout_mode = 2
+focus_mode = 0
 theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
@@ -33,6 +34,7 @@ theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 0
 theme_override_fonts/font = SubResource("FontVariation_vq8nc")
 toggle_mode = true
+button_pressed = true
 text = "Stroke"
 icon = ExtResource("2_vq8nc")
 alignment = 0
@@ -43,14 +45,14 @@ layout_mode = 2
 [node name="Label" type="Label" parent="StrokeColorFieldContainer"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
-size_flags_horizontal = 0
+size_flags_horizontal = 3
 tooltip_text = "This will set the default_color of the assigned Line2D."
 mouse_filter = 0
-text = "Stroke Color:"
+text = "Stroke Color"
 
 [node name="ColorPickerButton" type="ColorPickerButton" parent="StrokeColorFieldContainer"]
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
 tooltip_text = "This will set the default_color of the assigned Line2D."
 text = "Stroke"
 color = Color(1, 1, 1, 1)
@@ -61,9 +63,10 @@ layout_mode = 2
 [node name="Label" type="Label" parent="StrokeWidthFieldContainer"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 tooltip_text = "This will set the width of the assign Line2D node"
 mouse_filter = 0
-text = "Stroke Width:"
+text = "Stroke Width"
 
 [node name="StrokeWidthFloatFieldContainer" type="PanelContainer" parent="StrokeWidthFieldContainer"]
 layout_mode = 2
@@ -76,24 +79,16 @@ layout_mode = 2
 [node name="Label2" type="Label" parent="ButtonContainer"]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 tooltip_text = "This will create a new Line2D node and assign it to the line property of this ScalableVectorScape2D."
 mouse_filter = 0
-text = "Add Stroke:"
+text = "Add Stroke"
 
 [node name="CreateStrokeButton" type="Button" parent="ButtonContainer"]
 layout_mode = 2
+size_flags_horizontal = 2
 tooltip_text = "This will create a new Line2D node and assign it to the line property of this ScalableVectorScape2D."
 text = "Add Stroke"
-
-[node name="HSeparator" type="HSeparator" parent="."]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="."]
-layout_mode = 2
-tooltip_text = "The stroke property is simply an instance of a Line2D node assigned to the line property of this ScalableVectorShape2D node. 
-If you remove that node, you need to unassign it here as well, before you can add a new Stroke"
-mouse_filter = 0
-text = "Line2D Assignment as Stroke *"
 
 [connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
 [connection signal="color_changed" from="StrokeColorFieldContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
