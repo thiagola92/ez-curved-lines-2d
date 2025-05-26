@@ -11,20 +11,25 @@ signal path_changed(new_points : PackedVector2Array)
 ## the instance of assigned Line2D, Polygon2D, or CollisionPolygon2D has changed
 signal assigned_node_changed()
 
-## The Curve2D that dynamically triggers updates of the shapes assigned to this node
-## Changes to this curve will also emit the path_changed signal with the updated points array
-@export var curve: Curve2D = Curve2D.new():
-	set(_curve):
-		curve = _curve
-		assigned_node_changed.emit()
 
-## The Polygon2D controlled by this node's curve property
+## The 'Fill' of a [ScalableVectorShape2D] is simply an instance of a [Polygon2D] node
+## assigned to the `polygon` property.
+## If you remove that [Polygon2D] node, you need to unassign it here as well, before
+## you can add a new 'Fill' with the 'Add Fill' button
+## The polygon's shape is controlled by this node's curve ([Curve2D]) property,
+## it does _not_ have to be the child of this ScalableVectorShape2D
 @export var polygon: Polygon2D:
 	set(_poly):
 		polygon = _poly
 		assigned_node_changed.emit()
 
-## The Line2D controlled by this node's curve property
+
+## The 'Stroke' of a [ScalableVectorShape2D] is simply an instance of a [Line2D] node
+## assigned to the `line` property.
+## If you remove that Line2D node, you need to unassign it here as well, before
+## you can add a new 'Stroke' with the 'Add Stroke' button
+## The line's shape is controlled by this node's curve ([Curve2D]) pproperty, it
+## does _not_ have to be the child of this [ScalableVectorShape2D]
 @export var line: Line2D:
 	set(_line):
 		line = _line
@@ -36,13 +41,20 @@ signal assigned_node_changed()
 		collision_polygon = _poly
 		assigned_node_changed.emit()
 
+## Controls the paramaters used to divide up the line  in segments.
+## These settings are prefilled with the default values.
+@export_group("Curve settings")
+## The [Curve2D] that dynamically triggers updates of the shapes assigned to this node
+## Changes to this curve will also emit the path_changed signal with the updated points array
+@export var curve: Curve2D = Curve2D.new():
+	set(_curve):
+		curve = _curve
+		assigned_node_changed.emit()
+
 ## Controls whether the path is treated as static (only update in editor) or dynamic (can be updated during runtime)
 ## If you set this to true, be alert for potential performance issues
 @export var update_curve_at_runtime: bool = false
 
-## Controls the paramaters used to divide up the line  in segments.
-## These settings are prefilled with the default values.
-@export_group("Tesselation settings")
 ## Controls how many subdivisions a curve segment may face before it is considered approximate enough.
 ## Each subdivision splits the segment in half, so the default 5 stages may mean up to 32 subdivisions
 ## per curve segment. Increase with care!
@@ -50,6 +62,7 @@ signal assigned_node_changed()
 	set(_max_stages):
 		max_stages = _max_stages
 		assigned_node_changed.emit()
+
 ## Controls how many degrees the midpoint of a segment may deviate from the real curve, before the
 ## segment has to be subdivided.
 @export_range(0.0, 180.0) var tolerance_degrees := 4.0:
@@ -58,7 +71,12 @@ signal assigned_node_changed()
 		assigned_node_changed.emit()
 
 @export_group("Editor settings")
+## The [Color] used to draw the this shape's curve in the editor
 @export var shape_hint_color := Color.LIME_GREEN
+## When this field is checked, the 'Strokes', 'Fills' and 'Collisions' created
+## with the 'Add ...' buttons will be locked from transforming to prevent
+## inadvertently changing them, whilst the idea is that [ScalableVectorShape2D]
+## controls them
 @export var lock_assigned_shapes := true
 
 # Wire up signals at runtime

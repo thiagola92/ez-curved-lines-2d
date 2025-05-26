@@ -1,8 +1,12 @@
 @tool
 extends EditorInspectorPlugin
 
+class_name  Line2DGeneratorInspectorPlugin
+
+
 func _can_handle(obj) -> bool:
 	return obj is DrawablePath2D or obj is ScalableVectorShape2D
+
 
 func _parse_begin(object: Object) -> void:
 	if object is DrawablePath2D:
@@ -16,21 +20,18 @@ func _parse_begin(object: Object) -> void:
 
 
 func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: int, wide: bool) -> bool:
-	if name == "line" and (object is DrawablePath2D or object is ScalableVectorShape2D):
-		var button : Button = Button.new()
-		button.text = "Generate New Line2D"
-		add_custom_control(button)
-		button.pressed.connect(func(): _on_generate_line2d_button_pressed(object))
-	elif name == "polygon" and (object is DrawablePath2D or object is ScalableVectorShape2D):
-		var button : Button = Button.new()
-		button.text = "Generate New Polygon2D"
-		add_custom_control(button)
-		button.pressed.connect(func(): _on_generate_polygon2d_button_pressed(object))
-	elif name == "collision_polygon" and (object is DrawablePath2D or object is ScalableVectorShape2D):
-		var button : Button = Button.new()
-		button.text = "Generate New CollisionPolygon2D"
-		add_custom_control(button)
-		button.pressed.connect(func(): _on_generate_collision_polygon2d_button_pressed(object))
+	if name == "line" and (object is  ScalableVectorShape2D):
+		var assign_stroke_inspector_form = preload("res://addons/curved_lines_2d/assign_stroke_inspector_form.tscn").instantiate()
+		assign_stroke_inspector_form.scalable_vector_shape_2d = object
+		add_custom_control(assign_stroke_inspector_form)
+	elif name == "polygon" and (object  is ScalableVectorShape2D):
+		var assign_fill_inspector_form = preload("res://addons/curved_lines_2d/assign_fill_inspector_form.tscn").instantiate()
+		assign_fill_inspector_form.scalable_vector_shape_2d = object
+		add_custom_control(assign_fill_inspector_form)
+	elif name == "collision_polygon" and (object is ScalableVectorShape2D):
+		var assign_collision_inspector_form = preload("res://addons/curved_lines_2d/assign_collision_inspector_form.tscn").instantiate()
+		assign_collision_inspector_form.scalable_vector_shape_2d = object
+		add_custom_control(assign_collision_inspector_form)
 	return false
 
 
@@ -52,46 +53,3 @@ func _on_convert_button_pressed(orig : DrawablePath2D):
 		replacement.collision_polygon = orig.collision_polygon
 	orig.replace_by(replacement, true)
 	orig.queue_free()
-
-
-
-func _on_generate_line2d_button_pressed(drawable_path_2d):
-	var line_2d := Line2D.new()
-	var root := EditorInterface.get_edited_scene_root()
-	var undo_redo = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Add Line2D to %s " % str(drawable_path_2d))
-	undo_redo.add_do_method(drawable_path_2d, 'add_child', line_2d, true)
-	undo_redo.add_do_method(line_2d, 'set_owner', root)
-	undo_redo.add_do_reference(line_2d)
-	undo_redo.add_do_property(drawable_path_2d, 'line', line_2d)
-	undo_redo.add_undo_method(drawable_path_2d, 'remove_child', line_2d)
-	undo_redo.add_undo_property(drawable_path_2d, 'line', null)
-	undo_redo.commit_action()
-
-
-func _on_generate_polygon2d_button_pressed(drawable_path_2d):
-	var polygon_2d := Polygon2D.new()
-	var root := EditorInterface.get_edited_scene_root()
-	var undo_redo = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Add Line2D to %s " % str(drawable_path_2d))
-	undo_redo.add_do_method(drawable_path_2d, 'add_child', polygon_2d, true)
-	undo_redo.add_do_method(polygon_2d, 'set_owner', root)
-	undo_redo.add_do_reference(polygon_2d)
-	undo_redo.add_do_property(drawable_path_2d, 'polygon', polygon_2d)
-	undo_redo.add_undo_method(drawable_path_2d, 'remove_child', polygon_2d)
-	undo_redo.add_undo_property(drawable_path_2d, 'polygon', null)
-	undo_redo.commit_action()
-
-
-func _on_generate_collision_polygon2d_button_pressed(drawable_path_2d):
-	var collision_polygon_2d := CollisionPolygon2D.new()
-	var root := EditorInterface.get_edited_scene_root()
-	var undo_redo = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Add Line2D to %s " % str(drawable_path_2d))
-	undo_redo.add_do_method(drawable_path_2d, 'add_child', collision_polygon_2d, true)
-	undo_redo.add_do_method(collision_polygon_2d, 'set_owner', root)
-	undo_redo.add_do_reference(collision_polygon_2d)
-	undo_redo.add_do_property(drawable_path_2d, 'collision_polygon', collision_polygon_2d)
-	undo_redo.add_undo_method(drawable_path_2d, 'remove_child', collision_polygon_2d)
-	undo_redo.add_undo_property(drawable_path_2d, 'collision_polygon', null)
-	undo_redo.commit_action()
