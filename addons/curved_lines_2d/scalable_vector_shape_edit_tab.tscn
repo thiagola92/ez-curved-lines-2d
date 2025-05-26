@@ -1,7 +1,40 @@
-[gd_scene load_steps=3 format=3 uid="uid://dwns40mbgt82s"]
+[gd_scene load_steps=12 format=3 uid="uid://dwns40mbgt82s"]
 
 [ext_resource type="Script" uid="uid://tl3hcapnk7lb" path="res://addons/curved_lines_2d/scalable_vector_shape_edit_tab.gd" id="1_nt5in"]
+[ext_resource type="Texture2D" uid="uid://7hhlkt6n4b32" path="res://addons/curved_lines_2d/PaintOrder.svg" id="2_qgati"]
 [ext_resource type="PackedScene" uid="uid://cmoxkoulpd7so" path="res://addons/curved_lines_2d/link_button_with_copy_hint.tscn" id="2_xxhaf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qgati"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+bg_color = Color(0.0943486, 0.676718, 0.866922, 1)
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_qgati"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3cgh6"]
+resource_local_to_scene = true
+atlas = ExtResource("2_qgati")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xku8w"]
+atlas = ExtResource("2_qgati")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kh00m"]
+atlas = ExtResource("2_qgati")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4mj77"]
+atlas = ExtResource("2_qgati")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jq58x"]
+atlas = ExtResource("2_qgati")
+region = Rect2(32, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hip06"]
+atlas = ExtResource("2_qgati")
+region = Rect2(64, 32, 32, 32)
 
 [node name="ScalableVectorShapeEditTab" type="ScrollContainer"]
 anchors_preset = 15
@@ -27,19 +60,27 @@ theme_override_constants/separation = 13
 [node name="Label" type="Label" parent="VBoxContainer/EditorSettingsContainer"]
 custom_minimum_size = Vector2(157, 0)
 layout_mode = 2
-text = "Editor Settings"
+tooltip_text = "Determines what settings apply to the 2D Editor Viewport."
+mouse_filter = 0
+text = "Editor Settings*"
 
 [node name="EnableEditingCheckbox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 button_pressed = true
-text = "Enable ScalableVectorShape2D Editing in 2D Viewport"
+text = "Enable ScalableVectorShape2D Editing"
 
 [node name="EnableHintsCheckbox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 button_pressed = true
-text = "Show Edit Hints in 2D Viewport"
+text = "Show Edit Hints"
+
+[node name="EnablePointNumbersCheckbox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+button_pressed = true
+text = "Show Point Numbers"
 
 [node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
@@ -50,7 +91,9 @@ layout_mode = 2
 [node name="Label" type="Label" parent="VBoxContainer/DrawSettingsContainer"]
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
-text = "Draw Settings"
+tooltip_text = "These settings apply to all new shapes created via the buttons in this dock, as well as new nodes added via the 2D Viewport and Scene Tree,"
+mouse_filter = 0
+text = "Draw Settings*"
 
 [node name="StrokeWidthContainer" type="PanelContainer" parent="VBoxContainer/DrawSettingsContainer"]
 layout_mode = 2
@@ -59,36 +102,128 @@ size_flags_horizontal = 3
 [node name="Button" type="Button" parent="VBoxContainer/DrawSettingsContainer"]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
-text = "Create empty Shape"
+text = "Create Empty Shape"
 
 [node name="DrawSettingsContainer2" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
 [node name="FillCheckBox" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
-custom_minimum_size = Vector2(241, 0)
+custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 button_pressed = true
-text = "Fill"
+text = "Fill*"
 alignment = 2
 
 [node name="FillPickerButton" type="ColorPickerButton" parent="VBoxContainer/DrawSettingsContainer2"]
+custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
+color = Color(1, 1, 1, 1)
 
 [node name="StrokeCheckBox" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
 size_flags_horizontal = 8
 button_pressed = true
-text = "Stroke"
+text = "Stroke*"
 alignment = 2
 
 [node name="StrokePickerButton" type="ColorPickerButton" parent="VBoxContainer/DrawSettingsContainer2"]
+custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
 color = Color(1, 1, 1, 1)
+
+[node name="CollisionCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Collsions*"
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/DrawSettingsContainer2"]
+layout_mode = 2
+text = "Paint Order*"
+
+[node name="PaintOrderButton0" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
+layout_mode = 2
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_qgati")
+toggle_mode = true
+button_pressed = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_qgati")
+icon = SubResource("AtlasTexture_3cgh6")
+
+[node name="PaintOrderButton1" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
+layout_mode = 2
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_qgati")
+toggle_mode = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_qgati")
+icon = SubResource("AtlasTexture_xku8w")
+
+[node name="PaintOrderButton2" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
+layout_mode = 2
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_qgati")
+toggle_mode = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_qgati")
+icon = SubResource("AtlasTexture_kh00m")
+
+[node name="PaintOrderButton3" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
+layout_mode = 2
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_qgati")
+toggle_mode = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_qgati")
+icon = SubResource("AtlasTexture_4mj77")
+
+[node name="PaintOrderButton4" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
+layout_mode = 2
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_qgati")
+toggle_mode = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_qgati")
+icon = SubResource("AtlasTexture_jq58x")
+
+[node name="PaintOrderButton5" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
+layout_mode = 2
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = SubResource("StyleBoxFlat_qgati")
+toggle_mode = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_qgati")
+icon = SubResource("AtlasTexture_hip06")
 
 [node name="HSeparator4" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
@@ -163,5 +298,6 @@ Right click to copy this link"
 
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableEditingCheckbox" to="." method="_on_enable_editing_checkbox_toggled"]
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
+[connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnablePointNumbersCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
 [connection signal="pressed" from="VBoxContainer/RectBuilderContainer/CreateRectButton" to="." method="_on_create_rect_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/EllipseBuilderContainer/CreateCircleButton" to="." method="_on_create_circle_button_pressed"]

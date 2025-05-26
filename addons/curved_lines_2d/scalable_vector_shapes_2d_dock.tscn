@@ -10,14 +10,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-current_tab = 1
+current_tab = 0
 script = ExtResource("1_1mm15")
+
+[node name="Scalable Vector Shapes" parent="." instance=ExtResource("3_psho1")]
+layout_mode = 2
+metadata/_tab_index = 0
 
 [node name="Import SVG File" parent="." instance=ExtResource("2_0fwlu")]
 visible = false
-layout_mode = 2
-
-[node name="Scalable Vector Shapes" parent="." instance=ExtResource("3_psho1")]
 layout_mode = 2
 metadata/_tab_index = 1
 

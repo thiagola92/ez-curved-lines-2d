@@ -24,31 +24,32 @@ var ellipse_ry_input : EditorSpinSlider
 var warning_dialog : AcceptDialog = null
 
 func _enter_tree() -> void:
-	rect_width_input = _make_int_input("Width", 100, 2, 1000, "px")
-	rect_height_input = _make_int_input("Height", 100, 2, 1000, "px")
-	rect_rx_input = _make_int_input("Corner Radius X", 0, 0, 500, "px")
-	rect_ry_input = _make_int_input("Corner Radius Y", 0, 0, 500, "px")
+	rect_width_input = _make_number_input("Width", 100, 2, 1000, "")
+	rect_height_input = _make_number_input("Height", 100, 2, 1000, "")
+	rect_rx_input = _make_number_input("Corner Radius X", 0, 0, 500, "")
+	rect_ry_input = _make_number_input("Corner Radius Y", 0, 0, 500, "")
 	stroke_color_button = find_child("StrokePickerButton")
 	fill_color_button = find_child("FillPickerButton")
-	stroke_width_input = _make_int_input("Stroke Width", 1, 0, 100, "px")
+	stroke_width_input = _make_number_input("Stroke Width", 10.0, 0.0, 100.0, "", 0.01)
 	find_child("WidthSliderContainer").add_child(rect_width_input)
 	find_child("HeightSliderContainer").add_child(rect_height_input)
 	find_child("XRadiusSliderContainer").add_child(rect_rx_input)
 	find_child("YRadiusSliderContainer").add_child(rect_ry_input)
 	find_child("StrokeWidthContainer").add_child(stroke_width_input)
-	ellipse_rx_input = _make_int_input("Horizontal Radius (RX)", 50, 1, 500, "px")
-	ellipse_ry_input = _make_int_input("Vertical Radius (RY)", 50, 1, 500, "px")
+	ellipse_rx_input = _make_number_input("Horizontal Radius (RX)", 50, 1, 500, "")
+	ellipse_ry_input = _make_number_input("Vertical Radius (RY)", 50, 1, 500, "")
 	find_child("EllipseXRadiusSliderContainer").add_child(ellipse_rx_input)
 	find_child("EllipseYRadiusSliderContainer").add_child(ellipse_ry_input)
 
 
-func _make_int_input(lbl : String, value : int, min_value : int, max_value : int, suffix : String) -> EditorSpinSlider:
+func _make_number_input(lbl : String, value : float, min_value : float, max_value : float, suffix : String, step := 1.0) -> EditorSpinSlider:
 	var x_slider := EditorSpinSlider.new()
 	x_slider.value = value
 	x_slider.min_value = min_value
 	x_slider.max_value = max_value
 	x_slider.suffix = suffix
 	x_slider.label = lbl
+	x_slider.step = step
 	return x_slider
 
 
