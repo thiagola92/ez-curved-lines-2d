@@ -42,6 +42,7 @@ alignment = 0
 layout_mode = 2
 
 [node name="Label2" type="Label" parent="ButtonContainer"]
+clip_contents = true
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -55,5 +56,28 @@ size_flags_horizontal = 2
 tooltip_text = "This will create a new Polygon2D node and assign it to the polygon property of this ScalableVectorScape2D."
 text = "Add Collision"
 
+[node name="ButtonContainer2" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="ButtonContainer2"]
+clip_contents = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Click on this button to select the CollisionPolygon2D node that is assigned to this shape  in the Scene Tree.
+
+Use this for advanced features which are already built-in into godot."
+mouse_filter = 0
+text = "Edit CollisionPolygon2D*"
+
+[node name="GotoCollisionButton" type="Button" parent="ButtonContainer2"]
+layout_mode = 2
+size_flags_horizontal = 2
+tooltip_text = "Click on this button to select the CollisionPolygon2D node that is assigned to this shape  in the Scene Tree.
+
+Use this for advanced features which are already built-in into godot."
+text = "Edit CollisionPolygon2D"
+
 [connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
 [connection signal="pressed" from="ButtonContainer/CreateCollisionButton" to="." method="_on_create_collision_button_pressed"]
+[connection signal="pressed" from="ButtonContainer2/GotoCollisionButton" to="." method="_on_goto_collision_button_pressed"]

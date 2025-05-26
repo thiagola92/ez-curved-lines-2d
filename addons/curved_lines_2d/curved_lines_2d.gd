@@ -53,6 +53,7 @@ func _enter_tree():
 		svg_importer_dock.shape_created.connect(_on_shape_created)
 
 
+
 func select_node_reversibly(target_node : Node) -> void:
 	if is_instance_valid(target_node):
 		EditorInterface.edit_node(target_node)

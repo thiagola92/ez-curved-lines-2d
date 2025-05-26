@@ -43,6 +43,7 @@ alignment = 0
 layout_mode = 2
 
 [node name="Label" type="Label" parent="StrokeColorFieldContainer"]
+clip_contents = true
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -61,6 +62,7 @@ color = Color(1, 1, 1, 1)
 layout_mode = 2
 
 [node name="Label" type="Label" parent="StrokeWidthFieldContainer"]
+clip_contents = true
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -77,6 +79,7 @@ tooltip_text = "This will set the width of the assign Line2D node"
 layout_mode = 2
 
 [node name="Label2" type="Label" parent="ButtonContainer"]
+clip_contents = true
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -90,6 +93,31 @@ size_flags_horizontal = 2
 tooltip_text = "This will create a new Line2D node and assign it to the line property of this ScalableVectorScape2D."
 text = "Add Stroke"
 
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
+[node name="ButtonContainer2" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="ButtonContainer2"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Click on this button to select the Line2D node that is assigned to this shape  in the Scene Tree.
+
+Use this for advanced features which are already built-in into godot, like gradients, width curvature, and repeating textures."
+mouse_filter = 0
+text = "Edit Line2D *"
+
+[node name="GotoLine2DButton" type="Button" parent="ButtonContainer2"]
+layout_mode = 2
+size_flags_horizontal = 2
+tooltip_text = "Click on this button to select the Line2D node that is assigned to this shape  in the Scene Tree.
+
+Use this for advanced features which are already built-in into godot, like gradients, width curvature, and repeating textures."
+text = "Edit Line2D"
+
 [connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
 [connection signal="color_changed" from="StrokeColorFieldContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
 [connection signal="pressed" from="ButtonContainer/CreateStrokeButton" to="." method="_on_create_stroke_button_pressed"]
+[connection signal="pressed" from="ButtonContainer2/GotoLine2DButton" to="." method="_on_goto_line_2d_button_pressed"]

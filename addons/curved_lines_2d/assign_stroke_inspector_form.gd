@@ -5,6 +5,7 @@ class_name AssignStrokeInspectorForm
 
 var scalable_vector_shape_2d : ScalableVectorShape2D
 var create_button : Button
+var select_button : Button
 var title_button : Button
 var collapse_icon : Texture2D
 var expand_icon : Texture2D
@@ -18,11 +19,12 @@ func _enter_tree() -> void:
 	collapse_icon = preload("res://addons/curved_lines_2d/Collapse.svg")
 	expand_icon = preload("res://addons/curved_lines_2d/Expand.svg")
 	create_button = find_child("CreateStrokeButton")
+	select_button = find_child("GotoLine2DButton")
 	title_button = find_child("TitleButton")
 	color_button = find_child("ColorPickerButton")
 	scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
-	stroke_width_input = _make_float_input("Stroke Width", 1.0, 0.0, 100.0, "px")
+	stroke_width_input = _make_float_input("Stroke Width", 10.0, 0.0, 100.0, "px")
 	find_child("StrokeWidthFloatFieldContainer").add_child(stroke_width_input)
 	_on_svs_assignment_changed()
 	stroke_width_input.value_changed.connect(_on_stroke_width_changed)
@@ -30,11 +32,17 @@ func _enter_tree() -> void:
 
 func _on_svs_assignment_changed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.line):
+		create_button.get_parent().hide()
+		select_button.get_parent().show()
 		create_button.disabled = true
+		select_button.disabled = false
 		stroke_width_input.value = scalable_vector_shape_2d.line.width
 		color_button.color = scalable_vector_shape_2d.line.default_color
 	else:
+		create_button.get_parent().show()
+		select_button.get_parent().hide()
 		create_button.disabled = false
+		select_button.disabled = true
 
 
 func _on_stroke_width_changed(new_value : float) -> void:
@@ -55,6 +63,14 @@ func _on_color_picker_button_color_changed(color: Color) -> void:
 	undo_redo.add_do_property(scalable_vector_shape_2d.line, 'default_color', color)
 	undo_redo.add_undo_property(scalable_vector_shape_2d.line, 'default_color', scalable_vector_shape_2d.line.default_color)
 	undo_redo.commit_action()
+
+
+func _on_goto_line_2d_button_pressed() -> void:
+	if not is_instance_valid(scalable_vector_shape_2d):
+		return
+	if not is_instance_valid(scalable_vector_shape_2d.line):
+		return
+	EditorInterface.call_deferred('edit_node', scalable_vector_shape_2d.line)
 
 
 func _on_create_stroke_button_pressed():
@@ -102,3 +118,5 @@ func _make_float_input(lbl : String, value : float, min_value : float, max_value
 	x_slider.editing_integer = false
 	x_slider.step = 0.001
 	return x_slider
+
+
