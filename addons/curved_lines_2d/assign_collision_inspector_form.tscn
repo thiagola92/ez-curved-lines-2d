@@ -56,6 +56,9 @@ size_flags_horizontal = 2
 tooltip_text = "This will create a new Polygon2D node and assign it to the polygon property of this ScalableVectorScape2D."
 text = "Add Collision"
 
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 2
+
 [node name="ButtonContainer2" type="HBoxContainer" parent="."]
 layout_mode = 2
 
