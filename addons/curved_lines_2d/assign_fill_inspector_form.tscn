@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://53oqf8j7uyuu"]
+[gd_scene load_steps=4 format=3 uid="uid://53oqf8j7uyuu"]
 
 [ext_resource type="Texture2D" uid="uid://cc8salyqmquir" path="res://addons/curved_lines_2d/Collapse.svg" id="1_2eiat"]
+[ext_resource type="Script" uid="uid://b1ii4843yuwkw" path="res://addons/curved_lines_2d/assign_fill_inspector_form.gd" id="1_ogtsd"]
 
 [sub_resource type="FontVariation" id="FontVariation_ogtsd"]
 variation_embolden = 0.8
@@ -11,6 +12,11 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_ogtsd")
+
+[node name="HSeparator2" type="HSeparator" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 0
 
 [node name="TitleButton" type="Button" parent="."]
 layout_mode = 2
@@ -24,7 +30,6 @@ theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
 theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_constants/outline_size = 0
 theme_override_fonts/font = SubResource("FontVariation_ogtsd")
 toggle_mode = true
 text = "Fill"
@@ -72,4 +77,8 @@ layout_mode = 2
 tooltip_text = "The fill property is simply an instance of a Polygon2D node assigned to the polygon property of this ScalableVectorShape2D node. 
 If you remove that node, you need to unassign it here as well, before you can add a new Fill"
 mouse_filter = 0
-text = "Edit Polygon2D Assignment as Fill *"
+text = "Polygon2D Assignment as Fill *"
+
+[connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
+[connection signal="color_changed" from="FillColorFieldContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
+[connection signal="pressed" from="ButtonContainer/CreateFillButton" to="." method="_on_create_fill_button_pressed"]

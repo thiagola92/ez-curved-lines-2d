@@ -51,7 +51,7 @@ func _on_color_picker_button_color_changed(color: Color) -> void:
 	if not is_instance_valid(scalable_vector_shape_2d.line):
 		return
 	var undo_redo = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Adjust Line2D width for %s" % str(scalable_vector_shape_2d))
+	undo_redo.create_action("Adjust Line2D default_color for %s" % str(scalable_vector_shape_2d))
 	undo_redo.add_do_property(scalable_vector_shape_2d.line, 'default_color', color)
 	undo_redo.add_undo_property(scalable_vector_shape_2d.line, 'default_color', scalable_vector_shape_2d.line.default_color)
 	undo_redo.commit_action()

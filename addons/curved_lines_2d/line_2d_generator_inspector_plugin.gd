@@ -3,10 +3,10 @@ extends EditorInspectorPlugin
 
 class_name  Line2DGeneratorInspectorPlugin
 
-var assign_stroke_inspector_form : Control
 
 func _can_handle(obj) -> bool:
 	return obj is DrawablePath2D or obj is ScalableVectorShape2D
+
 
 func _parse_begin(object: Object) -> void:
 	if object is DrawablePath2D:
@@ -21,14 +21,13 @@ func _parse_begin(object: Object) -> void:
 
 func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: int, wide: bool) -> bool:
 	if name == "line" and (object is DrawablePath2D or object is ScalableVectorShape2D):
-		assign_stroke_inspector_form = preload("res://addons/curved_lines_2d/assign_stroke_inspector_form.tscn").instantiate()
+		var assign_stroke_inspector_form = preload("res://addons/curved_lines_2d/assign_stroke_inspector_form.tscn").instantiate()
 		assign_stroke_inspector_form.scalable_vector_shape_2d = object
 		add_custom_control(assign_stroke_inspector_form)
 	elif name == "polygon" and (object is DrawablePath2D or object is ScalableVectorShape2D):
-		var button : Button = Button.new()
-		button.text = "Generate New Polygon2D"
-		add_custom_control(button)
-		button.pressed.connect(func(): _on_generate_polygon2d_button_pressed(object))
+		var assign_fill_inspector_form = preload("res://addons/curved_lines_2d/assign_fill_inspector_form.tscn").instantiate()
+		assign_fill_inspector_form.scalable_vector_shape_2d = object
+		add_custom_control(assign_fill_inspector_form)
 	elif name == "collision_polygon" and (object is DrawablePath2D or object is ScalableVectorShape2D):
 		var button : Button = Button.new()
 		button.text = "Generate New CollisionPolygon2D"
