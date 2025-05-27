@@ -106,7 +106,8 @@ func _on_create_circle_button_pressed() -> void:
 
 
 func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
-	toggle_editing.emit(toggled_on)
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_EDITING_ENABLED, toggled_on)
+	ProjectSettings.save()
 
 
 func _on_enable_hints_checkbox_toggled(toggled_on: bool) -> void:

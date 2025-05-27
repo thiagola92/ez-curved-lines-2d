@@ -1,6 +1,9 @@
 @tool
 extends EditorPlugin
 
+class_name CurvedLines2D
+
+const SETTING_NAME_EDITING_ENABLED := "addons/curved_lines_2d/editing_enabled"
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
 const META_NAME_HOVER_CP_OUT_IDX := "_hover_cp_out_idx_"
@@ -12,7 +15,7 @@ var plugin : Line2DGeneratorInspectorPlugin
 var scalable_vector_shapes_2d_dock
 var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
-var editing_enabled := true
+#var editing_enabled := true
 var hints_enabled := true
 var in_undo_redo_transaction := false
 enum UndoRedoEntry { UNDOS, DOS, NAME, DO_PROPS, UNDO_PROPS }
@@ -46,7 +49,6 @@ func _enter_tree():
 	undo_redo.version_changed.connect(update_overlays)
 	make_bottom_panel_item_visible(scalable_vector_shapes_2d_dock)
 
-	scalable_vector_shapes_2d_dock.toggle_gui_editing.connect(func(flg): editing_enabled = flg)
 	scalable_vector_shapes_2d_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
 
 	if not scalable_vector_shapes_2d_dock.shape_created.is_connected(_on_shape_created):
@@ -102,7 +104,7 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
 
 func _on_selection_changed():
 	var scene_root := EditorInterface.get_edited_scene_root()
-	if editing_enabled and is_instance_valid(scene_root):
+	if _is_editing_enabled() and is_instance_valid(scene_root):
 		# inelegant fix to always keep an instance of Node selected, so
 		# _forward_canvas_gui_input will still be called upon losing focus
 		if (not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
@@ -352,7 +354,7 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
-	if not editing_enabled:
+	if not _is_editing_enabled():
 		return
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return
@@ -621,7 +623,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			not Input.is_key_pressed(KEY_SHIFT)):
 		_commit_undo_redo_transaction()
 
-	if not editing_enabled:
+	if not _is_editing_enabled():
 		return false
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
 		return false
@@ -712,13 +714,16 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		else:
 			for result : ScalableVectorShape2D in _find_scalable_vector_shape_2d_nodes_at(mouse_pos):
 				result.set_meta(META_NAME_SELECT_HINT, true)
-
 			if _is_svs_valid(current_selection):
 				_set_handle_hover(mouse_pos, current_selection)
-
 		update_overlays()
-
 	return false
+
+
+func _is_editing_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_EDITING_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_EDITING_ENABLED)
+	return true
 
 
 func _exit_tree():

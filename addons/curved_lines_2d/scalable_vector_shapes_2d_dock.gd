@@ -1,9 +1,9 @@
 @tool
 extends TabContainer
 
-signal toggle_gui_editing(toggled_on : bool)
-signal toggle_gui_hints(toggled_on : bool)
 
+
+signal toggle_gui_hints(toggled_on : bool)
 signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
 			stroke_width : int, stroke_color : Color, fill_color : Color)
 
@@ -24,10 +24,6 @@ func _enter_tree() -> void:
 	edit_tab.warning_dialog = warning_dialog
 	if not edit_tab.shape_created.is_connected(shape_created.emit):
 		edit_tab.shape_created.connect(shape_created.emit)
-
-
-func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
-	toggle_gui_editing.emit(toggled_on)
 
 
 func _on_enable_hints_checkbox_toggled(toggled_on: bool) -> void:
