@@ -37,6 +37,9 @@ func _enter_tree() -> void:
 	ellipse_ry_input = _make_number_input("Vertical Radius (RY)", 50, 1, 500, "")
 	find_child("EllipseXRadiusSliderContainer").add_child(ellipse_rx_input)
 	find_child("EllipseYRadiusSliderContainer").add_child(ellipse_ry_input)
+	find_child("EnableEditingCheckbox").button_pressed = CurvedLines2D._is_editing_enabled()
+	find_child("EnableHintsCheckbox").button_pressed = CurvedLines2D._are_hints_enabled()
+	find_child("EnablePointNumbersCheckbox").button_pressed = CurvedLines2D._am_showing_point_numbers()
 
 
 func _make_number_input(lbl : String, value : float, min_value : float, max_value : float, suffix : String, step := 1.0) -> EditorSpinSlider:
@@ -109,4 +112,9 @@ func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
 
 func _on_enable_hints_checkbox_toggled(toggled_on: bool) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_HINTS_ENABLED, toggled_on)
+	ProjectSettings.save()
+
+
+func _on_enable_point_numbers_checkbox_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_SHOW_POINT_NUMBERS, toggled_on)
 	ProjectSettings.save()

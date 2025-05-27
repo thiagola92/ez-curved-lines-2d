@@ -5,6 +5,7 @@ class_name CurvedLines2D
 
 const SETTING_NAME_EDITING_ENABLED := "addons/curved_lines_2d/editing_enabled"
 const SETTING_NAME_HINTS_ENABLED := "addons/curved_lines_2d/hints_enabled"
+const SETTING_NAME_SHOW_POINT_NUMBERS := "addons/curved_lines_2d/show_point_numbers"
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
 const META_NAME_HOVER_CP_OUT_IDX := "_hover_cp_out_idx_"
@@ -215,10 +216,23 @@ func _draw_hint(viewport_control : Control, txt : String) -> void:
 			HORIZONTAL_ALIGNMENT_LEFT, -1, ThemeDB.fallback_font_size, Color.WHITE_SMOKE)
 
 
+func _draw_point_number(viewport_control: Control, p : Vector2, text : String) -> void:
+	if not _am_showing_point_numbers():
+		return
+	var pos := _vp_transform(p)
+	var width := 8 * (text.length() + 1)
+	viewport_control.draw_string_outline(ThemeDB.fallback_font, pos +  + Vector2(-width, 6), text,
+		HORIZONTAL_ALIGNMENT_LEFT, width, ThemeDB.fallback_font_size, 3, Color.BLACK)
+	viewport_control.draw_string(ThemeDB.fallback_font, pos + Vector2(-width, 6), text,
+		HORIZONTAL_ALIGNMENT_LEFT, width, ThemeDB.fallback_font_size, Color.WHITE_SMOKE)
+
+
 func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
 	var hint_txt := ""
+	var point_txt := ""
+	var point_hint_pos := Vector2.ZERO
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
 		var handle = handles[i]
@@ -246,9 +260,11 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			viewport_control.draw_polygon(pts, [Color.DIM_GRAY])
 			pts.append(Vector2(p1.x - 8, p1.y))
 			viewport_control.draw_polyline(pts, color, width)
+
 		if is_hovered:
-			hint_txt = "Point: " + str(i)
-			hint_txt += handle['is_closed']
+			point_txt = str(i) + handle['is_closed']
+			point_hint_pos = handle['point_position']
+			hint_txt = "Point: " + point_txt
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				if Input.is_key_pressed(KEY_SHIFT):
 					hint_txt += " - Release mouse to set curve handles"
@@ -264,6 +280,9 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 					):
 						hint_txt += "\n - Double click to close loop"
 				hint_txt += "\n - Hold Shift + Drag to create curve handles"
+
+	if not point_txt.is_empty():
+		_draw_point_number(viewport_control, point_hint_pos, point_txt)
 	if not hint_txt.is_empty():
 		_draw_hint(viewport_control, hint_txt)
 
@@ -717,16 +736,23 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	return false
 
 
-func _is_editing_enabled() -> bool:
+static func _is_editing_enabled() -> bool:
 	if ProjectSettings.has_setting(SETTING_NAME_EDITING_ENABLED):
 		return ProjectSettings.get_setting(SETTING_NAME_EDITING_ENABLED)
 	return true
 
 
-func _are_hints_enabled() -> bool:
+static func _are_hints_enabled() -> bool:
 	if ProjectSettings.has_setting(SETTING_NAME_HINTS_ENABLED):
 		return ProjectSettings.get_setting(SETTING_NAME_HINTS_ENABLED)
 	return true
+
+
+static func _am_showing_point_numbers() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_SHOW_POINT_NUMBERS):
+		return ProjectSettings.get_setting(SETTING_NAME_SHOW_POINT_NUMBERS)
+	return true
+
 
 
 func _exit_tree():
