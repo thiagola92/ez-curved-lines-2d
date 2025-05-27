@@ -3,11 +3,8 @@ extends Control
 
 class_name ScalableVectorShapeEditTab
 
-signal toggle_editing(flg : bool)
-signal toggle_hints(flg : bool)
 signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
 			stroke_width : int, stroke_color : Color, fill_color : Color)
-
 
 var stroke_width_input : EditorSpinSlider
 var stroke_color_button : ColorPickerButton
@@ -111,4 +108,5 @@ func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
 
 
 func _on_enable_hints_checkbox_toggled(toggled_on: bool) -> void:
-	toggle_hints.emit(toggled_on)
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_HINTS_ENABLED, toggled_on)
+	ProjectSettings.save()

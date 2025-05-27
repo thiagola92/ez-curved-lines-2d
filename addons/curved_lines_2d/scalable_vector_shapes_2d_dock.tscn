@@ -21,6 +21,3 @@ metadata/_tab_index = 0
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
-
-[connection signal="toggle_editing" from="Scalable Vector Shapes" to="." method="_on_enable_editing_checkbox_toggled"]
-[connection signal="toggle_hints" from="Scalable Vector Shapes" to="." method="_on_enable_hints_checkbox_toggled"]

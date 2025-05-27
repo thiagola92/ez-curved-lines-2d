@@ -4,6 +4,7 @@ extends EditorPlugin
 class_name CurvedLines2D
 
 const SETTING_NAME_EDITING_ENABLED := "addons/curved_lines_2d/editing_enabled"
+const SETTING_NAME_HINTS_ENABLED := "addons/curved_lines_2d/hints_enabled"
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
 const META_NAME_HOVER_CP_OUT_IDX := "_hover_cp_out_idx_"
@@ -15,8 +16,6 @@ var plugin : Line2DGeneratorInspectorPlugin
 var scalable_vector_shapes_2d_dock
 var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
-#var editing_enabled := true
-var hints_enabled := true
 var in_undo_redo_transaction := false
 enum UndoRedoEntry { UNDOS, DOS, NAME, DO_PROPS, UNDO_PROPS }
 var undo_redo_transaction : Dictionary = {
@@ -48,8 +47,6 @@ func _enter_tree():
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
 	undo_redo.version_changed.connect(update_overlays)
 	make_bottom_panel_item_visible(scalable_vector_shapes_2d_dock)
-
-	scalable_vector_shapes_2d_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
 
 	if not scalable_vector_shapes_2d_dock.shape_created.is_connected(_on_shape_created):
 		scalable_vector_shapes_2d_dock.shape_created.connect(_on_shape_created)
@@ -203,7 +200,7 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 func _draw_hint(viewport_control : Control, txt : String) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
-	if not hints_enabled:
+	if not _are_hints_enabled():
 		return
 
 	var txt_pos := (_vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
@@ -723,6 +720,12 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 func _is_editing_enabled() -> bool:
 	if ProjectSettings.has_setting(SETTING_NAME_EDITING_ENABLED):
 		return ProjectSettings.get_setting(SETTING_NAME_EDITING_ENABLED)
+	return true
+
+
+func _are_hints_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_HINTS_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_HINTS_ENABLED)
 	return true
 
 
