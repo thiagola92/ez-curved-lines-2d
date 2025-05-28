@@ -111,6 +111,9 @@ layout_mode = 2
 custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 size_flags_horizontal = 8
+tooltip_text = "- Toggled On: when creating a new shape via this dock a Fill (Polygon2D) of this color will be automatically added
+- When a new ScalableVectorShape2D is generated via the Scene Tree or the 2D Viewport using add node, a Fill will _not_ be automatically assigned.
+- When generating a Fill via the Inspector button for ScalableVectorShape2D, the color configured here will be automatically picked."
 button_pressed = true
 text = "Fill*"
 alignment = 2
@@ -125,6 +128,9 @@ color = Color(1, 1, 1, 1)
 [node name="StrokeCheckBox" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
 size_flags_horizontal = 8
+tooltip_text = "- Toggled On: when creating a new shape via this dock a Stroke (Line2D) of this color will be automatically added
+- When a new ScalableVectorShape2D is generated via the Scene Tree or the 2D Viewport using add node, a Stroke will _not_ be automatically assigned.
+- When generating a Stroke via the Inspector button for ScalableVectorShape2D, the color configured here will be automatically picked."
 button_pressed = true
 text = "Stroke*"
 alignment = 2
@@ -139,15 +145,22 @@ color = Color(1, 1, 1, 1)
 [node name="CollisionCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
 size_flags_horizontal = 8
+tooltip_text = "Toggled On: when creating a new shape via this dock CollisionPolygon2D will be automatically added"
 text = "Collsions*"
 alignment = 2
 
 [node name="Label" type="Label" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
+tooltip_text = "- This toggle determines in what order 'Fills', 'Strokes' and 'Markers' are drawn.
+- This plugin treats CollisionPolygon2D as a marker, Line2D as stroke and Polygon2D as fill.
+- Button hints will show the order from back to front and use the term 'Collision' in stead of 'Marker'"
+mouse_filter = 0
 text = "Paint Order*"
 
 [node name="PaintOrderButton0" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
+tooltip_text = "Use Paint Order:
+Fills, Strokes, Collision"
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
@@ -162,6 +175,8 @@ icon = SubResource("AtlasTexture_3cgh6")
 
 [node name="PaintOrderButton1" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
+tooltip_text = "Use Paint Order:
+Strokes, Fills, Collision"
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
@@ -175,6 +190,8 @@ icon = SubResource("AtlasTexture_xku8w")
 
 [node name="PaintOrderButton2" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
+tooltip_text = "Use Paint Order:
+Fills, Collision, Strokes"
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
@@ -188,6 +205,8 @@ icon = SubResource("AtlasTexture_kh00m")
 
 [node name="PaintOrderButton3" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
+tooltip_text = "Use Paint Order:
+Collision, Fills, Strokes"
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
@@ -201,6 +220,8 @@ icon = SubResource("AtlasTexture_4mj77")
 
 [node name="PaintOrderButton4" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
+tooltip_text = "Use Paint Order:
+Strokes, Collision, Fills"
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
@@ -214,6 +235,8 @@ icon = SubResource("AtlasTexture_jq58x")
 
 [node name="PaintOrderButton5" type="Button" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
+tooltip_text = "Use Paint Order:
+Collision, Strokes, Fills"
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
