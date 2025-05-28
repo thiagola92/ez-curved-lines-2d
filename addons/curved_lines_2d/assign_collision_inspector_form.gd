@@ -37,8 +37,6 @@ func _on_svs_assignment_changed() -> void:
 		select_button.disabled = true
 
 
-
-
 func _on_goto_collision_button_pressed() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return

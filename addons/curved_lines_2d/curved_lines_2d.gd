@@ -1,21 +1,51 @@
 @tool
 extends EditorPlugin
 
+class_name CurvedLines2D
+
+const SETTING_NAME_EDITING_ENABLED := "addons/curved_lines_2d/editing_enabled"
+const SETTING_NAME_HINTS_ENABLED := "addons/curved_lines_2d/hints_enabled"
+const SETTING_NAME_SHOW_POINT_NUMBERS := "addons/curved_lines_2d/show_point_numbers"
+const SETTING_NAME_STROKE_WIDTH := "addons/curved_lines_2d/stroke_width"
+const SETTING_NAME_STROKE_COLOR := "addons/curved_lines_2d/stroke_color"
+const SETTING_NAME_FILL_COLOR := "addons/curved_lines_2d/fill_color"
+const SETTING_NAME_ADD_STROKE_ENABLED := "addons/curved_lines_2d/add_stroke_enabled"
+const SETTING_NAME_ADD_FILL_ENABLED := "addons/curved_lines_2d/add_fill_enabled"
+const SETTING_NAME_ADD_COLLISION_ENABLED := "addons/curved_lines_2d/add_collision_enabled"
+const SETTING_NAME_PAINT_ORDER := "addons/curved_lines_2d/paint_order"
+
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
 const META_NAME_HOVER_CP_OUT_IDX := "_hover_cp_out_idx_"
 const META_NAME_HOVER_CLOSEST_POINT := "_hover_closest_point_on_curve_"
 const META_NAME_SELECT_HINT := "_select_hint_"
+
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
+enum PaintOrder {
+	FILL_STROKE_MARKERS,
+	STROKE_FILL_MARKERS,
+	FILL_MARKERS_STROKE,
+	MARKERS_FILL_STROKE,
+	STROKE_MARKERS_FILL,
+	MARKERS_STROKE_FILL
+}
+enum UndoRedoEntry { UNDOS, DOS, NAME, DO_PROPS, UNDO_PROPS }
+
+const PAINT_ORDER_MAP := {
+	PaintOrder.FILL_STROKE_MARKERS: ['_add_fill_to_created_shape', '_add_stroke_to_created_shape', '_add_collision_to_created_shape'],
+	PaintOrder.STROKE_FILL_MARKERS: ['_add_stroke_to_created_shape', '_add_fill_to_created_shape', '_add_collision_to_created_shape'],
+	PaintOrder.FILL_MARKERS_STROKE: ['_add_fill_to_created_shape', '_add_collision_to_created_shape', '_add_stroke_to_created_shape'],
+	PaintOrder.MARKERS_FILL_STROKE: ['_add_collision_to_created_shape', '_add_fill_to_created_shape', '_add_stroke_to_created_shape'],
+	PaintOrder.STROKE_MARKERS_FILL: ['_add_stroke_to_created_shape', '_add_collision_to_created_shape', '_add_fill_to_created_shape'],
+	PaintOrder.MARKERS_STROKE_FILL: ['_add_collision_to_created_shape', '_add_stroke_to_created_shape', '_add_fill_to_created_shape']
+}
 var plugin : Line2DGeneratorInspectorPlugin
-var svg_importer_dock
+var scalable_vector_shapes_2d_dock
 var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
-var editing_enabled := true
-var hints_enabled := true
 var in_undo_redo_transaction := false
-enum UndoRedoEntry { UNDOS, DOS, NAME, DO_PROPS, UNDO_PROPS }
+
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
 	UndoRedoEntry.DOS: [],
@@ -25,7 +55,7 @@ var undo_redo_transaction : Dictionary = {
 }
 
 func _enter_tree():
-	svg_importer_dock = preload("res://addons/curved_lines_2d/svg_importer_dock.tscn").instantiate()
+	scalable_vector_shapes_2d_dock = preload("res://addons/curved_lines_2d/scalable_vector_shapes_2d_dock.tscn").instantiate()
 	plugin = preload("res://addons/curved_lines_2d/line_2d_generator_inspector_plugin.gd").new()
 	add_inspector_plugin(plugin)
 	add_custom_type(
@@ -41,16 +71,13 @@ func _enter_tree():
 		preload("res://addons/curved_lines_2d/DrawablePath2D.svg")
 	)
 	undo_redo = get_undo_redo()
-	add_control_to_bottom_panel(svg_importer_dock as Control, "Scalable Vector Shapes 2D")
+	add_control_to_bottom_panel(scalable_vector_shapes_2d_dock as Control, "Scalable Vector Shapes 2D")
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
 	undo_redo.version_changed.connect(update_overlays)
-	make_bottom_panel_item_visible(svg_importer_dock)
-	svg_importer_dock.toggle_gui_editing.connect(func(flg): editing_enabled = flg)
-	svg_importer_dock.toggle_gui_hints.connect(func(flg): hints_enabled = flg)
-	if not svg_importer_dock.shape_added.is_connected(select_node_reversibly):
-		svg_importer_dock.shape_added.connect(select_node_reversibly)
-	if not svg_importer_dock.shape_created.is_connected(_on_shape_created):
-		svg_importer_dock.shape_created.connect(_on_shape_created)
+	make_bottom_panel_item_visible(scalable_vector_shapes_2d_dock)
+
+	if not scalable_vector_shapes_2d_dock.shape_created.is_connected(_on_shape_created):
+		scalable_vector_shapes_2d_dock.shape_created.connect(_on_shape_created)
 
 
 
@@ -59,9 +86,7 @@ func select_node_reversibly(target_node : Node) -> void:
 		EditorInterface.edit_node(target_node)
 
 
-func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
-			stroke_width : int, stroke_color : Color, fill_color : Color) -> void:
-
+func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String) -> void:
 	var undo_redo := EditorInterface.get_editor_undo_redo()
 	var new_shape := ScalableVectorShape2D.new()
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
@@ -74,45 +99,58 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
 	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
 	undo_redo.add_do_reference(new_shape)
 	undo_redo.add_undo_method(parent, 'remove_child', new_shape)
-
-	var polygon := Polygon2D.new()
-	polygon.name = "Fill"
-	polygon.color = fill_color
-	undo_redo.add_do_property(new_shape, 'polygon', polygon)
-	undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
-	undo_redo.add_do_method(polygon, 'set_owner', scene_root)
-	undo_redo.add_do_reference(polygon)
-	undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
-
-	var line := Line2D.new()
-	line.name = "Stroke"
-	line.closed = true
-	line.default_color = stroke_color
-	line.width = stroke_width
-	undo_redo.add_do_property(new_shape, 'line', line)
-	undo_redo.add_do_method(new_shape, 'add_child', line, true)
-	undo_redo.add_do_method(line, 'set_owner', scene_root)
-	undo_redo.add_do_reference(line)
-	undo_redo.add_undo_method(new_shape, 'remove_child', line)
-
+	for draw_fn in PAINT_ORDER_MAP[_get_default_paint_order()]:
+		call(draw_fn, new_shape, scene_root)
 	undo_redo.add_do_method(self, 'select_node_reversibly', new_shape)
 	undo_redo.add_undo_method(self, 'select_node_reversibly', parent)
 	undo_redo.commit_action()
 
 
+func _add_fill_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
+	if _is_add_fill_enabled():
+		var polygon := Polygon2D.new()
+		polygon.name = "Fill"
+		polygon.color = _get_default_fill_color()
+		undo_redo.add_do_property(new_shape, 'polygon', polygon)
+		undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
+		undo_redo.add_do_method(polygon, 'set_owner', scene_root)
+		undo_redo.add_do_reference(polygon)
+		undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
+
+
+func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
+	if _is_add_stroke_enabled():
+		var line := Line2D.new()
+		line.name = "Stroke"
+		line.default_color = _get_default_stroke_color()
+		line.width = _get_default_stroke_width()
+		undo_redo.add_do_property(new_shape, 'line', line)
+		undo_redo.add_do_method(new_shape, 'add_child', line, true)
+		undo_redo.add_do_method(line, 'set_owner', scene_root)
+		undo_redo.add_do_reference(line)
+		undo_redo.add_undo_method(new_shape, 'remove_child', line)
+
+
+func _add_collision_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
+	if _is_add_collision_enabled():
+		var collision := CollisionPolygon2D.new()
+		undo_redo.add_do_property(new_shape, 'collision_polygon', collision)
+		undo_redo.add_do_method(new_shape, 'add_child', collision, true)
+		undo_redo.add_do_method(collision, 'set_owner', scene_root)
+		undo_redo.add_do_reference(collision)
+		undo_redo.add_undo_method(new_shape, 'remove_child', collision)
+
 
 func _on_selection_changed():
 	var scene_root := EditorInterface.get_edited_scene_root()
-	if editing_enabled and is_instance_valid(scene_root):
-
+	if _is_editing_enabled() and is_instance_valid(scene_root):
 		# inelegant fix to always keep an instance of Node selected, so
 		# _forward_canvas_gui_input will still be called upon losing focus
 		if (not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 				and EditorInterface.get_selection().get_selected_nodes().is_empty()):
 			EditorInterface.edit_node(scene_root)
 		var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-		if _is_svs_valid(current_selection):
-			svg_importer_dock.find_child(SvgImporterDock.EDIT_TAB_NAME).show()
+
 	update_overlays()
 
 
@@ -204,7 +242,7 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 func _draw_hint(viewport_control : Control, txt : String) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
-	if not hints_enabled:
+	if not _are_hints_enabled():
 		return
 
 	var txt_pos := (_vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
@@ -219,10 +257,23 @@ func _draw_hint(viewport_control : Control, txt : String) -> void:
 			HORIZONTAL_ALIGNMENT_LEFT, -1, ThemeDB.fallback_font_size, Color.WHITE_SMOKE)
 
 
+func _draw_point_number(viewport_control: Control, p : Vector2, text : String) -> void:
+	if not _am_showing_point_numbers():
+		return
+	var pos := _vp_transform(p)
+	var width := 8 * (text.length() + 1)
+	viewport_control.draw_string_outline(ThemeDB.fallback_font, pos +  + Vector2(-width, 6), text,
+		HORIZONTAL_ALIGNMENT_LEFT, width, ThemeDB.fallback_font_size, 3, Color.BLACK)
+	viewport_control.draw_string(ThemeDB.fallback_font, pos + Vector2(-width, 6), text,
+		HORIZONTAL_ALIGNMENT_LEFT, width, ThemeDB.fallback_font_size, Color.WHITE_SMOKE)
+
+
 func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
 	var hint_txt := ""
+	var point_txt := ""
+	var point_hint_pos := Vector2.ZERO
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
 		var handle = handles[i]
@@ -250,14 +301,15 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			viewport_control.draw_polygon(pts, [Color.DIM_GRAY])
 			pts.append(Vector2(p1.x - 8, p1.y))
 			viewport_control.draw_polyline(pts, color, width)
+
 		if is_hovered:
-			hint_txt = "Point: " + str(i)
-			hint_txt += handle['is_closed']
+			point_txt = str(i) + handle['is_closed']
+			point_hint_pos = handle['point_position']
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				if Input.is_key_pressed(KEY_SHIFT):
 					hint_txt += " - Release mouse to set curve handles"
 			else:
-				hint_txt += "\n - Drag to move"
+				hint_txt += " - Drag to move"
 				if handle['is_closed'].length() > 0:
 					hint_txt += "\n - Double click to break loop"
 				else:
@@ -268,6 +320,9 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 					):
 						hint_txt += "\n - Double click to close loop"
 				hint_txt += "\n - Hold Shift + Drag to create curve handles"
+
+	if not point_txt.is_empty():
+		_draw_point_number(viewport_control, point_hint_pos, point_txt)
 	if not hint_txt.is_empty():
 		_draw_hint(viewport_control, hint_txt)
 
@@ -355,7 +410,7 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
-	if not editing_enabled:
+	if not _is_editing_enabled():
 		return
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return
@@ -624,7 +679,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			not Input.is_key_pressed(KEY_SHIFT)):
 		_commit_undo_redo_transaction()
 
-	if not editing_enabled:
+	if not _is_editing_enabled():
 		return false
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
 		return false
@@ -715,18 +770,75 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		else:
 			for result : ScalableVectorShape2D in _find_scalable_vector_shape_2d_nodes_at(mouse_pos):
 				result.set_meta(META_NAME_SELECT_HINT, true)
-
 			if _is_svs_valid(current_selection):
 				_set_handle_hover(mouse_pos, current_selection)
-
 		update_overlays()
-
 	return false
+
+
+static func _is_editing_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_EDITING_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_EDITING_ENABLED)
+	return true
+
+
+static func _are_hints_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_HINTS_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_HINTS_ENABLED)
+	return true
+
+
+static func _am_showing_point_numbers() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_SHOW_POINT_NUMBERS):
+		return ProjectSettings.get_setting(SETTING_NAME_SHOW_POINT_NUMBERS)
+	return true
+
+
+static func _get_default_stroke_width() -> float:
+	if ProjectSettings.has_setting(SETTING_NAME_STROKE_WIDTH):
+		return ProjectSettings.get_setting(SETTING_NAME_STROKE_WIDTH)
+	return 10.0
+
+
+static func _get_default_stroke_color() -> Color:
+	if ProjectSettings.has_setting(SETTING_NAME_STROKE_COLOR):
+		return ProjectSettings.get_setting(SETTING_NAME_STROKE_COLOR)
+	return Color.WHITE
+
+
+static func _get_default_fill_color() -> Color:
+	if ProjectSettings.has_setting(SETTING_NAME_FILL_COLOR):
+		return ProjectSettings.get_setting(SETTING_NAME_FILL_COLOR)
+	return Color.WHITE
+
+
+static func _is_add_stroke_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_ADD_STROKE_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_ADD_STROKE_ENABLED)
+	return true
+
+
+static func _is_add_fill_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_ADD_FILL_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_ADD_FILL_ENABLED)
+	return true
+
+
+static func _is_add_collision_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_ADD_COLLISION_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_ADD_COLLISION_ENABLED)
+	return false
+
+
+static func _get_default_paint_order() -> PaintOrder:
+	if ProjectSettings.has_setting(SETTING_NAME_PAINT_ORDER):
+		return ProjectSettings.get_setting(SETTING_NAME_PAINT_ORDER)
+	return PaintOrder.FILL_STROKE_MARKERS
 
 
 func _exit_tree():
 	remove_inspector_plugin(plugin)
 	remove_custom_type("DrawablePath2D")
 	remove_custom_type("ScalableVectorShape2D")
-	remove_control_from_bottom_panel(svg_importer_dock)
-	svg_importer_dock.free()
+	remove_control_from_bottom_panel(scalable_vector_shapes_2d_dock)
+	scalable_vector_shapes_2d_dock.free()

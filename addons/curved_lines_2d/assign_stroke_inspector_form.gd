@@ -43,6 +43,8 @@ func _on_svs_assignment_changed() -> void:
 		select_button.get_parent().hide()
 		create_button.disabled = false
 		select_button.disabled = true
+		stroke_width_input.value = CurvedLines2D._get_default_stroke_width()
+		color_button.color = CurvedLines2D._get_default_stroke_color()
 
 
 func _on_stroke_width_changed(new_value : float) -> void:
