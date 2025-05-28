@@ -109,6 +109,20 @@ func _on_create_circle_button_pressed() -> void:
 	shape_created.emit(curve, scene_root, node_name, stroke_width_input.value, stroke_color_button.color, fill_color_button.color)
 
 
+func _on_create_empty_shape_button_pressed() -> void:
+	var scene_root := EditorInterface.get_edited_scene_root()
+	if not is_instance_valid(scene_root):
+		warning_dialog.dialog_text = "Can only create a Shape in an open 2D scene"
+		return
+	if not scene_root is Node2D:
+		warning_dialog.dialog_text = "Can only create a Shape in an open 2D scene"
+		warning_dialog.popup_centered()
+		return
+	var curve := Curve2D.new()
+	var node_name := "Path"
+	shape_created.emit(curve, scene_root, node_name, stroke_width_input.value, stroke_color_button.color, fill_color_button.color)
+
+
 func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_EDITING_ENABLED, toggled_on)
 	ProjectSettings.save()
@@ -126,3 +140,4 @@ func _on_enable_point_numbers_checkbox_toggled(toggled_on: bool) -> void:
 
 func _on_stroke_width_input_value_changed(new_value: float) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_STROKE_WIDTH, new_value)
+

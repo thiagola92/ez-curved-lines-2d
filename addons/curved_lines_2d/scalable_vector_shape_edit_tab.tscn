@@ -99,7 +99,7 @@ text = "Draw Settings*"
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Button" type="Button" parent="VBoxContainer/DrawSettingsContainer"]
+[node name="CreateEmptyShapeButton" type="Button" parent="VBoxContainer/DrawSettingsContainer"]
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 text = "Create Empty Shape"
@@ -299,5 +299,6 @@ Right click to copy this link"
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableEditingCheckbox" to="." method="_on_enable_editing_checkbox_toggled"]
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnablePointNumbersCheckbox" to="." method="_on_enable_point_numbers_checkbox_toggled"]
+[connection signal="pressed" from="VBoxContainer/DrawSettingsContainer/CreateEmptyShapeButton" to="." method="_on_create_empty_shape_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/RectBuilderContainer/CreateRectButton" to="." method="_on_create_rect_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/EllipseBuilderContainer/CreateCircleButton" to="." method="_on_create_circle_button_pressed"]
