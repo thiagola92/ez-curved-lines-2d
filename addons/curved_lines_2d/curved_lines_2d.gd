@@ -45,6 +45,7 @@ var scalable_vector_shapes_2d_dock
 var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
 var in_undo_redo_transaction := false
+var shape_preview : Curve2D = null
 
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
@@ -78,12 +79,18 @@ func _enter_tree():
 
 	if not scalable_vector_shapes_2d_dock.shape_created.is_connected(_on_shape_created):
 		scalable_vector_shapes_2d_dock.shape_created.connect(_on_shape_created)
-
+	if not scalable_vector_shapes_2d_dock.set_shape_preview.is_connected(_on_shape_preview):
+		scalable_vector_shapes_2d_dock.set_shape_preview.connect(_on_shape_preview)
 
 
 func select_node_reversibly(target_node : Node) -> void:
 	if is_instance_valid(target_node):
 		EditorInterface.edit_node(target_node)
+
+
+func _on_shape_preview(curve : Curve2D):
+	shape_preview = curve
+	update_overlays()
 
 
 func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String) -> void:
@@ -435,6 +442,29 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 		if not(result.line or result.collision_polygon or result.polygon):
 			_draw_curve(viewport_control, result, false)
 
+	if shape_preview:
+		var points := Array(shape_preview.tessellate())
+		var pos = _get_viewport_center()
+		var stroke_width = _get_default_stroke_width()
+		if _is_svs_valid(current_selection):
+			points = points.map(current_selection.to_global)
+			pos = Vector2.ZERO
+			stroke_width *= current_selection.global_scale.x
+		points = points.map(func(p): return p + pos).map(_vp_transform)
+		match _get_default_paint_order():
+			PaintOrder.MARKERS_STROKE_FILL, PaintOrder.STROKE_FILL_MARKERS, PaintOrder.STROKE_MARKERS_FILL:
+				if _is_add_stroke_enabled():
+					viewport_control.draw_polyline(points, _get_default_stroke_color(), stroke_width)
+				if _is_add_fill_enabled():
+					viewport_control.draw_polygon(points, [_get_default_fill_color()])
+			PaintOrder.MARKERS_FILL_STROKE, PaintOrder.FILL_STROKE_MARKERS, PaintOrder.FILL_MARKERS_STROKE, _:
+				if _is_add_fill_enabled():
+					viewport_control.draw_polygon(points, [_get_default_fill_color()])
+				if _is_add_stroke_enabled():
+					viewport_control.draw_polyline(points, _get_default_stroke_color(), stroke_width)
+
+		if not _is_add_fill_enabled() and not _is_add_stroke_enabled():
+			viewport_control.draw_polyline(points, Color.LIME, 1)
 
 
 func _start_undo_redo_transaction(name := "") -> void:
