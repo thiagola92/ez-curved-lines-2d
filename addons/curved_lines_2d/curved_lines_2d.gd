@@ -9,6 +9,8 @@ const SETTING_NAME_SHOW_POINT_NUMBERS := "addons/curved_lines_2d/show_point_numb
 const SETTING_NAME_STROKE_WIDTH := "addons/curved_lines_2d/stroke_width"
 const SETTING_NAME_STROKE_COLOR := "addons/curved_lines_2d/stroke_color"
 const SETTING_NAME_FILL_COLOR := "addons/curved_lines_2d/fill_color"
+const SETTING_NAME_ADD_STROKE_ENABLED := "addons/curved_lines_2d/add_stroke_enabled"
+const SETTING_NAME_ADD_FILL_ENABLED := "addons/curved_lines_2d/add_fill_enabled"
 
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
@@ -79,24 +81,26 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 	undo_redo.add_do_reference(new_shape)
 	undo_redo.add_undo_method(parent, 'remove_child', new_shape)
 
-	var polygon := Polygon2D.new()
-	polygon.name = "Fill"
-	polygon.color = _get_default_fill_color()
-	undo_redo.add_do_property(new_shape, 'polygon', polygon)
-	undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
-	undo_redo.add_do_method(polygon, 'set_owner', scene_root)
-	undo_redo.add_do_reference(polygon)
-	undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
+	if _is_add_fill_enabled():
+		var polygon := Polygon2D.new()
+		polygon.name = "Fill"
+		polygon.color = _get_default_fill_color()
+		undo_redo.add_do_property(new_shape, 'polygon', polygon)
+		undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
+		undo_redo.add_do_method(polygon, 'set_owner', scene_root)
+		undo_redo.add_do_reference(polygon)
+		undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
 
-	var line := Line2D.new()
-	line.name = "Stroke"
-	line.default_color = _get_default_stroke_color()
-	line.width = _get_default_stroke_width()
-	undo_redo.add_do_property(new_shape, 'line', line)
-	undo_redo.add_do_method(new_shape, 'add_child', line, true)
-	undo_redo.add_do_method(line, 'set_owner', scene_root)
-	undo_redo.add_do_reference(line)
-	undo_redo.add_undo_method(new_shape, 'remove_child', line)
+	if _is_add_stroke_enabled():
+		var line := Line2D.new()
+		line.name = "Stroke"
+		line.default_color = _get_default_stroke_color()
+		line.width = _get_default_stroke_width()
+		undo_redo.add_do_property(new_shape, 'line', line)
+		undo_redo.add_do_method(new_shape, 'add_child', line, true)
+		undo_redo.add_do_method(line, 'set_owner', scene_root)
+		undo_redo.add_do_reference(line)
+		undo_redo.add_undo_method(new_shape, 'remove_child', line)
 
 	undo_redo.add_do_method(self, 'select_node_reversibly', new_shape)
 	undo_redo.add_undo_method(self, 'select_node_reversibly', parent)
@@ -773,6 +777,17 @@ static func _get_default_fill_color() -> Color:
 		return ProjectSettings.get_setting(SETTING_NAME_FILL_COLOR)
 	return Color.WHITE
 
+
+static func _is_add_stroke_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_ADD_STROKE_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_ADD_STROKE_ENABLED)
+	return true
+
+
+static func _is_add_fill_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_ADD_FILL_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_ADD_FILL_ENABLED)
+	return true
 
 
 func _exit_tree():

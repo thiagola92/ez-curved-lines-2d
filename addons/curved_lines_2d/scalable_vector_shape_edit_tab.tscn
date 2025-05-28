@@ -107,7 +107,7 @@ text = "Create Empty Shape"
 [node name="DrawSettingsContainer2" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="FillCheckBox" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
+[node name="FillCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
 custom_minimum_size = Vector2(260, 0)
 layout_mode = 2
 size_flags_horizontal = 8
@@ -123,9 +123,9 @@ custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
-color = Color(0.582031, 0, 0, 1)
+color = Color(1, 1, 1, 1)
 
-[node name="StrokeCheckBox" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
+[node name="StrokeCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "- Toggled On: when creating a new shape via this panel, a Stroke (Line2D) of this color will be automatically added
@@ -140,7 +140,7 @@ custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
-color = Color(0.722656, 0.544815, 0.544815, 1)
+color = Color(1, 1, 1, 1)
 
 [node name="CollisionCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
@@ -323,7 +323,9 @@ Right click to copy this link"
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnablePointNumbersCheckbox" to="." method="_on_enable_point_numbers_checkbox_toggled"]
 [connection signal="pressed" from="VBoxContainer/DrawSettingsContainer/CreateEmptyShapeButton" to="." method="_on_create_empty_shape_button_pressed"]
+[connection signal="toggled" from="VBoxContainer/DrawSettingsContainer2/FillCheckButton" to="." method="_on_fill_check_button_toggled"]
 [connection signal="color_changed" from="VBoxContainer/DrawSettingsContainer2/FillPickerButton" to="." method="_on_fill_picker_button_color_changed"]
+[connection signal="toggled" from="VBoxContainer/DrawSettingsContainer2/StrokeCheckButton" to="." method="_on_stroke_check_button_toggled"]
 [connection signal="color_changed" from="VBoxContainer/DrawSettingsContainer2/StrokePickerButton" to="." method="_on_stroke_picker_button_color_changed"]
 [connection signal="pressed" from="VBoxContainer/RectBuilderContainer/CreateRectButton" to="." method="_on_create_rect_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/EllipseBuilderContainer/CreateCircleButton" to="." method="_on_create_circle_button_pressed"]

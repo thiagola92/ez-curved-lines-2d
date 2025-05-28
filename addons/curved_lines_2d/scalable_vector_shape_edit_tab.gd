@@ -41,11 +41,16 @@ func _enter_tree() -> void:
 	find_child("EnablePointNumbersCheckbox").button_pressed = CurvedLines2D._am_showing_point_numbers()
 	stroke_width_input.value = CurvedLines2D._get_default_stroke_width()
 	stroke_width_input.value_changed.connect(_on_stroke_width_input_value_changed)
-	stroke_width_input.value_focus_exited.connect(ProjectSettings.save)
 	stroke_color_button.color = CurvedLines2D._get_default_stroke_color()
-	stroke_color_button.focus_exited.connect(ProjectSettings.save)
 	fill_color_button.color = CurvedLines2D._get_default_fill_color()
-	fill_color_button.focus_exited.connect(ProjectSettings.save)
+	find_child("StrokeCheckButton").button_pressed = CurvedLines2D._is_add_stroke_enabled()
+	find_child("FillCheckButton").button_pressed = CurvedLines2D._is_add_fill_enabled()
+	if not stroke_width_input.value_focus_exited.is_connected(ProjectSettings.save):
+		stroke_width_input.value_focus_exited.connect(ProjectSettings.save)
+	if not stroke_color_button.focus_exited.is_connected(ProjectSettings.save):
+		stroke_color_button.focus_exited.connect(ProjectSettings.save)
+	if not fill_color_button.focus_exited.is_connected(ProjectSettings.save):
+		fill_color_button.focus_exited.connect(ProjectSettings.save)
 
 
 func _make_number_input(lbl : String, value : float, min_value : float, max_value : float, suffix : String, step := 1.0) -> EditorSpinSlider:
@@ -150,3 +155,13 @@ func _on_fill_picker_button_color_changed(color: Color) -> void:
 
 func _on_stroke_picker_button_color_changed(color: Color) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_STROKE_COLOR, color)
+
+
+func _on_stroke_check_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_ADD_STROKE_ENABLED, toggled_on)
+	ProjectSettings.save()
+
+
+func _on_fill_check_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_ADD_FILL_ENABLED, toggled_on)
+	ProjectSettings.save()
