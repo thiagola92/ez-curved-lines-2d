@@ -6,11 +6,14 @@ class_name CurvedLines2D
 const SETTING_NAME_EDITING_ENABLED := "addons/curved_lines_2d/editing_enabled"
 const SETTING_NAME_HINTS_ENABLED := "addons/curved_lines_2d/hints_enabled"
 const SETTING_NAME_SHOW_POINT_NUMBERS := "addons/curved_lines_2d/show_point_numbers"
+const SETTING_NAME_STROKE_WIDTH := "addons/curved_lines_2d/stroke_width"
+
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
 const META_NAME_HOVER_CP_OUT_IDX := "_hover_cp_out_idx_"
 const META_NAME_HOVER_CLOSEST_POINT := "_hover_closest_point_on_curve_"
 const META_NAME_SELECT_HINT := "_select_hint_"
+
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
 var plugin : Line2DGeneratorInspectorPlugin
@@ -264,12 +267,11 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 		if is_hovered:
 			point_txt = str(i) + handle['is_closed']
 			point_hint_pos = handle['point_position']
-			hint_txt = "Point: " + point_txt
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				if Input.is_key_pressed(KEY_SHIFT):
 					hint_txt += " - Release mouse to set curve handles"
 			else:
-				hint_txt += "\n - Drag to move"
+				hint_txt += " - Drag to move"
 				if handle['is_closed'].length() > 0:
 					hint_txt += "\n - Double click to break loop"
 				else:
@@ -753,6 +755,11 @@ static func _am_showing_point_numbers() -> bool:
 		return ProjectSettings.get_setting(SETTING_NAME_SHOW_POINT_NUMBERS)
 	return true
 
+
+static func _get_default_stroke_width() -> float:
+	if ProjectSettings.has_setting(SETTING_NAME_STROKE_WIDTH):
+		return ProjectSettings.get_setting(SETTING_NAME_STROKE_WIDTH)
+	return 10.0
 
 
 func _exit_tree():
