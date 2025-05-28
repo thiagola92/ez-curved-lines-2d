@@ -102,6 +102,16 @@ func _on_create_rect_button_pressed() -> void:
 	shape_created.emit(_get_rect_curve(), scene_root, "Rectangle")
 
 
+func _get_ellipse_curve() -> Curve2D:
+	var curve := Curve2D.new()
+	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2.ZERO, Vector2(0, ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
+	curve.add_point(Vector2(0, ellipse_ry_input.value), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
+	curve.add_point(Vector2(-ellipse_rx_input.value, 0), Vector2(0, ellipse_ry_input.value * SvgImporterDock.R_TO_CP), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
+	curve.add_point(Vector2(0, -ellipse_ry_input.value), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
+	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
+	return curve
+
+
 func _on_create_rect_button_mouse_entered() -> void:
 	set_shape_preview.emit(_get_rect_curve())
 
@@ -120,14 +130,18 @@ func _on_create_circle_button_pressed() -> void:
 		warning_dialog.popup_centered()
 		return
 
-	var curve := Curve2D.new()
-	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2.ZERO, Vector2(0, ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
-	curve.add_point(Vector2(0, ellipse_ry_input.value), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-	curve.add_point(Vector2(-ellipse_rx_input.value, 0), Vector2(0, ellipse_ry_input.value * SvgImporterDock.R_TO_CP), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
-	curve.add_point(Vector2(0, -ellipse_ry_input.value), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
 	var node_name := "Circle" if ellipse_rx_input.value == ellipse_ry_input.value else "Ellipse"
-	shape_created.emit(curve, scene_root, node_name)
+	shape_created.emit(_get_ellipse_curve(), scene_root, node_name)
+
+
+func _on_create_circle_button_mouse_entered() -> void:
+	set_shape_preview.emit(_get_ellipse_curve())
+
+
+func _on_create_circle_button_mouse_exited() -> void:
+	set_shape_preview.emit(null)
+
+
 
 
 func _on_create_empty_shape_button_pressed() -> void:
@@ -220,5 +234,3 @@ func _on_paint_order_button_5_toggled(toggled_on: bool) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
 			CurvedLines2D.PaintOrder.MARKERS_STROKE_FILL)
 	ProjectSettings.save()
-
-
