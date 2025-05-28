@@ -45,6 +45,7 @@ func _enter_tree() -> void:
 	fill_color_button.color = CurvedLines2D._get_default_fill_color()
 	find_child("StrokeCheckButton").button_pressed = CurvedLines2D._is_add_stroke_enabled()
 	find_child("FillCheckButton").button_pressed = CurvedLines2D._is_add_fill_enabled()
+	find_child("CollisionCheckButton").button_pressed = CurvedLines2D._is_add_collision_enabled()
 	if not stroke_width_input.value_focus_exited.is_connected(ProjectSettings.save):
 		stroke_width_input.value_focus_exited.connect(ProjectSettings.save)
 	if not stroke_color_button.focus_exited.is_connected(ProjectSettings.save):
@@ -164,4 +165,9 @@ func _on_stroke_check_button_toggled(toggled_on: bool) -> void:
 
 func _on_fill_check_button_toggled(toggled_on: bool) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_ADD_FILL_ENABLED, toggled_on)
+	ProjectSettings.save()
+
+
+func _on_collision_check_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_ADD_COLLISION_ENABLED, toggled_on)
 	ProjectSettings.save()

@@ -11,6 +11,7 @@ const SETTING_NAME_STROKE_COLOR := "addons/curved_lines_2d/stroke_color"
 const SETTING_NAME_FILL_COLOR := "addons/curved_lines_2d/fill_color"
 const SETTING_NAME_ADD_STROKE_ENABLED := "addons/curved_lines_2d/add_stroke_enabled"
 const SETTING_NAME_ADD_FILL_ENABLED := "addons/curved_lines_2d/add_fill_enabled"
+const SETTING_NAME_ADD_COLLISION_ENABLED := "addons/curved_lines_2d/add_collision_enabled"
 
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
@@ -101,6 +102,14 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 		undo_redo.add_do_method(line, 'set_owner', scene_root)
 		undo_redo.add_do_reference(line)
 		undo_redo.add_undo_method(new_shape, 'remove_child', line)
+
+	if _is_add_collision_enabled():
+		var collision := CollisionPolygon2D.new()
+		undo_redo.add_do_property(new_shape, 'collision_polygon', collision)
+		undo_redo.add_do_method(new_shape, 'add_child', collision, true)
+		undo_redo.add_do_method(collision, 'set_owner', scene_root)
+		undo_redo.add_do_reference(collision)
+		undo_redo.add_undo_method(new_shape, 'remove_child', collision)
 
 	undo_redo.add_do_method(self, 'select_node_reversibly', new_shape)
 	undo_redo.add_undo_method(self, 'select_node_reversibly', parent)
@@ -788,6 +797,12 @@ static func _is_add_fill_enabled() -> bool:
 	if ProjectSettings.has_setting(SETTING_NAME_ADD_FILL_ENABLED):
 		return ProjectSettings.get_setting(SETTING_NAME_ADD_FILL_ENABLED)
 	return true
+
+
+static func _is_add_collision_enabled() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_ADD_COLLISION_ENABLED):
+		return ProjectSettings.get_setting(SETTING_NAME_ADD_COLLISION_ENABLED)
+	return false
 
 
 func _exit_tree():

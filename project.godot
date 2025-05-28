@@ -8,15 +8,6 @@
 
 config_version=5
 
-[addons]
-
-curved_lines_2d/editing_enabled=true
-curved_lines_2d/hints_enabled=true
-curved_lines_2d/show_point_numbers=true
-curved_lines_2d/stroke_width=6.0
-curved_lines_2d/fill_color=Color(0.582031, 0, 0, 1)
-curved_lines_2d/stroke_color=Color(0.722656, 0.544815, 0.544815, 1)
-
 [application]
 
 config/name="EZ Curved Lines 2D"
