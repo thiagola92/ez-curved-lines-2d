@@ -3,8 +3,7 @@ extends Control
 
 class_name ScalableVectorShapeEditTab
 
-signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
-			stroke_width : int, stroke_color : Color, fill_color : Color)
+signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 
 var stroke_width_input : EditorSpinSlider
 var stroke_color_button : ColorPickerButton
@@ -37,13 +36,16 @@ func _enter_tree() -> void:
 	ellipse_ry_input = _make_number_input("Vertical Radius (RY)", 50, 1, 500, "")
 	find_child("EllipseXRadiusSliderContainer").add_child(ellipse_rx_input)
 	find_child("EllipseYRadiusSliderContainer").add_child(ellipse_ry_input)
-
 	find_child("EnableEditingCheckbox").button_pressed = CurvedLines2D._is_editing_enabled()
 	find_child("EnableHintsCheckbox").button_pressed = CurvedLines2D._are_hints_enabled()
 	find_child("EnablePointNumbersCheckbox").button_pressed = CurvedLines2D._am_showing_point_numbers()
 	stroke_width_input.value = CurvedLines2D._get_default_stroke_width()
 	stroke_width_input.value_changed.connect(_on_stroke_width_input_value_changed)
 	stroke_width_input.value_focus_exited.connect(ProjectSettings.save)
+	stroke_color_button.color = CurvedLines2D._get_default_stroke_color()
+	stroke_color_button.focus_exited.connect(ProjectSettings.save)
+	fill_color_button.color = CurvedLines2D._get_default_fill_color()
+	fill_color_button.focus_exited.connect(ProjectSettings.save)
 
 
 func _make_number_input(lbl : String, value : float, min_value : float, max_value : float, suffix : String, step := 1.0) -> EditorSpinSlider:
@@ -86,7 +88,7 @@ func _on_create_rect_button_pressed() -> void:
 		curve.add_point(Vector2(0, rect_ry_input.value), Vector2.ZERO, Vector2(0, -rect_ry_input.value *  SvgImporterDock.R_TO_CP))
 		curve.add_point(Vector2(rect_rx_input.value, 0), Vector2(-rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
 		curve.add_point(Vector2(rect_width_input.value - rect_rx_input.value, 0), Vector2.ZERO, Vector2(rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-	shape_created.emit(curve, scene_root, "Rectangle", stroke_width_input.value, stroke_color_button.color, fill_color_button.color)
+	shape_created.emit(curve, scene_root, "Rectangle")
 
 
 func _on_create_circle_button_pressed() -> void:
@@ -106,7 +108,7 @@ func _on_create_circle_button_pressed() -> void:
 	curve.add_point(Vector2(0, -ellipse_ry_input.value), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
 	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
 	var node_name := "Circle" if ellipse_rx_input.value == ellipse_ry_input.value else "Ellipse"
-	shape_created.emit(curve, scene_root, node_name, stroke_width_input.value, stroke_color_button.color, fill_color_button.color)
+	shape_created.emit(curve, scene_root, node_name)
 
 
 func _on_create_empty_shape_button_pressed() -> void:
@@ -120,7 +122,7 @@ func _on_create_empty_shape_button_pressed() -> void:
 		return
 	var curve := Curve2D.new()
 	var node_name := "Path"
-	shape_created.emit(curve, scene_root, node_name, stroke_width_input.value, stroke_color_button.color, fill_color_button.color)
+	shape_created.emit(curve, scene_root, node_name)
 
 
 func _on_enable_editing_checkbox_toggled(toggled_on: bool) -> void:
@@ -141,3 +143,10 @@ func _on_enable_point_numbers_checkbox_toggled(toggled_on: bool) -> void:
 func _on_stroke_width_input_value_changed(new_value: float) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_STROKE_WIDTH, new_value)
 
+
+func _on_fill_picker_button_color_changed(color: Color) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_FILL_COLOR, color)
+
+
+func _on_stroke_picker_button_color_changed(color: Color) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_STROKE_COLOR, color)

@@ -7,6 +7,8 @@ const SETTING_NAME_EDITING_ENABLED := "addons/curved_lines_2d/editing_enabled"
 const SETTING_NAME_HINTS_ENABLED := "addons/curved_lines_2d/hints_enabled"
 const SETTING_NAME_SHOW_POINT_NUMBERS := "addons/curved_lines_2d/show_point_numbers"
 const SETTING_NAME_STROKE_WIDTH := "addons/curved_lines_2d/stroke_width"
+const SETTING_NAME_STROKE_COLOR := "addons/curved_lines_2d/stroke_color"
+const SETTING_NAME_FILL_COLOR := "addons/curved_lines_2d/fill_color"
 
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
@@ -62,8 +64,7 @@ func select_node_reversibly(target_node : Node) -> void:
 		EditorInterface.edit_node(target_node)
 
 
-func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
-			stroke_width : int, stroke_color : Color, fill_color : Color) -> void:
+func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String) -> void:
 
 	var undo_redo := EditorInterface.get_editor_undo_redo()
 	var new_shape := ScalableVectorShape2D.new()
@@ -80,7 +81,7 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
 
 	var polygon := Polygon2D.new()
 	polygon.name = "Fill"
-	polygon.color = fill_color
+	polygon.color = _get_default_fill_color()
 	undo_redo.add_do_property(new_shape, 'polygon', polygon)
 	undo_redo.add_do_method(new_shape, 'add_child', polygon, true)
 	undo_redo.add_do_method(polygon, 'set_owner', scene_root)
@@ -89,9 +90,8 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
 
 	var line := Line2D.new()
 	line.name = "Stroke"
-	line.closed = true
-	line.default_color = stroke_color
-	line.width = stroke_width
+	line.default_color = _get_default_stroke_color()
+	line.width = _get_default_stroke_width()
 	undo_redo.add_do_property(new_shape, 'line', line)
 	undo_redo.add_do_method(new_shape, 'add_child', line, true)
 	undo_redo.add_do_method(line, 'set_owner', scene_root)
@@ -760,6 +760,19 @@ static func _get_default_stroke_width() -> float:
 	if ProjectSettings.has_setting(SETTING_NAME_STROKE_WIDTH):
 		return ProjectSettings.get_setting(SETTING_NAME_STROKE_WIDTH)
 	return 10.0
+
+
+static func _get_default_stroke_color() -> Color:
+	if ProjectSettings.has_setting(SETTING_NAME_STROKE_COLOR):
+		return ProjectSettings.get_setting(SETTING_NAME_STROKE_COLOR)
+	return Color.WHITE
+
+
+static func _get_default_fill_color() -> Color:
+	if ProjectSettings.has_setting(SETTING_NAME_FILL_COLOR):
+		return ProjectSettings.get_setting(SETTING_NAME_FILL_COLOR)
+	return Color.WHITE
+
 
 
 func _exit_tree():

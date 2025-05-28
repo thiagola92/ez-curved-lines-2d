@@ -1,8 +1,7 @@
 @tool
 extends TabContainer
 
-signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String,
-			stroke_width : int, stroke_color : Color, fill_color : Color)
+signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 
 
 const IMPORT_TAB_NAME :=  "Import SVG File"
