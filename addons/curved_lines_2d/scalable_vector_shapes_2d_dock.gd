@@ -2,7 +2,7 @@
 extends TabContainer
 
 signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
-
+signal set_shape_preview(curve : Curve2D)
 
 const IMPORT_TAB_NAME :=  "Import SVG File"
 const EDIT_TAB_NAME := "Scalable Vector Shapes"
@@ -20,6 +20,8 @@ func _enter_tree() -> void:
 	edit_tab.warning_dialog = warning_dialog
 	if not edit_tab.shape_created.is_connected(shape_created.emit):
 		edit_tab.shape_created.connect(shape_created.emit)
+	if not edit_tab.set_shape_preview.is_connected(set_shape_preview.emit):
+		edit_tab.set_shape_preview.connect(set_shape_preview.emit)
 
 
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:

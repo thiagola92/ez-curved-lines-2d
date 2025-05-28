@@ -4,6 +4,7 @@ extends Control
 class_name ScalableVectorShapeEditTab
 
 signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
+signal set_shape_preview(curve : Curve2D)
 
 var stroke_width_input : EditorSpinSlider
 var stroke_color_button : ColorPickerButton
@@ -66,18 +67,7 @@ func _make_number_input(lbl : String, value : float, min_value : float, max_valu
 	return x_slider
 
 
-func _on_create_rect_button_pressed() -> void:
-	var scene_root := EditorInterface.get_edited_scene_root()
-	if not is_instance_valid(scene_root):
-		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
-		warning_dialog.popup_centered()
-		return
-
-	if not scene_root is Node2D:
-		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
-		warning_dialog.popup_centered()
-		return
-
+func _get_rect_curve() -> Curve2D:
 	var curve := Curve2D.new()
 	if rect_rx_input.value == 0 and rect_ry_input.value == 0:
 		curve.add_point(Vector2.ZERO)
@@ -95,7 +85,29 @@ func _on_create_rect_button_pressed() -> void:
 		curve.add_point(Vector2(0, rect_ry_input.value), Vector2.ZERO, Vector2(0, -rect_ry_input.value *  SvgImporterDock.R_TO_CP))
 		curve.add_point(Vector2(rect_rx_input.value, 0), Vector2(-rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
 		curve.add_point(Vector2(rect_width_input.value - rect_rx_input.value, 0), Vector2.ZERO, Vector2(rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-	shape_created.emit(curve, scene_root, "Rectangle")
+	return curve
+
+
+func _on_create_rect_button_pressed() -> void:
+	var scene_root := EditorInterface.get_edited_scene_root()
+	if not is_instance_valid(scene_root):
+		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+		warning_dialog.popup_centered()
+		return
+
+	if not scene_root is Node2D:
+		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+		warning_dialog.popup_centered()
+		return
+	shape_created.emit(_get_rect_curve(), scene_root, "Rectangle")
+
+
+func _on_create_rect_button_mouse_entered() -> void:
+	set_shape_preview.emit(_get_rect_curve())
+
+
+func _on_create_rect_button_mouse_exited() -> void:
+	set_shape_preview.emit(null)
 
 
 func _on_create_circle_button_pressed() -> void:
@@ -208,3 +220,5 @@ func _on_paint_order_button_5_toggled(toggled_on: bool) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
 			CurvedLines2D.PaintOrder.MARKERS_STROKE_FILL)
 	ProjectSettings.save()
+
+
