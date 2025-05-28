@@ -12,6 +12,7 @@ const SETTING_NAME_FILL_COLOR := "addons/curved_lines_2d/fill_color"
 const SETTING_NAME_ADD_STROKE_ENABLED := "addons/curved_lines_2d/add_stroke_enabled"
 const SETTING_NAME_ADD_FILL_ENABLED := "addons/curved_lines_2d/add_fill_enabled"
 const SETTING_NAME_ADD_COLLISION_ENABLED := "addons/curved_lines_2d/add_collision_enabled"
+const SETTING_NAME_PAINT_ORDER := "addons/curved_lines_2d/paint_order"
 
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
@@ -21,12 +22,30 @@ const META_NAME_SELECT_HINT := "_select_hint_"
 
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
+enum PaintOrder {
+	FILL_STROKE_MARKERS,
+	STROKE_FILL_MARKERS,
+	FILL_MARKERS_STROKE,
+	MARKERS_FILL_STROKE,
+	STROKE_MARKERS_FILL,
+	MARKERS_STROKE_FILL
+}
+enum UndoRedoEntry { UNDOS, DOS, NAME, DO_PROPS, UNDO_PROPS }
+
+const PAINT_ORDER_MAP := {
+	PaintOrder.FILL_STROKE_MARKERS: ['_add_fill_to_created_shape', '_add_stroke_to_created_shape', '_add_collision_to_created_shape'],
+	PaintOrder.STROKE_FILL_MARKERS: ['_add_stroke_to_created_shape', '_add_fill_to_created_shape', '_add_collision_to_created_shape'],
+	PaintOrder.FILL_MARKERS_STROKE: ['_add_fill_to_created_shape', '_add_collision_to_created_shape', '_add_stroke_to_created_shape'],
+	PaintOrder.MARKERS_FILL_STROKE: ['_add_collision_to_created_shape', '_add_fill_to_created_shape', '_add_stroke_to_created_shape'],
+	PaintOrder.STROKE_MARKERS_FILL: ['_add_stroke_to_created_shape', '_add_collision_to_created_shape', '_add_fill_to_created_shape'],
+	PaintOrder.MARKERS_STROKE_FILL: ['_add_collision_to_created_shape', '_add_stroke_to_created_shape', '_add_fill_to_created_shape']
+}
 var plugin : Line2DGeneratorInspectorPlugin
 var scalable_vector_shapes_2d_dock
 var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
 var in_undo_redo_transaction := false
-enum UndoRedoEntry { UNDOS, DOS, NAME, DO_PROPS, UNDO_PROPS }
+
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
 	UndoRedoEntry.DOS: [],
@@ -68,7 +87,6 @@ func select_node_reversibly(target_node : Node) -> void:
 
 
 func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String) -> void:
-
 	var undo_redo := EditorInterface.get_editor_undo_redo()
 	var new_shape := ScalableVectorShape2D.new()
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
@@ -81,7 +99,14 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
 	undo_redo.add_do_reference(new_shape)
 	undo_redo.add_undo_method(parent, 'remove_child', new_shape)
+	for draw_fn in PAINT_ORDER_MAP[_get_default_paint_order()]:
+		call(draw_fn, new_shape, scene_root)
+	undo_redo.add_do_method(self, 'select_node_reversibly', new_shape)
+	undo_redo.add_undo_method(self, 'select_node_reversibly', parent)
+	undo_redo.commit_action()
 
+
+func _add_fill_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
 	if _is_add_fill_enabled():
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
@@ -92,6 +117,8 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 		undo_redo.add_do_reference(polygon)
 		undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
 
+
+func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
 	if _is_add_stroke_enabled():
 		var line := Line2D.new()
 		line.name = "Stroke"
@@ -103,6 +130,8 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 		undo_redo.add_do_reference(line)
 		undo_redo.add_undo_method(new_shape, 'remove_child', line)
 
+
+func _add_collision_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
 	if _is_add_collision_enabled():
 		var collision := CollisionPolygon2D.new()
 		undo_redo.add_do_property(new_shape, 'collision_polygon', collision)
@@ -110,10 +139,6 @@ func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 		undo_redo.add_do_method(collision, 'set_owner', scene_root)
 		undo_redo.add_do_reference(collision)
 		undo_redo.add_undo_method(new_shape, 'remove_child', collision)
-
-	undo_redo.add_do_method(self, 'select_node_reversibly', new_shape)
-	undo_redo.add_undo_method(self, 'select_node_reversibly', parent)
-	undo_redo.commit_action()
 
 
 func _on_selection_changed():
@@ -803,6 +828,12 @@ static func _is_add_collision_enabled() -> bool:
 	if ProjectSettings.has_setting(SETTING_NAME_ADD_COLLISION_ENABLED):
 		return ProjectSettings.get_setting(SETTING_NAME_ADD_COLLISION_ENABLED)
 	return false
+
+
+static func _get_default_paint_order() -> PaintOrder:
+	if ProjectSettings.has_setting(SETTING_NAME_PAINT_ORDER):
+		return ProjectSettings.get_setting(SETTING_NAME_PAINT_ORDER)
+	return PaintOrder.FILL_STROKE_MARKERS
 
 
 func _exit_tree():

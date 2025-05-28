@@ -52,6 +52,7 @@ func _enter_tree() -> void:
 		stroke_color_button.focus_exited.connect(ProjectSettings.save)
 	if not fill_color_button.focus_exited.is_connected(ProjectSettings.save):
 		fill_color_button.focus_exited.connect(ProjectSettings.save)
+	find_children("PaintOrderButton*")[CurvedLines2D._get_default_paint_order()].button_pressed = true
 
 
 func _make_number_input(lbl : String, value : float, min_value : float, max_value : float, suffix : String, step := 1.0) -> EditorSpinSlider:
@@ -170,4 +171,40 @@ func _on_fill_check_button_toggled(toggled_on: bool) -> void:
 
 func _on_collision_check_button_toggled(toggled_on: bool) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_ADD_COLLISION_ENABLED, toggled_on)
+	ProjectSettings.save()
+
+
+func _on_paint_order_button_0_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
+			CurvedLines2D.PaintOrder.FILL_STROKE_MARKERS)
+	ProjectSettings.save()
+
+
+func _on_paint_order_button_1_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
+			CurvedLines2D.PaintOrder.STROKE_FILL_MARKERS)
+	ProjectSettings.save()
+
+
+func _on_paint_order_button_2_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
+			CurvedLines2D.PaintOrder.FILL_MARKERS_STROKE)
+	ProjectSettings.save()
+
+
+func _on_paint_order_button_3_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
+			CurvedLines2D.PaintOrder.MARKERS_FILL_STROKE)
+	ProjectSettings.save()
+
+
+func _on_paint_order_button_4_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
+			CurvedLines2D.PaintOrder.STROKE_MARKERS_FILL)
+	ProjectSettings.save()
+
+
+func _on_paint_order_button_5_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
+			CurvedLines2D.PaintOrder.MARKERS_STROKE_FILL)
 	ProjectSettings.save()
