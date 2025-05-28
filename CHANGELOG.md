@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.2.1 - 2025-05-28
+
+### Added
+- Adds easier to use forms for Stroke, Fill and Collision shape to the `ScalableVectorShape2D` inspector
+- Adds project settings for defaults like stroke width, stroke and fill colors, and paint order
+- Separates the point numbers from the hint labels
+- Saves project settings for enabling and disabling hints and viewport editing
+- Shows a preview of the shape which is about to be added via the bottom panel
+- Explanatory tooltips for all the fields and options that are not self-explanatory enough
+
+
 ## 2.1.3 - 2025-05-24
 
 ### Added
