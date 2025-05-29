@@ -40,9 +40,9 @@ fill_to = Vector2(0.957265, 1)
 
 [node name="Rectangle" type="Node2D" node_paths=PackedStringArray("polygon", "line")]
 script = ExtResource("1_0qe1d")
-curve = SubResource("Curve2D_jr52a")
 polygon = NodePath("Fill")
 line = NodePath("Stroke")
+curve = SubResource("Curve2D_jr52a")
 
 [node name="Fill" type="Polygon2D" parent="."]
 show_behind_parent = true
@@ -59,9 +59,9 @@ default_color = Color(0.129412, 0.145098, 0.196078, 1)
 [node name="Rectangle2" type="Node2D" parent="." node_paths=PackedStringArray("polygon", "line")]
 position = Vector2(63.5, 65)
 script = ExtResource("1_0qe1d")
-curve = SubResource("Curve2D_2027v")
 polygon = NodePath("Fill")
 line = NodePath("Stroke")
+curve = SubResource("Curve2D_2027v")
 
 [node name="Fill" type="Polygon2D" parent="Rectangle2"]
 show_behind_parent = true
@@ -86,8 +86,8 @@ position = Vector2(63.5, -49)
 rotation = 0.800018
 scale = Vector2(0.564941, 0.868743)
 script = ExtResource("1_0qe1d")
-curve = SubResource("Curve2D_bi08n")
 polygon = NodePath("Polygon2D")
+curve = SubResource("Curve2D_bi08n")
 shape_hint_color = Color(0.196078, 0.803922, 0.196078, 0.27451)
 metadata/_custom_type_script = "uid://de3jpss66xjfh"
 

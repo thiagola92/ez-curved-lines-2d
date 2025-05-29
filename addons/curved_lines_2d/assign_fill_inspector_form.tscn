@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://53oqf8j7uyuu"]
+[gd_scene load_steps=12 format=3 uid="uid://53oqf8j7uyuu"]
 
 [ext_resource type="Texture2D" uid="uid://cc8salyqmquir" path="res://addons/curved_lines_2d/Collapse.svg" id="1_2eiat"]
 [ext_resource type="Script" uid="uid://b1ii4843yuwkw" path="res://addons/curved_lines_2d/assign_fill_inspector_form.gd" id="1_ogtsd"]
@@ -28,6 +28,10 @@ region = Rect2(32, 0, 32, 32)
 [sub_resource type="AtlasTexture" id="AtlasTexture_7rdpo"]
 atlas = ExtResource("4_d26vq")
 region = Rect2(65, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_alhox"]
+atlas = ExtResource("4_d26vq")
+region = Rect2(96, 0, 32, 32)
 
 [node name="AssignFillInspectorForm" type="VBoxContainer"]
 anchors_preset = 15
@@ -140,6 +144,22 @@ keep_pressed_outside = true
 button_group = SubResource("ButtonGroup_6uned")
 icon = SubResource("AtlasTexture_7rdpo")
 
+[node name="OtherTextureToggleButton" type="Button" parent="GradientFieldContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "This disabled toggle is active if another type of texture is applied to the Polygon2D"
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = ExtResource("3_alhox")
+disabled = true
+toggle_mode = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_6uned")
+icon = SubResource("AtlasTexture_alhox")
+
 [node name="ButtonContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
 
@@ -185,8 +205,8 @@ text = "Edit Polygon2D"
 
 [connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
 [connection signal="color_changed" from="FillColorFieldContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
-[connection signal="toggled" from="GradientFieldContainer/HBoxContainer/RemoveGradientToggleButton" to="." method="_on_remove_gradient_toggle_button_toggled"]
-[connection signal="toggled" from="GradientFieldContainer/HBoxContainer/LinearGradientToggleButton" to="." method="_on_linear_gradient_toggle_button_toggled"]
-[connection signal="toggled" from="GradientFieldContainer/HBoxContainer/RadialGradientToggleButton" to="." method="_on_radial_gradient_toggle_button_toggled"]
+[connection signal="button_down" from="GradientFieldContainer/HBoxContainer/RemoveGradientToggleButton" to="." method="_on_remove_gradient_toggle_button_button_down"]
+[connection signal="button_down" from="GradientFieldContainer/HBoxContainer/LinearGradientToggleButton" to="." method="_on_linear_gradient_toggle_button_button_down"]
+[connection signal="button_down" from="GradientFieldContainer/HBoxContainer/RadialGradientToggleButton" to="." method="_on_radial_gradient_toggle_button_button_down"]
 [connection signal="pressed" from="ButtonContainer/CreateFillButton" to="." method="_on_create_fill_button_pressed"]
 [connection signal="pressed" from="ButtonContainer2/GotoPolygon2DButton" to="." method="_on_goto_polygon_2d_button_pressed"]

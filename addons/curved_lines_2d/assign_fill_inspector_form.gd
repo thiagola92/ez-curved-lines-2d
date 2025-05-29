@@ -15,7 +15,7 @@ var color_button : ColorPickerButton
 var remove_gradient_toggle_button : Button
 var linear_gradient_toggle_button : Button
 var radial_gradient_toggle_button : Button
-
+var other_texture_toggle_button : Button
 
 func _enter_tree() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
@@ -29,6 +29,7 @@ func _enter_tree() -> void:
 	remove_gradient_toggle_button = find_child("RemoveGradientToggleButton")
 	linear_gradient_toggle_button = find_child("LinearGradientToggleButton")
 	radial_gradient_toggle_button = find_child("RadialGradientToggleButton")
+	other_texture_toggle_button = find_child("OtherTextureToggleButton")
 	scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
 	_on_svs_assignment_changed()
@@ -50,7 +51,7 @@ func _on_svs_assignment_changed() -> void:
 			else:
 				linear_gradient_toggle_button.button_pressed = true
 		elif scalable_vector_shape_2d.polygon.texture:
-			print("TODO: determine what to do when a non-gradient texture is toggled")
+			other_texture_toggle_button.button_pressed = true
 		else:
 			remove_gradient_toggle_button.button_pressed = true
 	else:
@@ -114,21 +115,29 @@ func _on_title_button_toggled(toggled_on: bool) -> void:
 			n.hide()
 
 
-func _on_remove_gradient_toggle_button_toggled(toggled_on: bool) -> void:
-	if not toggled_on:
-		return
+func _set_texture(texture : Texture2D, texture_offset := Vector2.ZERO) -> void:
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Set texture for %s" % str(scalable_vector_shape_2d))
+	undo_redo.add_do_property(scalable_vector_shape_2d.polygon, 'texture', texture)
+	undo_redo.add_do_property(scalable_vector_shape_2d.polygon, 'texture_offset', texture_offset)
+	undo_redo.add_do_method(self, '_on_svs_assignment_changed')
+	undo_redo.add_undo_property(scalable_vector_shape_2d.polygon, 'texture', scalable_vector_shape_2d.polygon.texture)
+	undo_redo.add_undo_property(scalable_vector_shape_2d.polygon, 'texture_offset', scalable_vector_shape_2d.polygon.texture_offset)
+	undo_redo.add_undo_method(self, '_on_svs_assignment_changed')
+	undo_redo.commit_action()
+
+
+func _on_remove_gradient_toggle_button_button_down() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
 	if not is_instance_valid(scalable_vector_shape_2d.polygon):
 		return
 
-	# TODO use Undo/Redo here
-	scalable_vector_shape_2d.polygon.texture = null
+	_set_texture(null)
 
 
-func _on_linear_gradient_toggle_button_toggled(toggled_on: bool) -> void:
-	if not toggled_on:
-		return
+
+func _on_linear_gradient_toggle_button_button_down() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
 	if not is_instance_valid(scalable_vector_shape_2d.polygon):
@@ -137,19 +146,15 @@ func _on_linear_gradient_toggle_button_toggled(toggled_on: bool) -> void:
 				scalable_vector_shape_2d.polygon.texture.fill == GradientTexture2D.FILL_LINEAR):
 		return
 
-	# TODO use Undo/Redo here & extract func
 	var texture := GradientTexture2D.new()
 	var box := scalable_vector_shape_2d.get_bounding_rect()
 	texture.width = ceil(box.size.x)
 	texture.height = ceil(box.size.y)
 	texture.gradient = Gradient.new()
-	scalable_vector_shape_2d.polygon.texture = texture
-	scalable_vector_shape_2d.polygon.texture_offset = -box.position
+	_set_texture(texture, -box.position)
 
 
-func _on_radial_gradient_toggle_button_toggled(toggled_on: bool) -> void:
-	if not toggled_on:
-		return
+func _on_radial_gradient_toggle_button_button_down() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
 	if not is_instance_valid(scalable_vector_shape_2d.polygon):
@@ -158,13 +163,14 @@ func _on_radial_gradient_toggle_button_toggled(toggled_on: bool) -> void:
 				scalable_vector_shape_2d.polygon.texture.fill == GradientTexture2D.FILL_RADIAL):
 		return
 
-	# TODO use Undo/Redo here & extract func
 	var texture := GradientTexture2D.new()
 	var box := scalable_vector_shape_2d.get_bounding_rect()
 	texture.width = ceil(box.size.x)
 	texture.height = ceil(box.size.y)
 	texture.gradient = Gradient.new()
 	texture.fill = GradientTexture2D.FILL_RADIAL
-	# TODO texture.fill_from = box.position / box.size align with box center
-	scalable_vector_shape_2d.polygon.texture = texture
-	scalable_vector_shape_2d.polygon.texture_offset = -box.position
+	texture.fill_from = -box.position / box.size
+	texture.fill_to = (scalable_vector_shape_2d.get_farthest_point() - box.position) / box.size
+	texture.gradient.colors = [Color.WHITE, Color.BLACK]
+	texture.gradient.offsets = [0.0, 1.0]
+	_set_texture(texture, -box.position)

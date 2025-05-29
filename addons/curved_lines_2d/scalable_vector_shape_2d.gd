@@ -213,6 +213,14 @@ func get_poly_points() -> Array:
 	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)
 
 
+func get_farthest_point(from_local_pos := Vector2.ZERO) -> Vector2:
+	var farthest_point = from_local_pos
+	for p in curve.tessellate(max_stages, tolerance_degrees):
+		if p.distance_to(from_local_pos) > farthest_point.distance_to(from_local_pos):
+			farthest_point = p
+	return farthest_point
+
+
 func is_curve_closed() -> bool:
 	var n = curve.point_count
 	return n > 2 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
