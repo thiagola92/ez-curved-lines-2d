@@ -95,6 +95,7 @@ mouse_filter = 0
 text = "Gradient*"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="GradientFieldContainer"]
+clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -160,6 +161,26 @@ keep_pressed_outside = true
 button_group = SubResource("ButtonGroup_6uned")
 icon = SubResource("AtlasTexture_alhox")
 
+[node name="GradientStopColorButtonContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GradientStopColorButtonContainer"]
+clip_contents = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+tooltip_text = "- Change the stop colors of the gradient
+- To add or remove color-stops, use the guide and handles in the 2D Viewport
+- Or click the `Edit Polgyon2D` button below and use the built-in texture editor"
+mouse_filter = 0
+text = "Stop Colors*"
+
+[node name="StopColorButtonsContainer" type="HFlowContainer" parent="GradientStopColorButtonContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="ButtonContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
 
@@ -170,7 +191,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "This will create a new Polygon2D node and assign it to the polygon property of this ScalableVectorScape2D."
 mouse_filter = 0
-text = "Add Fill"
+text = "Add Fill*"
 
 [node name="CreateFillButton" type="Button" parent="ButtonContainer"]
 layout_mode = 2
