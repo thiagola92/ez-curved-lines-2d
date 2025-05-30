@@ -597,6 +597,50 @@ func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mou
 		undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection.curve, 'set_point_out', idx_1, -current_selection.curve.get_point_in(idx)])
 
 
+func _update_gradient_from_position(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Move gradient from position for %s" % str(svs))
+		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS].append([svs.polygon.texture, 'fill_from',
+				svs.polygon.texture.fill_from])
+	var box := svs.get_bounding_rect()
+	svs.polygon.texture.fill_from = (svs.to_local(mouse_pos) - box.position) / box.size
+	undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [[
+		svs.polygon.texture, 'fill_from', svs.polygon.texture.fill_from
+	]]
+
+
+func _update_gradient_to_position(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Move gradient from position for %s" % str(svs))
+		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS].append([svs.polygon.texture, 'fill_to',
+				svs.polygon.texture.fill_to])
+	var box := svs.get_bounding_rect()
+	svs.polygon.texture.fill_to = (svs.to_local(mouse_pos) - box.position) / box.size
+	undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [[
+		svs.polygon.texture, 'fill_to', svs.polygon.texture.fill_to
+	]]
+
+
+func _get_gradient_offset(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> float:
+	var box := svs.get_bounding_rect()
+	var gradient_tex : GradientTexture2D = svs.polygon.texture
+	var p := ((svs.to_local(mouse_pos) - box.position) / box.size)
+	var p1 := Geometry2D.get_closest_point_to_segment(p, gradient_tex.fill_from, gradient_tex.fill_to)
+	return p1.distance_to(gradient_tex.fill_from) / gradient_tex.fill_from.distance_to(gradient_tex.fill_to)
+
+
+func _update_gradient_stop_color_pos(svs : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
+	var new_offset := _get_gradient_offset(svs, mouse_pos)
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Move gradient offset  %d on %s" % [idx, svs])
+		undo_redo_transaction[UndoRedoEntry.UNDOS].append([svs.polygon.texture.gradient,
+				'set_offset', idx, svs.polygon.texture.gradient.offsets[idx]])
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[
+			svs.polygon.texture.gradient, 'set_offset', idx, new_offset
+	]]
+	svs.polygon.texture.gradient.set_offset(idx, new_offset)
+
+
 func _update_curve_cp_out_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
 	if idx == current_selection.curve.point_count - 1:
 		idx = 0
@@ -850,6 +894,13 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					_update_curve_cp_in_position(current_selection, mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
 				elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
 					_update_curve_cp_out_position(current_selection, mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
+				elif current_selection.has_meta(META_NAME_HOVER_GRADIENT_FROM):
+					_update_gradient_from_position(current_selection, mouse_pos)
+				elif current_selection.has_meta(META_NAME_HOVER_GRADIENT_TO):
+					_update_gradient_to_position(current_selection, mouse_pos)
+				elif current_selection.has_meta(META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX):
+					_update_gradient_stop_color_pos(current_selection, mouse_pos,
+							current_selection.get_meta(META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX))
 				update_overlays()
 				return true
 		else:
