@@ -187,6 +187,8 @@ func _on_linear_gradient_toggle_button_button_down() -> void:
 	var box := scalable_vector_shape_2d.get_bounding_rect()
 	var texture := _initialize_gradient(box)
 	texture.fill = GradientTexture2D.FILL_LINEAR
+	texture.fill_from = Vector2(0.0, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
 	_set_texture(texture, -box.position)
 
 

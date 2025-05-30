@@ -250,6 +250,31 @@ func get_curve_handles() -> Array:
 	return result
 
 
+func get_gradient_handles() -> Dictionary:
+	if not (
+		is_instance_valid(polygon) and polygon.texture is GradientTexture2D
+	):
+		return {}
+	var gradient_tex : GradientTexture2D = polygon.texture
+	var box := get_bounding_rect()
+	var stop_colors = Array(
+		gradient_tex.gradient.colors if gradient_tex.gradient.colors else [
+			Color.WHITE, Color.BLACK
+		]
+	)
+	#gradient_tex.gradient.offsets
+	var result := {
+		"fill_from": gradient_tex.fill_from,
+		"fill_to": gradient_tex.fill_to,
+		"fill_from_pos": to_global((gradient_tex.fill_from * box.size) + box.position),
+		"fill_to_pos":  to_global((gradient_tex.fill_to * box.size) + box.position),
+		"start_color": stop_colors[0] * polygon.color,
+		"end_color": stop_colors[stop_colors.size() - 1] * polygon.color
+	}
+
+	return result
+
+
 func set_global_curve_point_position(global_pos : Vector2, point_idx : int) -> void:
 	if curve.point_count > point_idx:
 		curve.set_point_position(point_idx, to_local(global_pos))

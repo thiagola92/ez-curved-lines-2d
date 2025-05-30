@@ -229,7 +229,7 @@ func _handle_has_hover(svs : ScalableVectorShape2D) -> bool:
 
 
 func _draw_control_point_handle(viewport_control : Control, svs : ScalableVectorShape2D,
-		handle : Dictionary, prefix : String, is_hovered : bool, self_is_hovered : bool) -> void:
+		handle : Dictionary, prefix : String, is_hovered : bool, self_is_hovered : bool) -> String:
 	if handle[prefix].length():
 		var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 		var width := 2 if is_hovered else 1
@@ -242,8 +242,8 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				hint_txt += "\n - Drag to move\n - Right click to delete"
 				hint_txt += "\n - Hold Shift + Drag to move mirrored"
-
-			_draw_hint(viewport_control, hint_txt)
+			return hint_txt
+	return ""
 
 
 func _draw_hint(viewport_control : Control, txt : String) -> void:
@@ -289,9 +289,9 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 		var cp_out_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_OUT_IDX, -1) == i
 		var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 		var width := 2 if is_hovered else 1
-		_draw_control_point_handle(viewport_control, svs, handle, 'in',
+		hint_txt += _draw_control_point_handle(viewport_control, svs, handle, 'in',
 				is_hovered or cp_in_is_hovered, cp_in_is_hovered)
-		_draw_control_point_handle(viewport_control, svs, handle, 'out',
+		hint_txt +=_draw_control_point_handle(viewport_control, svs, handle, 'out',
 				is_hovered or cp_out_is_hovered, cp_out_is_hovered)
 		if handle['mirrored']:
 			# mirrored handles
@@ -327,6 +327,21 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 					):
 						hint_txt += "\n - Double click to close loop"
 				hint_txt += "\n - Hold Shift + Drag to create curve handles"
+	var gradient_handles := svs.get_gradient_handles()
+	if not gradient_handles.is_empty():
+		var p1 := _vp_transform(gradient_handles['fill_from_pos'])
+		var p2 := _vp_transform(gradient_handles['fill_to_pos'])
+		# TODO var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
+		# TODO var width := 2 if is_hovered else 1
+		viewport_control.draw_circle(p1 + Vector2(2,2), 6, Color(0.0,0.0,0.0, 0.2), true, -1, true)
+		viewport_control.draw_circle(p2 + Vector2(2,2), 6, Color(0.0,0.0,0.0, 0.2), true, -1, true)
+		viewport_control.draw_line(p1, p2, Color.WEB_GRAY, .5, true)
+		viewport_control.draw_circle(p1, 5, gradient_handles["start_color"])
+		viewport_control.draw_circle(p1, 5, Color.WHITE, false, 0.5, true)
+
+		viewport_control.draw_circle(p2, 5, gradient_handles["end_color"])
+		viewport_control.draw_circle(p2, 5, Color.WHITE, false, 0.5, true)
+
 
 	if not point_txt.is_empty():
 		_draw_point_number(viewport_control, point_hint_pos, point_txt)
