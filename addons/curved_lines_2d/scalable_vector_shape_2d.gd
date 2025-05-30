@@ -141,6 +141,11 @@ func curve_changed():
 		line.closed = is_curve_closed()
 	if is_instance_valid(polygon):
 		polygon.polygon = new_points
+		if polygon.texture is GradientTexture2D:
+			var box := get_bounding_rect()
+			polygon.texture_offset = -box.position
+			polygon.texture.width = box.size.x
+			polygon.texture.height = box.size.y
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
