@@ -327,20 +327,27 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 					):
 						hint_txt += "\n - Double click to close loop"
 				hint_txt += "\n - Hold Shift + Drag to create curve handles"
+
 	var gradient_handles := svs.get_gradient_handles()
 	if not gradient_handles.is_empty():
 		var p1 := _vp_transform(gradient_handles['fill_from_pos'])
 		var p2 := _vp_transform(gradient_handles['fill_to_pos'])
+		var dir := p1.direction_to(p2)
+		for p : Vector2 in gradient_handles['stop_positions']:
+			viewport_control.draw_circle(_vp_transform(p) + Vector2(2,2), 6, Color(0.0,0.0,0.0, 0.2), true, -1, true)
+
+		viewport_control.draw_line(p1, p2, Color.WEB_GRAY, .5, true)
+
+		for idx in range(gradient_handles['stop_positions'].size()):
+			var p := _vp_transform(gradient_handles['stop_positions'][idx])
+			viewport_control.draw_circle(p, 5, gradient_handles["stop_colors"][idx])
+			viewport_control.draw_circle(p, 5, Color.WEB_GRAY, false, 0.5, true)
+
 		# TODO var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 		# TODO var width := 2 if is_hovered else 1
-		viewport_control.draw_circle(p1 + Vector2(2,2), 6, Color(0.0,0.0,0.0, 0.2), true, -1, true)
-		viewport_control.draw_circle(p2 + Vector2(2,2), 6, Color(0.0,0.0,0.0, 0.2), true, -1, true)
-		viewport_control.draw_line(p1, p2, Color.WEB_GRAY, .5, true)
-		viewport_control.draw_circle(p1, 5, gradient_handles["start_color"])
-		viewport_control.draw_circle(p1, 5, Color.WHITE, false, 0.5, true)
+		_draw_crosshair(viewport_control, p1 , 8, 8)
+		_draw_crosshair(viewport_control, p2 , 8, 8)
 
-		viewport_control.draw_circle(p2, 5, gradient_handles["end_color"])
-		viewport_control.draw_circle(p2, 5, Color.WHITE, false, 0.5, true)
 
 
 	if not point_txt.is_empty():
@@ -386,17 +393,18 @@ func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D,
 		viewport_control.draw_dashed_line(last_p, points[0], color, 1, 5.0, true, true)
 
 
-func _draw_crosshair(viewport_control : Control, p : Vector2) -> void:
+func _draw_crosshair(viewport_control : Control, p : Vector2, orbit := 2.0, outer_orbit := 6.0) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
-	viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WEB_GRAY, 2)
-	viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WEB_GRAY,2)
-	viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WEB_GRAY, 2)
-	viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WEB_GRAY, 2)
-	viewport_control.draw_line(p - 8 * Vector2.UP, p - 2 * Vector2.UP, Color.WHITE)
-	viewport_control.draw_line(p - 8 * Vector2.RIGHT, p - 2 * Vector2.RIGHT, Color.WHITE)
-	viewport_control.draw_line(p - 8 * Vector2.DOWN, p - 2 * Vector2.DOWN, Color.WHITE)
-	viewport_control.draw_line(p - 8 * Vector2.LEFT, p - 2 * Vector2.LEFT, Color.WHITE)
+	var line_len = outer_orbit + orbit
+	viewport_control.draw_line(p - line_len * Vector2.UP, p - orbit * Vector2.UP, Color.WEB_GRAY, 2)
+	viewport_control.draw_line(p - line_len * Vector2.RIGHT, p - orbit * Vector2.RIGHT, Color.WEB_GRAY,2)
+	viewport_control.draw_line(p - line_len * Vector2.DOWN, p - orbit * Vector2.DOWN, Color.WEB_GRAY, 2)
+	viewport_control.draw_line(p - line_len * Vector2.LEFT, p - orbit * Vector2.LEFT, Color.WEB_GRAY, 2)
+	viewport_control.draw_line(p - line_len * Vector2.UP, p - orbit * Vector2.UP, Color.WHITE)
+	viewport_control.draw_line(p - line_len * Vector2.RIGHT, p - orbit * Vector2.RIGHT, Color.WHITE)
+	viewport_control.draw_line(p - line_len * Vector2.DOWN, p - orbit * Vector2.DOWN, Color.WHITE)
+	viewport_control.draw_line(p - line_len * Vector2.LEFT, p - orbit * Vector2.LEFT, Color.WHITE)
 
 
 func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2D) -> void:

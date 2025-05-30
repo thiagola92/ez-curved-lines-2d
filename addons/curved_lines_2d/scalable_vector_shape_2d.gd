@@ -261,15 +261,21 @@ func get_gradient_handles() -> Dictionary:
 		gradient_tex.gradient.colors if gradient_tex.gradient.colors else [
 			Color.WHITE, Color.BLACK
 		]
-	)
-	#gradient_tex.gradient.offsets
+	).map(func(gc): return gc * polygon.color)
+	var stop_positions = Array(gradient_tex.gradient.offsets).map(
+		func(offs): return (gradient_tex.fill_to - gradient_tex.fill_from) * offs
+	).map(func(offs_p): return gradient_tex.fill_from + offs_p
+	).map(func(offs_p1): return to_global((offs_p1 * box.size) + box.position))
+
 	var result := {
 		"fill_from": gradient_tex.fill_from,
 		"fill_to": gradient_tex.fill_to,
 		"fill_from_pos": to_global((gradient_tex.fill_from * box.size) + box.position),
 		"fill_to_pos":  to_global((gradient_tex.fill_to * box.size) + box.position),
 		"start_color": stop_colors[0] * polygon.color,
-		"end_color": stop_colors[stop_colors.size() - 1] * polygon.color
+		"end_color": stop_colors[stop_colors.size() - 1] * polygon.color,
+		"stop_positions": stop_positions,
+		"stop_colors": stop_colors
 	}
 
 	return result
