@@ -12,6 +12,11 @@ var expand_icon : Texture2D
 var collapsible_siblings : Array[Node]
 var color_button : ColorPickerButton
 
+var remove_gradient_toggle_button : Button
+var linear_gradient_toggle_button : Button
+var radial_gradient_toggle_button : Button
+var other_texture_toggle_button : Button
+
 func _enter_tree() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
@@ -21,6 +26,10 @@ func _enter_tree() -> void:
 	select_button = find_child("GotoPolygon2DButton")
 	title_button = find_child("TitleButton")
 	color_button = find_child("ColorPickerButton")
+	remove_gradient_toggle_button = find_child("RemoveGradientToggleButton")
+	linear_gradient_toggle_button = find_child("LinearGradientToggleButton")
+	radial_gradient_toggle_button = find_child("RadialGradientToggleButton")
+	other_texture_toggle_button = find_child("OtherTextureToggleButton")
 	scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
 	_on_svs_assignment_changed()
@@ -30,15 +39,38 @@ func _on_svs_assignment_changed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.polygon):
 		create_button.get_parent().hide()
 		select_button.get_parent().show()
+		find_child("GradientFieldContainer").show()
+		find_child("GradientStopColorButtonContainer").show()
 		create_button.disabled = true
 		select_button.disabled = false
 		color_button.color = scalable_vector_shape_2d.polygon.color
+		radial_gradient_toggle_button.disabled = false
+		linear_gradient_toggle_button.disabled = false
+		remove_gradient_toggle_button.disabled = false
+		if scalable_vector_shape_2d.polygon.texture is GradientTexture2D:
+			if scalable_vector_shape_2d.polygon.texture.fill == GradientTexture2D.FILL_RADIAL:
+				radial_gradient_toggle_button.button_pressed = true
+			else:
+				linear_gradient_toggle_button.button_pressed = true
+			_set_gradient_stop_color_buttons()
+		elif scalable_vector_shape_2d.polygon.texture:
+			other_texture_toggle_button.button_pressed = true
+			find_child("GradientStopColorButtonContainer").hide()
+		else:
+			remove_gradient_toggle_button.button_pressed = true
+			find_child("GradientStopColorButtonContainer").hide()
 	else:
 		create_button.get_parent().show()
 		select_button.get_parent().hide()
+		find_child("GradientFieldContainer").hide()
+		find_child("GradientStopColorButtonContainer").hide()
 		create_button.disabled = false
 		select_button.disabled = true
 		color_button.color = CurvedLines2D._get_default_fill_color()
+		radial_gradient_toggle_button.disabled = true
+		linear_gradient_toggle_button.disabled = true
+		remove_gradient_toggle_button.disabled = true
+		remove_gradient_toggle_button.button_pressed = true
 
 
 func _on_color_picker_button_color_changed(color: Color) -> void:
@@ -84,7 +116,104 @@ func _on_title_button_toggled(toggled_on: bool) -> void:
 		title_button.icon = collapse_icon
 		for n in collapsible_siblings:
 			n.show()
+		_on_svs_assignment_changed()
 	else:
 		title_button.icon = expand_icon
 		for n in collapsible_siblings:
 			n.hide()
+
+
+func _set_texture(texture : Texture2D, texture_offset := Vector2.ZERO) -> void:
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Set texture for %s" % str(scalable_vector_shape_2d))
+	undo_redo.add_do_property(scalable_vector_shape_2d.polygon, 'texture', texture)
+	undo_redo.add_do_property(scalable_vector_shape_2d.polygon, 'texture_offset', texture_offset)
+	undo_redo.add_do_method(self, '_on_svs_assignment_changed')
+	undo_redo.add_undo_property(scalable_vector_shape_2d.polygon, 'texture', scalable_vector_shape_2d.polygon.texture)
+	undo_redo.add_undo_property(scalable_vector_shape_2d.polygon, 'texture_offset', scalable_vector_shape_2d.polygon.texture_offset)
+	undo_redo.add_undo_method(self, '_on_svs_assignment_changed')
+	undo_redo.commit_action()
+
+
+func _update_stop_color(idx : int, color : Color) -> void:
+	var new_colors = scalable_vector_shape_2d.polygon.texture.gradient.colors.duplicate()
+	new_colors[idx] = color
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Set stop color for %s" % str(scalable_vector_shape_2d))
+	undo_redo.add_do_property(scalable_vector_shape_2d.polygon.texture.gradient, 'colors', new_colors)
+	undo_redo.add_undo_property(scalable_vector_shape_2d.polygon.texture.gradient, 'colors', scalable_vector_shape_2d.polygon.texture.gradient.colors)
+	undo_redo.commit_action()
+
+
+func _on_remove_gradient_toggle_button_button_down() -> void:
+	if not is_instance_valid(scalable_vector_shape_2d):
+		return
+	if not is_instance_valid(scalable_vector_shape_2d.polygon):
+		return
+
+	_set_texture(null)
+
+
+func _set_gradient_stop_color_buttons() -> void:
+	if not is_instance_valid(scalable_vector_shape_2d):
+		return
+	if not is_instance_valid(scalable_vector_shape_2d.polygon):
+		return
+	if not scalable_vector_shape_2d.polygon.texture is GradientTexture2D:
+		return
+
+	var container := find_child("StopColorButtonsContainer")
+	for b in container.get_children():
+		b.queue_free()
+
+	for idx in range(scalable_vector_shape_2d.polygon.texture.gradient.colors.size()):
+		var color : Color = scalable_vector_shape_2d.polygon.texture.gradient.colors[idx]
+		var new_button := ColorPickerButton.new()
+		new_button.color = color
+		container.add_child(new_button)
+		new_button.color_changed.connect(func(c): _update_stop_color(idx, c))
+		new_button.custom_minimum_size = Vector2(40, 40)
+
+
+func _on_linear_gradient_toggle_button_button_down() -> void:
+	if not is_instance_valid(scalable_vector_shape_2d):
+		return
+	if not is_instance_valid(scalable_vector_shape_2d.polygon):
+		return
+	if (scalable_vector_shape_2d.polygon.texture is GradientTexture2D and
+				scalable_vector_shape_2d.polygon.texture.fill == GradientTexture2D.FILL_LINEAR):
+		return
+
+	var box := scalable_vector_shape_2d.get_bounding_rect()
+	var texture := _initialize_gradient(box)
+	texture.fill = GradientTexture2D.FILL_LINEAR
+	texture.fill_from = Vector2(0.0, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	_set_texture(texture, -box.position)
+
+
+func _on_radial_gradient_toggle_button_button_down() -> void:
+	if not is_instance_valid(scalable_vector_shape_2d):
+		return
+	if not is_instance_valid(scalable_vector_shape_2d.polygon):
+		return
+	if (scalable_vector_shape_2d.polygon.texture is GradientTexture2D and
+				scalable_vector_shape_2d.polygon.texture.fill == GradientTexture2D.FILL_RADIAL):
+		return
+
+	var box := scalable_vector_shape_2d.get_bounding_rect()
+	var texture := _initialize_gradient(box)
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = -box.position / box.size
+	texture.fill_to = (scalable_vector_shape_2d.get_farthest_point() - box.position) / box.size
+	_set_texture(texture, -box.position)
+
+
+static func _initialize_gradient(box : Rect2) -> GradientTexture2D:
+	var texture := GradientTexture2D.new()
+	texture.width = ceil(box.size.x)
+	texture.height = ceil(box.size.y)
+	texture.gradient = Gradient.new()
+	texture.gradient.colors = [Color.WHITE, Color.BLACK]
+	texture.gradient.offsets = [0.0, 1.0]
+	return texture

@@ -123,6 +123,12 @@ func _on_assigned_node_changed():
 			collision_polygon.set_meta("_edit_lock_", true)
 		curve_changed()
 
+
+## Exposes assigned_node_changed signal to outside callers
+func notify_assigned_node_change():
+	assigned_node_changed.emit()
+
+
 ## Redraw the line based on the new curve, using its tesselate method
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
@@ -141,6 +147,11 @@ func curve_changed():
 		line.closed = is_curve_closed()
 	if is_instance_valid(polygon):
 		polygon.polygon = new_points
+		if polygon.texture is GradientTexture2D:
+			var box := get_bounding_rect()
+			polygon.texture_offset = -box.position
+			polygon.texture.width = 1 if box.size.x < 1 else box.size.x
+			polygon.texture.height = 1 if box.size.y < 1 else box.size.y
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	path_changed.emit(new_points)
@@ -213,6 +224,14 @@ func get_poly_points() -> Array:
 	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)
 
 
+func get_farthest_point(from_local_pos := Vector2.ZERO) -> Vector2:
+	var farthest_point = from_local_pos
+	for p in curve.tessellate(max_stages, tolerance_degrees):
+		if p.distance_to(from_local_pos) > farthest_point.distance_to(from_local_pos):
+			farthest_point = p
+	return farthest_point
+
+
 func is_curve_closed() -> bool:
 	var n = curve.point_count
 	return n > 2 and curve.get_point_position(0).distance_to(curve.get_point_position(n - 1)) < 0.001
@@ -239,6 +258,37 @@ func get_curve_handles() -> Array:
 			'out_position': to_global(p + c_o),
 			'is_closed': (" ∞ " + str(n - 1) if i == 0 and is_closed else "")
 		})
+	return result
+
+
+func get_gradient_handles() -> Dictionary:
+	if not (
+		is_instance_valid(polygon) and polygon.texture is GradientTexture2D
+	):
+		return {}
+	var gradient_tex : GradientTexture2D = polygon.texture
+	var box := get_bounding_rect()
+	var stop_colors = Array(
+		gradient_tex.gradient.colors if gradient_tex.gradient.colors else [
+			Color.WHITE, Color.BLACK
+		]
+	).map(func(gc): return gc * polygon.color)
+	var stop_positions = Array(gradient_tex.gradient.offsets).map(
+		func(offs): return (gradient_tex.fill_to - gradient_tex.fill_from) * offs
+	).map(func(offs_p): return gradient_tex.fill_from + offs_p
+	).map(func(offs_p1): return to_global((offs_p1 * box.size) + box.position))
+
+	var result := {
+		"fill_from": gradient_tex.fill_from,
+		"fill_to": gradient_tex.fill_to,
+		"fill_from_pos": to_global((gradient_tex.fill_from * box.size) + box.position),
+		"fill_to_pos":  to_global((gradient_tex.fill_to * box.size) + box.position),
+		"start_color": stop_colors[0] * polygon.color,
+		"end_color": stop_colors[stop_colors.size() - 1] * polygon.color,
+		"stop_positions": stop_positions,
+		"stop_colors": stop_colors
+	}
+
 	return result
 
 
