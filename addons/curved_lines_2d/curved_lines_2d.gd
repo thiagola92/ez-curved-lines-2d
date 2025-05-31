@@ -22,8 +22,10 @@ const META_NAME_HOVER_GRADIENT_FROM := "_hover_gradient_from_"
 const META_NAME_HOVER_GRADIENT_TO := "_hover_gradient_to_"
 const META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX := "_hover_gradient_color_stop_idx_"
 const META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE := "_hover_closest_point_on_gradient_"
-
 const META_NAME_SELECT_HINT := "_select_hint_"
+
+const GLOBAL_SELECTION_AUTOLOAD_NAME := "GlobalSelection"
+
 
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
@@ -51,6 +53,7 @@ var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
 var in_undo_redo_transaction := false
 var shape_preview : Curve2D = null
+var animation_player : AnimationPlayer = null
 
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
@@ -86,6 +89,15 @@ func _enter_tree():
 		scalable_vector_shapes_2d_dock.shape_created.connect(_on_shape_created)
 	if not scalable_vector_shapes_2d_dock.set_shape_preview.is_connected(_on_shape_preview):
 		scalable_vector_shapes_2d_dock.set_shape_preview.connect(_on_shape_preview)
+
+
+func _enable_plugin() -> void:
+	add_autoload_singleton(GLOBAL_SELECTION_AUTOLOAD_NAME, "res://addons/curved_lines_2d/global_selection.gd")
+
+
+func _disable_plugin() -> void:
+	remove_autoload_singleton(GLOBAL_SELECTION_AUTOLOAD_NAME)
+
 
 
 func select_node_reversibly(target_node : Node) -> void:
@@ -162,7 +174,8 @@ func _on_selection_changed():
 				and EditorInterface.get_selection().get_selected_nodes().is_empty()):
 			EditorInterface.edit_node(scene_root)
 		var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-
+		if current_selection is AnimationPlayer:
+			animation_player = current_selection
 	update_overlays()
 
 
