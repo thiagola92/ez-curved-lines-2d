@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.3.1 - 2025-05-31
+## 2.3.2 - 2025-05-31
 
 ### Added
 - Adds gradient fill toggle to the inspector form
