@@ -9,6 +9,15 @@ const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "
 		"fill", "fill-opacity", "paint-order"]
 const SVG_ROOT_META_NAME := "svg_root"
 const SVG_STYLE_META_NAME := "svg_style"
+const PAINT_ORDER_MAP := {
+	"normal": ['add_fill_to_path', 'add_stroke_to_path', 'add_collision_to_path'],
+	"fill stroke markers": ['add_fill_to_path', 'add_stroke_to_path', 'add_collision_to_path'],
+	"stroke fill markers": ['add_stroke_to_path', 'add_fill_to_path', 'add_collision_to_path'],
+	"fill markers stroke": ['add_fill_to_path', 'add_collision_to_path', 'add_stroke_to_path'],
+	"markers fill stroke": ['add_collision_to_path', 'add_fill_to_path', 'add_stroke_to_path'],
+	"stroke markers fill": ['add_stroke_to_path', 'add_collision_to_path', 'add_fill_to_path'],
+	"markers stroke fill": ['add_collision_to_path', 'add_stroke_to_path', 'add_fill_to_path']
+}
 
 enum LogLevel { DEBUG, INFO, WARN, ERROR }
 var log_scroll_container : ScrollContainer = null
@@ -461,6 +470,10 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	new_path.name = path_name
 	new_path.position = pos_override
 	new_path.curve = curve
+
+	if (is_closed and curve.point_count > 1 and  curve.get_point_position(0).distance_to(
+				curve.get_point_position(curve.point_count - 1)) > 0.001):
+		curve.add_point(curve.get_point_position(0))
 	new_path.lock_assigned_shapes = keep_drawable_path_node and lock_shapes
 	if pos_override == Vector2.ZERO:
 		new_path.set_position_to_center()
@@ -488,15 +501,14 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		line.antialiased = antialiased_shapes
 		_managed_add_child_and_set_owner(new_path, line, scene_root, 'line')
 		line.width = 1.0
-		line.closed = is_closed
 	elif "fill" not in style and "stroke" not in style:
 		style["fill"] = "#000000"
 
 	if paint_order_is_normal(style):
 		add_fill_to_path(new_path, style, scene_root, gradients, gradient_point_parent)
-		add_stroke_to_path(new_path, style, scene_root, is_closed)
+		add_stroke_to_path(new_path, style, scene_root)
 	else:
-		add_stroke_to_path(new_path, style, scene_root, is_closed)
+		add_stroke_to_path(new_path, style, scene_root)
 		add_fill_to_path(new_path, style, scene_root, gradients, gradient_point_parent)
 
 	# FIXME: Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
@@ -509,9 +521,10 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		var bare_node := Node2D.new()
 		bare_node.name = new_path.name
 		bare_node.position = new_path.position
-		new_path.replace_by(bare_node)
-		new_path.queue_free()
+		undo_redo.add_do_method(new_path, 'replace_by', bare_node)
+		undo_redo.add_do_reference(bare_node)
 
+		new_path.replace_by(bare_node)
 
 func paint_order_is_normal(style : Dictionary) -> bool:
 	if style.has("paint-order"):
@@ -524,7 +537,7 @@ func paint_order_is_normal(style : Dictionary) -> bool:
 	return true
 
 
-func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D, is_closed: bool):
+func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D):
 	if style.has("stroke") and style["stroke"] != "none":
 		var line := Line2D.new()
 		line.name = "Stroke"
@@ -541,7 +554,6 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 		line.end_cap_mode = Line2D.LINE_CAP_ROUND
 		line.begin_cap_mode = Line2D.LINE_CAP_ROUND
 		line.joint_mode = Line2D.LINE_JOINT_ROUND
-		line.closed = is_closed
 
 
 func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene_root : Node2D,
