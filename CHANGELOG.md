@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.3.1 - 2025-05-31
+
+### Added
+- Adds gradient fill toggle to the inspector form
+- Adds gradient stop color buttons to the inspector form
+- Adds gradient start- and end handle to 2D editor
+- Adds stop color handles to 2D editor
+- Implements paint-order correctly in SVG importer
+- Better tooltips for SVG importer
+- Warning message for unsupported clipping (using 'm'- / 'M'-operator) in SVG importer
+
+### Changed
+- Bugfix: resizes the gradient texture when the bounding box changes
+- Regression fix: all the SVG importer settings in the SVG importer form work again
+
 ## 2.2.1 - 2025-05-28
 
 ### Added
