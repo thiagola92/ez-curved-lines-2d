@@ -317,6 +317,8 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 	string_arrays.append(string_array_top)
 
 	var string_array_count = -1
+	if string_arrays.size() > 1:
+		log_message("WARNING: jumps in a path using the 'M' or 'm' operation - i.e. clipping - is not supported", LogLevel.WARN)
 	for string_array in string_arrays:
 		var cursor = Vector2.ZERO
 		var curve = Curve2D.new()
@@ -504,18 +506,8 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 	elif "fill" not in style and "stroke" not in style:
 		style["fill"] = "#000000"
 
-	if paint_order_is_normal(style):
-		add_fill_to_path(new_path, style, scene_root, gradients, gradient_point_parent)
-		add_stroke_to_path(new_path, style, scene_root)
-	else:
-		add_stroke_to_path(new_path, style, scene_root)
-		add_fill_to_path(new_path, style, scene_root, gradients, gradient_point_parent)
-
-	# FIXME: Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
-	if (import_collision_polygons and
-			("fill" in style or import_collision_polygons_for_all_shapes)):
-		var poly := CollisionPolygon2D.new()
-		_managed_add_child_and_set_owner(new_path, poly, scene_root, 'collision_polygon')
+	for func_name in PAINT_ORDER_MAP[get_paint_order(style)]:
+		call(func_name, new_path, style, scene_root, gradients, gradient_point_parent)
 
 	if not keep_drawable_path_node:
 		var bare_node := Node2D.new()
@@ -523,21 +515,18 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: T
 		bare_node.position = new_path.position
 		undo_redo.add_do_method(new_path, 'replace_by', bare_node)
 		undo_redo.add_do_reference(bare_node)
-
 		new_path.replace_by(bare_node)
 
-func paint_order_is_normal(style : Dictionary) -> bool:
-	if style.has("paint-order"):
-		if style["paint-order"] == "normal":
-			return true
-		elif style["paint-order"] == "stroke":
-			return false
-		var parts = style["paint-order"].split(" ")
-		return parts.find("stroke") > parts.find("fill")
-	return true
+
+func get_paint_order(style : Dictionary) -> String:
+	if style.has("paint-order") and style['paint-order'] in PAINT_ORDER_MAP:
+		return style['paint-order']
+	else:
+		return "normal"
 
 
-func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D):
+func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D,
+			_gradients : Array[Dictionary], _gradient_point_parent : Node2D):
 	if style.has("stroke") and style["stroke"] != "none":
 		var line := Line2D.new()
 		line.name = "Stroke"
@@ -557,8 +546,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 
 
 func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene_root : Node2D,
-		gradients : Array[Dictionary], gradient_point_parent : Node2D):
-
+			gradients : Array[Dictionary], gradient_point_parent : Node2D):
 	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
@@ -575,6 +563,14 @@ func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene
 			polygon.color = Color(style["fill"])
 		if style.has("fill-opacity"):
 			polygon.self_modulate.a = float(style["fill-opacity"])
+
+
+func add_collision_to_path(new_path : ScalableVectorShape2D, style : Dictionary, scene_root : Node2D,
+			_gradients : Array[Dictionary], _gradient_point_parent : Node2D) -> void:
+	if (import_collision_polygons and
+			("fill" in style or import_collision_polygons_for_all_shapes)):
+		var poly := CollisionPolygon2D.new()
+		_managed_add_child_and_set_owner(new_path, poly, scene_root, 'collision_polygon')
 
 
 func add_gradient_to_fill(new_path : ScalableVectorShape2D, svg_gradient: Dictionary, polygon : Polygon2D,
