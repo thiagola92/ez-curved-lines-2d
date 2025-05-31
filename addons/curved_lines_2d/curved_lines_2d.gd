@@ -370,7 +370,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 		_draw_crosshair(viewport_control, p1 , 8, 8, p1_color, 1)
 		_draw_crosshair(viewport_control, p2 , 8, 8, p2_color, 1)
 		if svs.has_meta(META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX):
-			hint_txt = "- Drag to change gradient color stop"
+			hint_txt = "- Drag to move color stop\n- Right click to remove color stop"
 		if (svs.has_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE)
 				and not Input.is_key_pressed(KEY_CTRL)
 				and not Input.is_key_pressed(KEY_SHIFT)):
@@ -657,8 +657,31 @@ func _update_gradient_stop_color_pos(svs : ScalableVectorShape2D, mouse_pos : Ve
 	svs.polygon.texture.gradient.set_offset(idx, new_offset)
 
 
-func _add_color_stop(svs : ScalableVectorShape2D) -> void:
-	print("TODO: add color stop at ", svs.get_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE))
+func _add_color_stop(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
+	var new_offset := _get_gradient_offset(svs, mouse_pos)
+	var undo_idx := 0
+	for ofs in svs.polygon.texture.gradient.offsets:
+		if ofs > new_offset:
+			break
+		undo_idx += 1
+	undo_redo.create_action("Add color stop to %s " % str(svs))
+	undo_redo.add_do_method(svs.polygon.texture.gradient, 'add_point', new_offset,
+			svs.polygon.texture.gradient.sample(new_offset))
+	undo_redo.add_do_method(svs, 'notify_assigned_node_change')
+	undo_redo.add_undo_method(svs.polygon.texture.gradient, 'remove_point', undo_idx)
+	undo_redo.add_undo_method(svs, 'notify_assigned_node_change')
+	undo_redo.commit_action()
+
+
+func _remove_color_stop(svs : ScalableVectorShape2D, idx : int) -> void:
+	undo_redo.create_action("Remove color stop from %s " % str(svs))
+	undo_redo.add_do_method(svs.polygon.texture.gradient, 'remove_point', idx)
+	undo_redo.add_do_method(svs, 'notify_assigned_node_change')
+	undo_redo.add_undo_method(svs.polygon.texture.gradient, 'add_point',
+			svs.polygon.texture.gradient.get_offset(idx),
+			svs.polygon.texture.gradient.get_color(idx))
+	undo_redo.add_undo_method(svs, 'notify_assigned_node_change')
+	undo_redo.commit_action()
 
 
 func _update_curve_cp_out_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
@@ -856,7 +879,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE):
 				if event.double_click:
-					_add_color_stop(current_selection)
+					_add_color_stop(current_selection, mouse_pos)
 				return true
 			else:
 				var results := _find_scalable_vector_shape_2d_nodes_at(mouse_pos)
@@ -879,6 +902,8 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					_remove_cp_in_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
 				elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
 					_remove_cp_out_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
+				elif current_selection.has_meta(META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX):
+					_remove_color_stop(current_selection, current_selection.get_meta(META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX))
 			return true
 
 	if (event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT) and

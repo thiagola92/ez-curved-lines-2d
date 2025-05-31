@@ -123,6 +123,12 @@ func _on_assigned_node_changed():
 			collision_polygon.set_meta("_edit_lock_", true)
 		curve_changed()
 
+
+## Exposes assigned_node_changed signal to outside callers
+func notify_assigned_node_change():
+	assigned_node_changed.emit()
+
+
 ## Redraw the line based on the new curve, using its tesselate method
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
