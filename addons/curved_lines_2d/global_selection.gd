@@ -9,6 +9,8 @@ var animation_under_edit_button : OptionButton
 var animation_postion_spinbox : SpinBox
 
 func _enter_tree() -> void:
+	if not Engine.is_editor_hint():
+		return
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
 	animation_player_editor = EditorInterface.get_base_control().find_child("*AnimationPlayerEditor*", true, false)
 	if is_instance_valid(animation_player_editor):
@@ -62,12 +64,38 @@ func batch_insert_key_frames(svs : ScalableVectorShape2D):
 		printerr("Could not find a path from AnimationPlayer's root node (%s) to this node (%s)" % [animation_player.root_node, str(svs)])
 		return
 
-	print("Will attempt to add keys at track position: ", track_position)
 	var animation := animation_player.get_animation(selected_anim_name)
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Batch insert curve keyframes for %s on animation %s" % [str(svs), selected_anim_name])
 	for p_idx in range(svs.curve.point_count):
 		var point_position_path = NodePath("%s:curve:point_%d/position" % [path_to_node, p_idx])
-		var t_idx := animation.find_track(point_position_path, Animation.TrackType.TYPE_VALUE)
-		if t_idx < 0:
-			print("No track found for ", point_position_path)
-		else:
-			print("Track found for '", point_position_path, "' at index=", t_idx)
+		var add_result = add_anim_track_if_absent(animation, point_position_path)
+		if add_result[1]:
+			undo_redo.add_do_method(self, 'add_anim_track_if_absent', animation, point_position_path)
+			undo_redo.add_undo_method(self, 'remove_anim_track_by_path', animation, point_position_path)
+
+		# FIXME: do undo/redo via dedicated method on this singletonautoload
+		var t_idx = add_result[0]
+		var k_idx = animation.track_insert_key(t_idx, track_position, svs.curve.get_point_position(p_idx))
+		undo_redo.add_do_method(animation, 'track_insert_key', t_idx, track_position, svs.curve.get_point_position(p_idx))
+		undo_redo.add_undo_method(animation, 'track_remove_key', t_idx, k_idx)
+
+	undo_redo.commit_action(false)
+
+
+
+
+
+func add_anim_track_if_absent(animation : Animation, point_position_path : NodePath) -> Array:
+	var t_idx := animation.find_track(point_position_path, Animation.TrackType.TYPE_VALUE)
+	if t_idx < 0:
+		t_idx = animation.add_track(Animation.TrackType.TYPE_VALUE)
+		animation.track_set_path(t_idx, point_position_path)
+		return [t_idx, true]
+	return [t_idx, false]
+
+
+func remove_anim_track_by_path(animation : Animation, point_position_path : NodePath) -> void:
+	var t_idx := animation.find_track(point_position_path, Animation.TrackType.TYPE_VALUE)
+	if t_idx > -1:
+		animation.remove_track(t_idx)
