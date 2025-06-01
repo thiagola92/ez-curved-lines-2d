@@ -68,17 +68,28 @@ func batch_insert_key_frames(svs : ScalableVectorShape2D):
 	var undo_redo := EditorInterface.get_editor_undo_redo()
 	undo_redo.create_action("Batch insert curve keyframes for %s on animation %s" % [str(svs), selected_anim_name])
 	for p_idx in range(svs.curve.point_count):
-		var point_position_path = NodePath("%s:curve:point_%d/position" % [path_to_node, p_idx])
-		if animation.find_track(point_position_path, Animation.TrackType.TYPE_VALUE) < 0:
-			undo_redo.add_do_method(self, 'add_anim_track_if_absent', animation, point_position_path)
-			undo_redo.add_undo_method(self, 'remove_anim_track_by_path', animation, point_position_path)
-
-		undo_redo.add_do_method(self, 'add_key_to_anim_track_by_path', animation, point_position_path,
-				track_position,  svs.curve.get_point_position(p_idx))
-		undo_redo.add_undo_method(self, 'remove_key_from_anim_track_by_path_and_position', animation,
-				point_position_path, track_position)
+		add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/position" % [path_to_node, p_idx]),
+				track_position, svs.curve.get_point_position(p_idx))
+		if p_idx > 0:
+			add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/in" % [path_to_node, p_idx]),
+					track_position, svs.curve.get_point_in(p_idx))
+		if p_idx < svs.curve.point_count - 1:
+			add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/out" % [path_to_node, p_idx]),
+					track_position, svs.curve.get_point_out(p_idx))
 
 	undo_redo.commit_action()
+
+
+func add_key_frame(undo_redo : EditorUndoRedoManager, animation : Animation, node_path : NodePath,
+			track_position : float, val : Variant):
+	if animation.find_track(node_path, Animation.TrackType.TYPE_VALUE) < 0:
+		undo_redo.add_do_method(self, 'add_anim_track_if_absent', animation, node_path)
+		undo_redo.add_undo_method(self, 'remove_anim_track_by_path', animation, node_path)
+
+	undo_redo.add_do_method(self, 'add_key_to_anim_track_by_path', animation, node_path,
+			track_position, val)
+	undo_redo.add_undo_method(self, 'remove_key_from_anim_track_by_path_and_position', animation,
+			node_path, track_position)
 
 
 func remove_key_from_anim_track_by_path_and_position(animation : Animation, node_path : NodePath,

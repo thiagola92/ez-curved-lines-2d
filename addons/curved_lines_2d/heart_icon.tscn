@@ -41,6 +41,33 @@ fill = 1
 fill_from = Vector2(0.542735, 0.320513)
 fill_to = Vector2(0.957265, 1)
 
+[sub_resource type="Animation" id="Animation_fby7p"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Rectangle2/ScalableVectorShape2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(47.5, -33)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Rectangle2:curve:point_1/position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.617999, 42.92)]
+}
+
 [sub_resource type="Animation" id="Animation_7bfrm"]
 resource_name = "new_animation"
 loop_mode = 2
@@ -128,20 +155,353 @@ tracks/6/keys = {
 "update": 0,
 "values": [Vector2(65.5, -58), Vector2(47.5, -33)]
 }
-
-[sub_resource type="Animation" id="Animation_fby7p"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Rectangle2/ScalableVectorShape2D:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath(".:curve:point_0/position")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(47.5, -33)]
+"values": [Vector2(110, 0), Vector2(107, 9.9)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath(".:curve:point_1/position")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(126, 16), Vector2(124.1, 24.9)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath(".:curve:point_2/position")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(126, 110), Vector2(119.6, 89.1)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath(".:curve:point_3/position")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(110, 126), Vector2(100.7, 107.6)]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath(".:curve:point_4/position")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(16, 126), Vector2(26.4, 114.6)]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath(".:curve:point_5/position")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 110), Vector2(11, 97.5)]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath(".:curve:point_6/position")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 16), Vector2(-0.799988, 28.5)]
+}
+tracks/14/type = "value"
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/path = NodePath(".:curve:point_7/position")
+tracks/14/interp = 1
+tracks/14/loop_wrap = true
+tracks/14/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(16, 0), Vector2(14.2, 9.9)]
+}
+tracks/15/type = "value"
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/path = NodePath(".:curve:point_8/position")
+tracks/15/interp = 1
+tracks/15/loop_wrap = true
+tracks/15/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(110, 0), Vector2(107, 9.9)]
+}
+tracks/16/type = "value"
+tracks/16/imported = false
+tracks/16/enabled = true
+tracks/16/path = NodePath("Rectangle2:curve:point_0/out")
+tracks/16/interp = 1
+tracks/16/loop_wrap = true
+tracks/16/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(29.2, -50), Vector2(40.5834, -33.833)]
+}
+tracks/17/type = "value"
+tracks/17/imported = false
+tracks/17/enabled = true
+tracks/17/path = NodePath("Rectangle2:curve:point_1/in")
+tracks/17/interp = 1
+tracks/17/loop_wrap = true
+tracks/17/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(94.8, -57.4), Vector2(34.75, -12.2496)]
+}
+tracks/18/type = "value"
+tracks/18/imported = false
+tracks/18/enabled = true
+tracks/18/path = NodePath("Rectangle2:curve:point_1/out")
+tracks/18/interp = 1
+tracks/18/loop_wrap = true
+tracks/18/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-88.8, -44.5), Vector2(-49.25, -10.4996)]
+}
+tracks/19/type = "value"
+tracks/19/imported = false
+tracks/19/enabled = true
+tracks/19/path = NodePath("Rectangle2:curve:point_2/in")
+tracks/19/interp = 1
+tracks/19/loop_wrap = true
+tracks/19/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-42.8, -54.2), Vector2(-34.6666, -25.083)]
+}
+tracks/20/type = "value"
+tracks/20/imported = false
+tracks/20/enabled = true
+tracks/20/path = NodePath(".:curve:point_0/out")
+tracks/20/interp = 1
+tracks/20/loop_wrap = true
+tracks/20/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(8.8368, 0), Vector2(8.8368, 0)]
+}
+tracks/21/type = "value"
+tracks/21/imported = false
+tracks/21/enabled = true
+tracks/21/path = NodePath(".:curve:point_1/in")
+tracks/21/interp = 1
+tracks/21/loop_wrap = true
+tracks/21/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, -8.8368), Vector2(0, -8.8368)]
+}
+tracks/22/type = "value"
+tracks/22/imported = false
+tracks/22/enabled = true
+tracks/22/path = NodePath(".:curve:point_1/out")
+tracks/22/interp = 1
+tracks/22/loop_wrap = true
+tracks/22/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 0)]
+}
+tracks/23/type = "value"
+tracks/23/imported = false
+tracks/23/enabled = true
+tracks/23/path = NodePath(".:curve:point_2/in")
+tracks/23/interp = 1
+tracks/23/loop_wrap = true
+tracks/23/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 0)]
+}
+tracks/24/type = "value"
+tracks/24/imported = false
+tracks/24/enabled = true
+tracks/24/path = NodePath(".:curve:point_2/out")
+tracks/24/interp = 1
+tracks/24/loop_wrap = true
+tracks/24/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 8.8368), Vector2(0, 8.8368)]
+}
+tracks/25/type = "value"
+tracks/25/imported = false
+tracks/25/enabled = true
+tracks/25/path = NodePath(".:curve:point_3/in")
+tracks/25/interp = 1
+tracks/25/loop_wrap = true
+tracks/25/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(8.8368, 0), Vector2(10.3, 12.15)]
+}
+tracks/26/type = "value"
+tracks/26/imported = false
+tracks/26/enabled = true
+tracks/26/path = NodePath(".:curve:point_3/out")
+tracks/26/interp = 1
+tracks/26/loop_wrap = true
+tracks/26/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(-10.3, -12.15)]
+}
+tracks/27/type = "value"
+tracks/27/imported = false
+tracks/27/enabled = true
+tracks/27/path = NodePath(".:curve:point_4/in")
+tracks/27/interp = 1
+tracks/27/loop_wrap = true
+tracks/27/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 0)]
+}
+tracks/28/type = "value"
+tracks/28/imported = false
+tracks/28/enabled = true
+tracks/28/path = NodePath(".:curve:point_4/out")
+tracks/28/interp = 1
+tracks/28/loop_wrap = true
+tracks/28/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-8.8368, 0), Vector2(17.35, 24.65)]
+}
+tracks/29/type = "value"
+tracks/29/imported = false
+tracks/29/enabled = true
+tracks/29/path = NodePath(".:curve:point_5/in")
+tracks/29/interp = 1
+tracks/29/loop_wrap = true
+tracks/29/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 8.8368), Vector2(-36.5, 30.25)]
+}
+tracks/30/type = "value"
+tracks/30/imported = false
+tracks/30/enabled = true
+tracks/30/path = NodePath(".:curve:point_5/out")
+tracks/30/interp = 1
+tracks/30/loop_wrap = true
+tracks/30/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 0)]
+}
+tracks/31/type = "value"
+tracks/31/imported = false
+tracks/31/enabled = true
+tracks/31/path = NodePath(".:curve:point_6/in")
+tracks/31/interp = 1
+tracks/31/loop_wrap = true
+tracks/31/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 0)]
+}
+tracks/32/type = "value"
+tracks/32/imported = false
+tracks/32/enabled = true
+tracks/32/path = NodePath(".:curve:point_6/out")
+tracks/32/interp = 1
+tracks/32/loop_wrap = true
+tracks/32/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, -8.8368), Vector2(0, -8.8368)]
+}
+tracks/33/type = "value"
+tracks/33/imported = false
+tracks/33/enabled = true
+tracks/33/path = NodePath(".:curve:point_7/in")
+tracks/33/interp = 1
+tracks/33/loop_wrap = true
+tracks/33/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-8.8368, 0), Vector2(-8.8368, 0)]
+}
+tracks/34/type = "value"
+tracks/34/imported = false
+tracks/34/enabled = true
+tracks/34/path = NodePath(".:curve:point_7/out")
+tracks/34/interp = 1
+tracks/34/loop_wrap = true
+tracks/34/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 0)]
+}
+tracks/35/type = "value"
+tracks/35/imported = false
+tracks/35/enabled = true
+tracks/35/path = NodePath(".:curve:point_8/in")
+tracks/35/interp = 1
+tracks/35/loop_wrap = true
+tracks/35/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, 0)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7bfrm"]
@@ -212,7 +572,7 @@ metadata/_custom_type_script = "uid://de3jpss66xjfh"
 show_behind_parent = true
 texture = SubResource("GradientTexture2D_2eynm")
 texture_offset = Vector2(21.2175, -41.5691)
-polygon = PackedVector2Array(10.6337, 49.0369, 12.5074, 51.044, 14.0639, 53.1226, 15.3172, 55.2581, 16.2813, 57.4362, 16.9702, 59.6423, 17.3978, 61.8621, 17.5782, 64.0811, 17.5253, 66.2848, 17.2532, 68.4589, 16.7757, 70.5888, 16.1069, 72.6601, 15.2608, 74.6583, 14.2514, 76.5691, 13.0925, 78.378, 11.7983, 80.0704, 10.3827, 81.6321, 8.85971, 83.0484, 7.24327, 84.3051, 5.54737, 85.3875, 3.78601, 86.2814, 1.97317, 86.9722, 0.122838, 87.4455, -1.75101, 87.6868, -3.63438, 87.6817, -4.57527, 87.5822, -5.51329, 87.4158, -6.44671, 87.1805, -7.37377, 86.8745, -8.29273, 86.4962, -9.20183, 86.0436, -10.9835, 84.9084, -12.7047, 83.4546, -14.3516, 81.6677, -15.9101, 79.5333, -17.3663, 77.0369, -18.6296, 74.3874, -19.6273, 71.8063, -20.3722, 69.2983, -20.877, 66.868, -21.1545, 64.5199, -21.2175, 62.2587, -21.0787, 60.089, -20.751, 58.0153, -20.2469, 56.0423, -19.5794, 54.1746, -18.7612, 52.4168, -17.805, 50.7735, -16.7236, 49.2492, -15.5298, 47.8487, -14.2363, 46.5764, -12.856, 45.437, -11.4015, 44.4351, -9.88558, 43.5754, -8.32108, 42.8623, -6.72074, 42.3005, -5.09731, 41.8947, -3.46356, 41.6494, -1.83225, 41.5691, -0.216151, 41.6586, 1.37198, 41.9225, 2.91939, 42.3652, 4.4133, 42.9915, 5.84095, 43.8059, 7.18958, 44.813, 8.44642, 46.0175, 9.59872, 47.4239)
+polygon = PackedVector2Array(10.6337, 49.0369, 12.5074, 51.044, 14.0639, 53.1226, 15.3172, 55.2581, 16.2813, 57.4362, 16.9702, 59.6423, 17.3978, 61.8621, 17.5782, 64.0811, 17.5253, 66.2848, 17.2532, 68.4589, 16.7757, 70.5888, 16.1069, 72.6601, 15.2608, 74.6583, 14.2514, 76.5691, 13.0926, 78.378, 11.7983, 80.0704, 10.3827, 81.6321, 8.85972, 83.0484, 7.24327, 84.3051, 5.54737, 85.3875, 3.78601, 86.2814, 1.97317, 86.9722, 0.122839, 87.4455, -1.75101, 87.6868, -3.63438, 87.6817, -4.57527, 87.5823, -5.5133, 87.4158, -6.44671, 87.1805, -7.37377, 86.8746, -8.29273, 86.4962, -9.20183, 86.0436, -10.9835, 84.9084, -12.7047, 83.4546, -14.3516, 81.6677, -15.9101, 79.5333, -17.3663, 77.0369, -18.6296, 74.3874, -19.6273, 71.8063, -20.3722, 69.2983, -20.877, 66.868, -21.1545, 64.5199, -21.2175, 62.2587, -21.0787, 60.089, -20.751, 58.0153, -20.2469, 56.0423, -19.5794, 54.1746, -18.7612, 52.4168, -17.805, 50.7735, -16.7236, 49.2492, -15.5298, 47.8486, -14.2363, 46.5764, -12.856, 45.437, -11.4015, 44.4351, -9.88558, 43.5753, -8.32109, 42.8623, -6.72074, 42.3005, -5.09732, 41.8947, -3.46356, 41.6493, -1.83226, 41.5691, -0.216152, 41.6586, 1.37198, 41.9224, 2.91939, 42.3652, 4.41329, 42.9915, 5.84095, 43.8059, 7.18957, 44.813, 8.44642, 46.0175, 9.59871, 47.4239)
 metadata/_edit_lock_ = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Rectangle"]
