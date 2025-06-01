@@ -1,12 +1,12 @@
-[gd_scene load_steps=13 format=3 uid="uid://c6dfjd23olqhh"]
+[gd_scene load_steps=9 format=3 uid="uid://c6dfjd23olqhh"]
 
 [ext_resource type="Script" uid="uid://de3jpss66xjfh" path="res://addons/curved_lines_2d/scalable_vector_shape_2d.gd" id="1_0qe1d"]
 
 [sub_resource type="Curve2D" id="Curve2D_jr52a"]
 _data = {
-"points": PackedVector2Array(0, 0, 8.8368, 0, 110, 0, 0, -8.8368, 0, 0, 126, 16, 0, 0, 0, 8.8368, 126, 110, 8.8368, 0, 0, 0, 110, 126, 0, 0, -8.8368, 0, 16, 126, 0, 8.8368, 0, 0, 0, 110, 0, 0, 0, -8.8368, 0, 16, -8.8368, 0, 0, 0, 16, 0)
+"points": PackedVector2Array(0, 0, 8.8368, 0, 110, 0, 0, -8.8368, 0, 0, 126, 16, 0, 0, 0, 8.8368, 126, 110, 8.8368, 0, 0, 0, 110, 126, 0, 0, -8.8368, 0, 16, 126, 0, 8.8368, 0, 0, 0, 110, 0, 0, 0, -8.8368, 0, 16, -8.8368, 0, 0, 0, 16, 0, 0, 0, 0, 0, 110, 0)
 }
-point_count = 8
+point_count = 9
 
 [sub_resource type="Curve2D" id="Curve2D_2027v"]
 _data = {
@@ -19,6 +19,8 @@ colors = PackedColorArray(0.60933, 0.60933, 0.60933, 1, 1, 1, 1, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_gpl51"]
 gradient = SubResource("Gradient_ygkck")
+width = 100
+height = 87
 
 [sub_resource type="Curve2D" id="Curve2D_bi08n"]
 _data = {
@@ -32,33 +34,18 @@ colors = PackedColorArray(0.313726, 0.572549, 1, 1, 0.117647, 0.494118, 0.831373
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_2eynm"]
 gradient = SubResource("Gradient_42wa7")
-width = 40
-height = 40
+width = 51
+height = 67
 fill = 1
 fill_from = Vector2(0.542735, 0.320513)
 fill_to = Vector2(0.957265, 1)
-
-[sub_resource type="Animation" id="Animation_7bfrm"]
-resource_name = "new_animation_2"
-
-[sub_resource type="Animation" id="Animation_ejmy8"]
-resource_name = "new_animation"
-
-[sub_resource type="Animation" id="Animation_fby7p"]
-resource_name = "zza"
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_7bfrm"]
-_data = {
-&"new_animation": SubResource("Animation_ejmy8"),
-&"new_animation_2": SubResource("Animation_7bfrm"),
-&"zza": SubResource("Animation_fby7p")
-}
 
 [node name="Rectangle" type="Node2D" node_paths=PackedStringArray("polygon", "line")]
 script = ExtResource("1_0qe1d")
 polygon = NodePath("Fill")
 line = NodePath("Stroke")
 curve = SubResource("Curve2D_jr52a")
+metadata/_select_hint_ = true
 
 [node name="Fill" type="Polygon2D" parent="."]
 show_behind_parent = true
@@ -78,6 +65,7 @@ script = ExtResource("1_0qe1d")
 polygon = NodePath("Fill")
 line = NodePath("Stroke")
 curve = SubResource("Curve2D_2027v")
+metadata/_select_hint_ = true
 
 [node name="Fill" type="Polygon2D" parent="Rectangle2"]
 show_behind_parent = true
@@ -110,10 +98,6 @@ metadata/_custom_type_script = "uid://de3jpss66xjfh"
 [node name="Polygon2D" type="Polygon2D" parent="Rectangle2/ScalableVectorShape2D"]
 show_behind_parent = true
 texture = SubResource("GradientTexture2D_2eynm")
-texture_offset = Vector2(25.5692, -48.4516)
-polygon = PackedVector2Array(10.6337, 49.0369, 13.8486, 52.3666, 16.6343, 55.7112, 19.0072, 59.0534, 20.9838, 62.3758, 22.5808, 65.6611, 23.8146, 68.892, 24.7019, 72.0512, 25.2591, 75.1213, 25.5028, 78.085, 25.4496, 80.9249, 25.1159, 83.6239, 24.5184, 86.1644, 23.6736, 88.5293, 22.5979, 90.7011, 21.3081, 92.6626, 19.8205, 94.3964, 18.1518, 95.8853, 17.2547, 96.5324, 16.3185, 97.1118, 15.3453, 97.6212, 14.3372, 98.0586, 13.2961, 98.4218, 12.2243, 98.7085, 11.1237, 98.9167, 9.99644, 99.0441, 8.84458, 99.0886, 7.67017, 99.0481, 6.4753, 98.9203, 5.26202, 98.7031, 2.78853, 97.9918, 0.266237, 96.897, -2.2883, 95.4012, -4.85854, 93.4872, -7.42795, 91.1376, -9.97997, 88.3351, -12.4981, 85.0623, -17.3663, 77.0369, -21.3952, 68.4317, -24.1127, 60.7136, -25.6349, 53.8882, -25.9839, 50.8121, -26.0775, 47.9614, -25.9301, 45.3368, -25.5564, 42.939, -24.9707, 40.7687, -24.1875, 38.8267, -23.2214, 37.1137, -22.6742, 36.3433, -22.0868, 35.6304, -21.4608, 34.9751, -20.7981, 34.3775, -20.1006, 33.8377, -19.37, 33.3558, -18.6082, 32.9319, -17.8169, 32.566, -16.9979, 32.2583, -16.1531, 32.0088, -14.3934, 31.6849, -12.5521, 31.5951, -10.6436, 31.74, -8.68261, 32.1205, -6.68348, 32.7372, -4.66071, 33.5908, -2.62881, 34.6821, -0.602249, 36.0118, 1.40448, 37.5806, 3.3769, 39.3893, 5.30052, 41.4385, 7.16085, 43.7291)
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_7bfrm")
-}
+texture_offset = Vector2(26.0775, -31.5951)
+polygon = PackedVector2Array(10.6337, 49.0369, 13.8487, 52.3666, 16.6343, 55.7113, 19.0072, 59.0534, 20.9838, 62.3758, 22.5808, 65.6611, 23.8147, 68.892, 24.7019, 72.0512, 25.2591, 75.1213, 25.5028, 78.085, 25.4496, 80.9249, 25.116, 83.6239, 24.5184, 86.1644, 23.6736, 88.5293, 22.598, 90.7011, 21.3081, 92.6626, 19.8206, 94.3964, 18.1519, 95.8852, 17.2547, 96.5324, 16.3186, 97.1118, 15.3453, 97.6212, 14.3372, 98.0586, 13.2962, 98.4218, 12.2243, 98.7085, 11.1237, 98.9167, 9.99647, 99.0441, 8.8446, 99.0886, 7.67019, 99.048, 6.47531, 98.9203, 5.26203, 98.7031, 2.78854, 97.9918, 0.266253, 96.897, -2.28829, 95.4012, -4.85853, 93.4872, -7.42794, 91.1376, -9.97996, 88.3351, -12.4981, 85.0623, -17.3663, 77.0369, -21.3952, 68.4317, -24.1128, 60.7136, -25.6349, 53.8882, -25.9839, 50.8121, -26.0775, 47.9614, -25.9301, 45.3368, -25.5564, 42.939, -24.9707, 40.7687, -24.1875, 38.8267, -23.2214, 37.1137, -22.6742, 36.3433, -22.0868, 35.6304, -21.4608, 34.9751, -20.7982, 34.3775, -20.1006, 33.8378, -19.37, 33.3558, -18.6082, 32.9319, -17.8169, 32.566, -16.9979, 32.2583, -16.1532, 32.0088, -14.3934, 31.6849, -12.5521, 31.5951, -10.6436, 31.74, -8.68262, 32.1205, -6.68348, 32.7372, -4.66072, 33.5908, -2.62881, 34.6821, -0.602251, 36.0118, 1.40448, 37.5806, 3.3769, 39.3893, 5.30052, 41.4385, 7.16084, 43.7291)
+metadata/_edit_lock_ = true
