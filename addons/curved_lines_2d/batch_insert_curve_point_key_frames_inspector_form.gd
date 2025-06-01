@@ -5,8 +5,11 @@ var batch_insert_button : Button
 var scalable_vector_shape_2d : ScalableVectorShape2D
 
 func _enter_tree() -> void:
-	GlobalSelection.key_frame_capabilities_changed.connect(
-		_on_key_frame_capabilities_changed)
+	if not GlobalSelection.key_frame_capabilities_changed.is_connected(
+			_on_key_frame_capabilities_changed
+	):
+		GlobalSelection.key_frame_capabilities_changed.connect(
+			_on_key_frame_capabilities_changed)
 	batch_insert_button = find_child("BatchInsertButton")
 	_on_key_frame_capabilities_changed()
 

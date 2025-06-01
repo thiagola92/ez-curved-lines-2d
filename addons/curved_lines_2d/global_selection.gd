@@ -69,33 +69,45 @@ func batch_insert_key_frames(svs : ScalableVectorShape2D):
 	undo_redo.create_action("Batch insert curve keyframes for %s on animation %s" % [str(svs), selected_anim_name])
 	for p_idx in range(svs.curve.point_count):
 		var point_position_path = NodePath("%s:curve:point_%d/position" % [path_to_node, p_idx])
-		var add_result = add_anim_track_if_absent(animation, point_position_path)
-		if add_result[1]:
+		if animation.find_track(point_position_path, Animation.TrackType.TYPE_VALUE) < 0:
 			undo_redo.add_do_method(self, 'add_anim_track_if_absent', animation, point_position_path)
 			undo_redo.add_undo_method(self, 'remove_anim_track_by_path', animation, point_position_path)
 
-		# FIXME: do undo/redo via dedicated method on this singletonautoload
-		var t_idx = add_result[0]
-		var k_idx = animation.track_insert_key(t_idx, track_position, svs.curve.get_point_position(p_idx))
-		undo_redo.add_do_method(animation, 'track_insert_key', t_idx, track_position, svs.curve.get_point_position(p_idx))
-		undo_redo.add_undo_method(animation, 'track_remove_key', t_idx, k_idx)
+		undo_redo.add_do_method(self, 'add_key_to_anim_track_by_path', animation, point_position_path,
+				track_position,  svs.curve.get_point_position(p_idx))
+		undo_redo.add_undo_method(self, 'remove_key_from_anim_track_by_path_and_position', animation,
+				point_position_path, track_position)
 
-	undo_redo.commit_action(false)
-
+	undo_redo.commit_action()
 
 
+func remove_key_from_anim_track_by_path_and_position(animation : Animation, node_path : NodePath,
+			track_position : float):
+	var t_idx := animation.find_track(node_path, Animation.TrackType.TYPE_VALUE)
+	if t_idx < 0:
+		return
+	var k_idx := animation.track_find_key(t_idx, track_position)
+	if k_idx < 0:
+		return
+	animation.track_remove_key(t_idx, k_idx)
 
 
-func add_anim_track_if_absent(animation : Animation, point_position_path : NodePath) -> Array:
-	var t_idx := animation.find_track(point_position_path, Animation.TrackType.TYPE_VALUE)
+func add_key_to_anim_track_by_path(animation : Animation, node_path : NodePath,
+			track_position : float, val : Variant):
+	var t_idx := animation.find_track(node_path, Animation.TrackType.TYPE_VALUE)
+	if t_idx < 0:
+		return
+	animation.track_insert_key(t_idx, track_position, val)
+
+
+func add_anim_track_if_absent(animation : Animation, node_path : NodePath):
+	var t_idx := animation.find_track(node_path, Animation.TrackType.TYPE_VALUE)
 	if t_idx < 0:
 		t_idx = animation.add_track(Animation.TrackType.TYPE_VALUE)
-		animation.track_set_path(t_idx, point_position_path)
-		return [t_idx, true]
-	return [t_idx, false]
+		animation.track_set_path(t_idx, node_path)
 
 
-func remove_anim_track_by_path(animation : Animation, point_position_path : NodePath) -> void:
-	var t_idx := animation.find_track(point_position_path, Animation.TrackType.TYPE_VALUE)
+func remove_anim_track_by_path(animation : Animation, node_path : NodePath) -> void:
+	var t_idx := animation.find_track(node_path, Animation.TrackType.TYPE_VALUE)
 	if t_idx > -1:
 		animation.remove_track(t_idx)
