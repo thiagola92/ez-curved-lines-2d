@@ -48,7 +48,7 @@ func batch_insert_key_frames(svs : ScalableVectorShape2D):
 	if selected_anim_id < 0:
 		return
 	else:
-		selected_anim_name = GlobalSelection.animation_under_edit_button.get_item_text(selected_anim_id)
+		selected_anim_name = animation_under_edit_button.get_item_text(selected_anim_id)
 
 	if not animation_player.has_animation(selected_anim_name):
 		printerr("Could not find animation %s in in %s" % [selected_anim_name, str(animation_player)])

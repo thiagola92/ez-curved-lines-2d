@@ -23,7 +23,7 @@ config/icon="uid://b5yxa1e62b0hb"
 
 [autoload]
 
-GlobalSelection="*res://addons/curved_lines_2d/global_selection.gd"
+BatchKeyFrameAdder="*res://addons/curved_lines_2d/batch_key_frame_adder.gd"
 
 [editor_plugins]
 

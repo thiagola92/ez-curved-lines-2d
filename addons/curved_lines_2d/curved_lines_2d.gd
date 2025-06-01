@@ -24,7 +24,7 @@ const META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX := "_hover_gradient_color_stop_idx
 const META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE := "_hover_closest_point_on_gradient_"
 const META_NAME_SELECT_HINT := "_select_hint_"
 
-const GLOBAL_SELECTION_AUTOLOAD_NAME := "GlobalSelection"
+const BATCH_KEY_FRAME_AUTOLOAD_NAME := "BatchKeyFrameAdder"
 
 
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
@@ -92,11 +92,11 @@ func _enter_tree():
 
 
 func _enable_plugin() -> void:
-	add_autoload_singleton(GLOBAL_SELECTION_AUTOLOAD_NAME, "res://addons/curved_lines_2d/global_selection.gd")
+	add_autoload_singleton(BATCH_KEY_FRAME_AUTOLOAD_NAME, "res://addons/curved_lines_2d/batch_key_frame_adder.gd")
 
 
 func _disable_plugin() -> void:
-	remove_autoload_singleton(GLOBAL_SELECTION_AUTOLOAD_NAME)
+	remove_autoload_singleton(BATCH_KEY_FRAME_AUTOLOAD_NAME)
 
 
 

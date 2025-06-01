@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://c6dfjd23olqhh"]
+[gd_scene load_steps=13 format=3 uid="uid://c6dfjd23olqhh"]
 
 [ext_resource type="Script" uid="uid://de3jpss66xjfh" path="res://addons/curved_lines_2d/scalable_vector_shape_2d.gd" id="1_0qe1d"]
 [ext_resource type="Script" uid="uid://bq71tj10w4224" path="res://addons/curved_lines_2d/heart_icon.gd" id="1_7bfrm"]
@@ -25,7 +25,7 @@ height = 89
 
 [sub_resource type="Curve2D" id="Curve2D_bi08n"]
 _data = {
-"points": PackedVector2Array(0, 0, 36.6413, 35.3762, 10.6337, 49.0369, 25.1903, 48.2492, -25.1903, -48.2492, -17.3663, 77.0369, -17.4863, -30.9003, 0, 0, 10.6337, 49.0369)
+"points": PackedVector2Array(0, 0, 21.7271, 20.9769, 10.6337, 49.0369, 14.937, 28.6102, -14.937, -28.6102, -17.3663, 77.0369, -10.3688, -18.3229, 0, 0, 10.6337, 49.0369)
 }
 point_count = 3
 
@@ -35,8 +35,8 @@ colors = PackedColorArray(0.313726, 0.572549, 1, 1, 0.117647, 0.494118, 0.831373
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_2eynm"]
 gradient = SubResource("Gradient_42wa7")
-width = 51
-height = 67
+width = 38
+height = 46
 fill = 1
 fill_from = Vector2(0.542735, 0.320513)
 fill_to = Vector2(0.957265, 1)
@@ -54,7 +54,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(0.973248, -28.9963), Vector2(8.5, -10.3337)]
+"values": [Vector2(0.973248, -28.9963), Vector2(-0.833374, -6.66701)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -66,7 +66,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(0.617999, 42.92), Vector2(-14.5, 20.333)]
+"values": [Vector2(0.617999, 42.92), Vector2(1.5, 25.9996)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -78,11 +78,75 @@ tracks/2/keys = {
 "times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(0.973248, -28.9963), Vector2(8.5, -10.3337)]
+"values": [Vector2(0.973248, -28.9963), Vector2(-0.833374, -6.66701)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Rectangle2/ScalableVectorShape2D:curve:point_0/position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(10.6337, 49.0369), Vector2(6.30543, 29.0772)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Rectangle2/ScalableVectorShape2D:curve:point_1/position")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-17.3663, 77.0369), Vector2(-10.2976, 45.6803)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Rectangle2/ScalableVectorShape2D:curve:point_2/position")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(10.6337, 49.0369), Vector2(6.30543, 29.0772)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Rectangle2/ScalableVectorShape2D:position")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(65.5, -58), Vector2(47.5, -33)]
+}
+
+[sub_resource type="Animation" id="Animation_fby7p"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Rectangle2/ScalableVectorShape2D:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(47.5, -33)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7bfrm"]
 _data = {
+&"RESET": SubResource("Animation_fby7p"),
 &"new_animation": SubResource("Animation_7bfrm")
 }
 
@@ -135,7 +199,7 @@ begin_cap_mode = 2
 end_cap_mode = 2
 
 [node name="ScalableVectorShape2D" type="Node2D" parent="Rectangle/Rectangle2" node_paths=PackedStringArray("polygon")]
-position = Vector2(63.5, -49)
+position = Vector2(47.5, -33)
 rotation = 0.800018
 scale = Vector2(0.564941, 0.868743)
 script = ExtResource("1_0qe1d")
@@ -147,8 +211,8 @@ metadata/_custom_type_script = "uid://de3jpss66xjfh"
 [node name="Polygon2D" type="Polygon2D" parent="Rectangle/Rectangle2/ScalableVectorShape2D"]
 show_behind_parent = true
 texture = SubResource("GradientTexture2D_2eynm")
-texture_offset = Vector2(26.0775, -31.5951)
-polygon = PackedVector2Array(10.6337, 49.0369, 13.8487, 52.3666, 16.6343, 55.7113, 19.0072, 59.0534, 20.9838, 62.3758, 22.5808, 65.6611, 23.8147, 68.892, 24.7019, 72.0512, 25.2591, 75.1213, 25.5028, 78.085, 25.4496, 80.9249, 25.116, 83.6239, 24.5184, 86.1644, 23.6736, 88.5293, 22.598, 90.7011, 21.3081, 92.6626, 19.8206, 94.3964, 18.1519, 95.8852, 17.2547, 96.5324, 16.3186, 97.1118, 15.3453, 97.6212, 14.3372, 98.0586, 13.2962, 98.4218, 12.2243, 98.7085, 11.1237, 98.9167, 9.99647, 99.0441, 8.8446, 99.0886, 7.67019, 99.048, 6.47531, 98.9203, 5.26203, 98.7031, 2.78854, 97.9918, 0.266253, 96.897, -2.28829, 95.4012, -4.85853, 93.4872, -7.42794, 91.1376, -9.97996, 88.3351, -12.4981, 85.0623, -17.3663, 77.0369, -21.3952, 68.4317, -24.1128, 60.7136, -25.6349, 53.8882, -25.9839, 50.8121, -26.0775, 47.9614, -25.9301, 45.3368, -25.5564, 42.939, -24.9707, 40.7687, -24.1875, 38.8267, -23.2214, 37.1137, -22.6742, 36.3433, -22.0868, 35.6304, -21.4608, 34.9751, -20.7982, 34.3775, -20.1006, 33.8378, -19.37, 33.3558, -18.6082, 32.9319, -17.8169, 32.566, -16.9979, 32.2583, -16.1532, 32.0088, -14.3934, 31.6849, -12.5521, 31.5951, -10.6436, 31.74, -8.68262, 32.1205, -6.68348, 32.7372, -4.66072, 33.5908, -2.62881, 34.6821, -0.602251, 36.0118, 1.40448, 37.5806, 3.3769, 39.3893, 5.30052, 41.4385, 7.16084, 43.7291)
+texture_offset = Vector2(21.2175, -41.5691)
+polygon = PackedVector2Array(10.6337, 49.0369, 12.5074, 51.044, 14.0639, 53.1226, 15.3172, 55.2581, 16.2813, 57.4362, 16.9702, 59.6423, 17.3978, 61.8621, 17.5782, 64.0811, 17.5253, 66.2848, 17.2532, 68.4589, 16.7757, 70.5888, 16.1069, 72.6601, 15.2608, 74.6583, 14.2514, 76.5691, 13.0925, 78.378, 11.7983, 80.0704, 10.3827, 81.6321, 8.85971, 83.0484, 7.24327, 84.3051, 5.54737, 85.3875, 3.78601, 86.2814, 1.97317, 86.9722, 0.122838, 87.4455, -1.75101, 87.6868, -3.63438, 87.6817, -4.57527, 87.5822, -5.51329, 87.4158, -6.44671, 87.1805, -7.37377, 86.8745, -8.29273, 86.4962, -9.20183, 86.0436, -10.9835, 84.9084, -12.7047, 83.4546, -14.3516, 81.6677, -15.9101, 79.5333, -17.3663, 77.0369, -18.6296, 74.3874, -19.6273, 71.8063, -20.3722, 69.2983, -20.877, 66.868, -21.1545, 64.5199, -21.2175, 62.2587, -21.0787, 60.089, -20.751, 58.0153, -20.2469, 56.0423, -19.5794, 54.1746, -18.7612, 52.4168, -17.805, 50.7735, -16.7236, 49.2492, -15.5298, 47.8487, -14.2363, 46.5764, -12.856, 45.437, -11.4015, 44.4351, -9.88558, 43.5754, -8.32108, 42.8623, -6.72074, 42.3005, -5.09731, 41.8947, -3.46356, 41.6494, -1.83225, 41.5691, -0.216151, 41.6586, 1.37198, 41.9225, 2.91939, 42.3652, 4.4133, 42.9915, 5.84095, 43.8059, 7.18958, 44.813, 8.44642, 46.0175, 9.59872, 47.4239)
 metadata/_edit_lock_ = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Rectangle"]
