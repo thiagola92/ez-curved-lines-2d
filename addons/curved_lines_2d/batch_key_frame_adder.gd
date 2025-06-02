@@ -80,6 +80,28 @@ func _guarded_get_track_position() -> float:
 	return 0.0
 
 
+func batch_insert_gradient_key_frames(p2d : Polygon2D):
+	var track_position := _guarded_get_track_position()
+	var animation := _guarded_get_animation()
+	var path_to_node := _guarded_get_path_to_node(p2d)
+	if not animation:
+		return
+	if path_to_node.is_empty():
+		return
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Batch all gradient keyframes for %s on animation %s" % [str(p2d), str(animation)])
+	_add_key_frame(undo_redo, animation, NodePath("%s:texture:gradient:colors" % path_to_node),
+		track_position, p2d.texture.gradient.colors)
+	_add_key_frame(undo_redo, animation, NodePath("%s:texture:gradient:offsets" % path_to_node),
+		track_position, p2d.texture.gradient.offsets)
+	_add_key_frame(undo_redo, animation, NodePath("%s:texture:fill_from" % path_to_node),
+		track_position, p2d.texture.fill_from)
+	_add_key_frame(undo_redo, animation, NodePath("%s:texture:fill_to" % path_to_node),
+		track_position, p2d.texture.fill_to)
+
+	undo_redo.commit_action()
+
+
 func batch_insert_key_frames(svs : ScalableVectorShape2D):
 	var track_position := _guarded_get_track_position()
 	var animation := _guarded_get_animation()

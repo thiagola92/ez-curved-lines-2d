@@ -190,10 +190,26 @@ tooltip_text = "- Change the stop colors of the gradient
 mouse_filter = 0
 text = "Stop Colors*"
 
-[node name="StopColorButtonsContainer" type="HFlowContainer" parent="GradientStopColorButtonContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="GradientStopColorButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StopColorButtonsContainer" type="HFlowContainer" parent="GradientStopColorButtonContainer/HBoxContainer"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="BatchInsertGradientKeyFrameButton" type="Button" parent="GradientStopColorButtonContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+tooltip_text = "Pressing this button will add key frames for all aspects* of the GradientTexture2D on the Polygon2D:
+- The start- and end position
+- The stop colors
+- The stop positions of the colors
+
+* For more refined control, use the inspector foe the assigned Polygon2D node"
+icon = ExtResource("3_d26vq")
 
 [node name="ButtonContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -244,5 +260,6 @@ text = "Edit Polygon2D"
 [connection signal="button_down" from="GradientFieldContainer/HBoxContainer/RemoveGradientToggleButton" to="." method="_on_remove_gradient_toggle_button_button_down"]
 [connection signal="button_down" from="GradientFieldContainer/HBoxContainer/LinearGradientToggleButton" to="." method="_on_linear_gradient_toggle_button_button_down"]
 [connection signal="button_down" from="GradientFieldContainer/HBoxContainer/RadialGradientToggleButton" to="." method="_on_radial_gradient_toggle_button_button_down"]
+[connection signal="pressed" from="GradientStopColorButtonContainer/HBoxContainer/BatchInsertGradientKeyFrameButton" to="." method="_on_batch_insert_gradient_key_frame_button_pressed"]
 [connection signal="pressed" from="ButtonContainer/CreateFillButton" to="." method="_on_create_fill_button_pressed"]
 [connection signal="pressed" from="ButtonContainer2/GotoPolygon2DButton" to="." method="_on_goto_polygon_2d_button_pressed"]

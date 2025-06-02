@@ -44,6 +44,7 @@ func _enter_tree() -> void:
 
 func _on_key_frame_capabilities_changed():
 	find_child("AddFillKeyFrameButton").visible = BatchKeyFrameAdder.is_capable()
+	find_child("BatchInsertGradientKeyFrameButton").visible = BatchKeyFrameAdder.is_capable()
 
 
 func _on_svs_assignment_changed() -> void:
@@ -235,3 +236,11 @@ func _on_add_fill_key_frame_button_pressed() -> void:
 		BatchKeyFrameAdder.add_key_frame(
 			scalable_vector_shape_2d.polygon, "color", color_button.color
 		)
+
+
+func _on_batch_insert_gradient_key_frame_button_pressed() -> void:
+	if not is_instance_valid(scalable_vector_shape_2d.polygon):
+		return
+	if not scalable_vector_shape_2d.polygon.texture is GradientTexture2D:
+		return
+	BatchKeyFrameAdder.batch_insert_gradient_key_frames(scalable_vector_shape_2d.polygon)
