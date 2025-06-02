@@ -34,6 +34,16 @@ func _enter_tree() -> void:
 		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
 	_on_svs_assignment_changed()
+	if not BatchKeyFrameAdder.key_frame_capabilities_changed.is_connected(
+			_on_key_frame_capabilities_changed
+	):
+		BatchKeyFrameAdder.key_frame_capabilities_changed.connect(
+			_on_key_frame_capabilities_changed)
+	_on_key_frame_capabilities_changed()
+
+
+func _on_key_frame_capabilities_changed():
+	find_child("AddFillKeyFrameButton").visible = BatchKeyFrameAdder.is_capable()
 
 
 func _on_svs_assignment_changed() -> void:
@@ -218,3 +228,10 @@ static func _initialize_gradient(box : Rect2) -> GradientTexture2D:
 	texture.gradient.colors = [Color.WHITE, Color.BLACK]
 	texture.gradient.offsets = [0.0, 1.0]
 	return texture
+
+
+func _on_add_fill_key_frame_button_pressed() -> void:
+	if is_instance_valid(scalable_vector_shape_2d.polygon):
+		BatchKeyFrameAdder.add_key_frame(
+			scalable_vector_shape_2d.polygon, "color", color_button.color
+		)

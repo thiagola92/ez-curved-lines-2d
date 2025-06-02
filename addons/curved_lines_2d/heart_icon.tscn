@@ -44,6 +44,7 @@ fill_to = Vector2(0.957265, 1)
 [sub_resource type="Animation" id="Animation_7bfrm"]
 resource_name = "heart_beat"
 loop_mode = 2
+step = 0.5
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -128,6 +129,114 @@ tracks/6/keys = {
 "update": 0,
 "values": [Vector2(-42.8, -54.2), Vector2(-38.7768, -0.7463)]
 }
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Heart/Fill:color")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.278431, 0.54902, 0.74902, 1), Color(0.756863, 0.54902, 0.74902, 1)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Heart/ScalableVectorShape2D:curve:point_0/position")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(13.3388, -11.7091), Vector2(26.2659, 31.7503)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Heart/ScalableVectorShape2D:curve:point_0/out")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(21.7271, 20.9769), Vector2(16.3979, 15.8317)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Heart/ScalableVectorShape2D:curve:point_1/position")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-14.6612, 16.2909), Vector2(-3.46613, 40.8997)]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("Heart/ScalableVectorShape2D:curve:point_1/in")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(14.937, 28.6102), Vector2(11.2732, 21.5927)]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("Heart/ScalableVectorShape2D:curve:point_1/out")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-14.937, -28.6102), Vector2(-11.2732, -21.5927)]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("Heart/ScalableVectorShape2D:curve:point_2/position")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(13.3388, -11.7091), Vector2(26.2659, 31.7503)]
+}
+tracks/14/type = "value"
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/path = NodePath("Heart/ScalableVectorShape2D:curve:point_2/in")
+tracks/14/interp = 1
+tracks/14/loop_wrap = true
+tracks/14/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-10.3688, -18.3229), Vector2(-7.82554, -13.8287)]
+}
+tracks/15/type = "value"
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/path = NodePath("Heart/ScalableVectorShape2D/Polygon2D:color")
+tracks/15/interp = 1
+tracks/15/loop_wrap = true
+tracks/15/keys = {
+"times": PackedFloat32Array(0, 0.55, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0.690196), Color(1, 1, 1, 0)]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7bfrm"]
 _data = {
@@ -166,6 +275,7 @@ polygon = NodePath("Fill")
 line = NodePath("Stroke")
 curve = SubResource("Curve2D_2027v")
 update_curve_at_runtime = true
+metadata/_select_hint_ = true
 
 [node name="Fill" type="Polygon2D" parent="Rectangle/Heart"]
 show_behind_parent = true
@@ -194,17 +304,12 @@ polygon = NodePath("Polygon2D")
 curve = SubResource("Curve2D_bi08n")
 shape_hint_color = Color(0.196078, 0.803922, 0.196078, 0.27451)
 metadata/_custom_type_script = "uid://de3jpss66xjfh"
-metadata/_hover_closest_point_on_curve_ = {
-"before_segment": 1,
-"local_point_position": Vector2(20.125, 6.38102),
-"point_position": Vector2(116.966, -34.1694)
-}
 
 [node name="Polygon2D" type="Polygon2D" parent="Rectangle/Heart/ScalableVectorShape2D"]
 show_behind_parent = true
 texture = SubResource("GradientTexture2D_2eynm")
 texture_offset = Vector2(18.5124, 19.1769)
-polygon = PackedVector2Array(13.3388, -11.7091, 15.2125, -9.70196, 16.769, -7.62341, 18.0223, -5.48788, 18.9864, -3.30982, 19.6753, -1.10366, 20.1029, 1.11613, 20.2833, 3.33513, 20.2304, 5.53887, 19.9583, 7.71291, 19.4808, 9.84281, 18.812, 11.9141, 17.9659, 13.9124, 16.9565, 15.8232, 15.7976, 17.632, 14.5034, 19.3245, 13.0878, 20.8861, 11.5648, 22.3025, 9.94836, 23.5591, 8.25246, 24.6416, 6.4911, 25.5354, 4.67826, 26.2262, 2.82793, 26.6995, 0.954084, 26.9408, -0.929289, 26.9357, -1.87018, 26.8363, -2.80821, 26.6698, -3.74162, 26.4345, -4.66868, 26.1286, -5.58764, 25.7502, -6.49674, 25.2976, -8.27838, 24.1624, -9.99963, 22.7086, -11.6465, 20.9218, -13.205, 18.7873, -14.6612, 16.2909, -15.9245, 13.6414, -16.9222, 11.0604, -17.6671, 8.55236, -18.1719, 6.12202, -18.4494, 3.77395, -18.5124, 1.51274, -18.3737, -0.656992, -18.0459, -2.73066, -17.5418, -4.70364, -16.8743, -6.57135, -16.0561, -8.32918, -15.0999, -9.97252, -14.0185, -11.4968, -12.8247, -12.8973, -11.5313, -14.1696, -10.1509, -15.309, -8.69637, -16.3109, -7.18049, -17.1706, -5.61599, -17.8837, -4.01565, -18.4455, -2.39222, -18.8513, -0.758473, -19.0966, 0.872835, -19.1769, 2.48894, -19.0874, 4.07707, -18.8235, 5.62448, -18.3808, 7.11839, -17.7545, 8.54604, -16.9401, 9.89467, -15.9329, 11.1515, -14.7285, 12.3038, -13.322)
+polygon = PackedVector2Array(13.3388, -11.7091, 15.2125, -9.70198, 16.769, -7.62344, 18.0223, -5.48791, 18.9864, -3.30984, 19.6753, -1.10369, 20.1029, 1.11611, 20.2833, 3.3351, 20.2304, 5.53884, 19.9583, 7.71288, 19.4808, 9.84278, 18.812, 11.9141, 17.9659, 13.9123, 16.9565, 15.8231, 15.7977, 17.632, 14.5034, 19.3244, 13.0878, 20.8861, 11.5648, 22.3024, 9.94837, 23.5591, 8.25247, 24.6415, 6.49111, 25.5354, 4.67827, 26.2262, 2.82794, 26.6995, 0.954094, 26.9408, -0.929278, 26.9357, -1.87017, 26.8363, -2.8082, 26.6698, -3.74161, 26.4345, -4.66867, 26.1285, -5.58763, 25.7502, -6.49673, 25.2976, -8.27837, 24.1624, -9.99963, 22.7086, -11.6465, 20.9217, -13.205, 18.7873, -14.6612, 16.2909, -15.9245, 13.6414, -16.9222, 11.0603, -17.6671, 8.55233, -18.1719, 6.12199, -18.4494, 3.77392, -18.5124, 1.51271, -18.3736, -0.657024, -18.0459, -2.73069, -17.5418, -4.70367, -16.8743, -6.57138, -16.0561, -8.32921, -15.0999, -9.97255, -14.0185, -11.4968, -12.8247, -12.8974, -11.5312, -14.1696, -10.1509, -15.309, -8.69637, -16.3109, -7.18048, -17.1707, -5.61599, -17.8837, -4.01564, -18.4455, -2.39221, -18.8513, -0.758465, -19.0967, 0.872844, -19.1769, 2.48895, -19.0874, 4.07708, -18.8236, 5.62449, -18.3808, 7.11839, -17.7545, 8.54605, -16.9401, 9.89467, -15.933, 11.1515, -14.7285, 12.3038, -13.3221)
 metadata/_edit_lock_ = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Rectangle"]

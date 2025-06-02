@@ -32,8 +32,20 @@ func _on_selection_changed():
 	if not is_instance_valid(animation_player):
 		key_frame_capabilities_changed.emit()
 
+func is_capable() -> bool:
+	if not is_instance_valid(animation_player_editor):
+		return false
+	if not is_instance_valid(animation_under_edit_button):
+		return false
+	if animation_under_edit_button.get_selected_id() < 0:
+		return false
+	if not is_instance_valid(animation_player):
+		return false
+	if not animation_player_editor.visible:
+		return false
+	return true
 
-func _guarded_get_path_to_node(svs : ScalableVectorShape2D) -> String:
+func _guarded_get_path_to_node(svs : Node) -> String:
 	var root_node := animation_player.get_node(animation_player.root_node)
 	if not is_instance_valid(root_node):
 		printerr("Could not find root node for %s by path: %s" % [str(animation_player), animation_player.root_node])
@@ -87,17 +99,27 @@ func batch_insert_key_frames(svs : ScalableVectorShape2D):
 		if p_idx < svs.curve.point_count - 1:
 			_add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/out" % [path_to_node, p_idx]),
 					track_position, svs.curve.get_point_out(p_idx))
-
 	undo_redo.commit_action()
 
 
-func add_key_frame(svs : ScalableVectorShape2D, property_path : String, val : Variant):
+func add_key_frame(node : Node, property_path : String, val : Variant):
+	var track_position := _guarded_get_track_position()
+	var animation := _guarded_get_animation()
+	var path_to_node := _guarded_get_path_to_node(node)
+	if not animation:
+		return
+	if path_to_node.is_empty():
+		return
 	var undo_redo := EditorInterface.get_editor_undo_redo()
-	print("TODO")
+	undo_redo.create_action("Add key frame on %s of %s" % [property_path, str(node)])
+	_add_key_frame(undo_redo, animation, NodePath("%s:%s" % [path_to_node, property_path]),
+			track_position, val)
+	undo_redo.commit_action()
 
 
 func _add_key_frame(undo_redo : EditorUndoRedoManager, animation : Animation, node_path : NodePath,
 			track_position : float, val : Variant):
+	undo_redo.add_do_reference(animation)
 	if animation.find_track(node_path, Animation.TrackType.TYPE_VALUE) < 0:
 		undo_redo.add_do_method(self, 'add_anim_track_if_absent', animation, node_path)
 		undo_redo.add_undo_method(self, 'remove_anim_track_by_path', animation, node_path)
