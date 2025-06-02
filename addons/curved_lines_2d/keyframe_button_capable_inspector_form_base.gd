@@ -100,14 +100,21 @@ func add_key_frame(node : Node, property_path : String, val : Variant):
 func _add_key_frame(undo_redo : EditorUndoRedoManager, animation : Animation, node_path : NodePath,
 			track_position : float, val : Variant):
 	undo_redo.add_do_reference(animation)
-	if animation.find_track(node_path, Animation.TrackType.TYPE_VALUE) < 0:
+	var t_idx := animation.find_track(node_path, Animation.TrackType.TYPE_VALUE)
+	if t_idx < 0:
 		undo_redo.add_do_method(self, 'add_anim_track_if_absent', animation, node_path)
 		undo_redo.add_undo_method(self, 'remove_anim_track_by_path', animation, node_path)
 
 	undo_redo.add_do_method(self, 'add_key_to_anim_track_by_path', animation, node_path,
 			track_position, val)
-	undo_redo.add_undo_method(self, 'remove_key_from_anim_track_by_path_and_position', animation,
-			node_path, track_position)
+
+	var k_idx := animation.track_find_key(t_idx, track_position) if t_idx > -1 else -1
+	if k_idx < 0:
+		undo_redo.add_undo_method(self, 'remove_key_from_anim_track_by_path_and_position', animation,
+				node_path, track_position)
+	else:
+		undo_redo.add_undo_method(self, 'add_key_to_anim_track_by_path', animation, node_path,
+			track_position, animation.track_get_key_value(t_idx, k_idx))
 
 
 func remove_key_from_anim_track_by_path_and_position(animation : Animation, node_path : NodePath,
