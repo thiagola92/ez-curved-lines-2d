@@ -259,7 +259,7 @@ tracks/17/keys = {
 "times": PackedFloat32Array(0, 0.75, 1),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [6.0, 10.0, 20.0]
+"values": [6.0, 10.0, 8.0]
 }
 tracks/18/type = "value"
 tracks/18/imported = false
@@ -608,6 +608,18 @@ tracks/46/keys = {
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
 "values": [Vector2(1, 0), Vector2(1, 0), Vector2(0.46501, 1.12571)]
+}
+tracks/47/type = "value"
+tracks/47/imported = false
+tracks/47/enabled = true
+tracks/47/path = NodePath("Fill:color")
+tracks/47/interp = 1
+tracks/47/loop_wrap = true
+tracks/47/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.211765, 0.239216, 0.321569, 1), Color(0.2, 0.08, 0.134, 1)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7bfrm"]

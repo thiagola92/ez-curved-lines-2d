@@ -50,7 +50,6 @@ var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
 var in_undo_redo_transaction := false
 var shape_preview : Curve2D = null
-var animation_player : AnimationPlayer = null
 
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
@@ -162,8 +161,6 @@ func _on_selection_changed():
 				and EditorInterface.get_selection().get_selected_nodes().is_empty()):
 			EditorInterface.edit_node(scene_root)
 		var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-		if current_selection is AnimationPlayer:
-			animation_player = current_selection
 	update_overlays()
 
 
