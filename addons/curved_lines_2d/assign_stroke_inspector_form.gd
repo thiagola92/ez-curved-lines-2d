@@ -29,6 +29,17 @@ func _enter_tree() -> void:
 	find_child("StrokeWidthFloatFieldContainer").add_child(stroke_width_input)
 	_on_svs_assignment_changed()
 	stroke_width_input.value_changed.connect(_on_stroke_width_changed)
+	if not BatchKeyFrameAdder.key_frame_capabilities_changed.is_connected(
+			_on_key_frame_capabilities_changed
+	):
+		BatchKeyFrameAdder.key_frame_capabilities_changed.connect(
+			_on_key_frame_capabilities_changed)
+	_on_key_frame_capabilities_changed()
+
+
+func _on_key_frame_capabilities_changed():
+	find_child("AddStrokeColorKeyFrameButton").visible = BatchKeyFrameAdder.is_capable()
+	find_child("AddStrokeWidthKeyFrameButton").visible = BatchKeyFrameAdder.is_capable()
 
 
 func _on_svs_assignment_changed() -> void:
@@ -123,3 +134,15 @@ func _make_float_input(lbl : String, value : float, min_value : float, max_value
 	return x_slider
 
 
+func _on_add_stroke_width_key_frame_button_pressed() -> void:
+	if is_instance_valid(scalable_vector_shape_2d.line):
+		BatchKeyFrameAdder.add_key_frame(
+			scalable_vector_shape_2d.line, "width", stroke_width_input.value
+		)
+
+
+func _on_add_stroke_color_key_frame_button_pressed() -> void:
+	if is_instance_valid(scalable_vector_shape_2d.line):
+		BatchKeyFrameAdder.add_key_frame(
+			scalable_vector_shape_2d.line, "default_color", color_button.color
+		)

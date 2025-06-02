@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://bm31gemem22uc"]
+[gd_scene load_steps=5 format=3 uid="uid://bm31gemem22uc"]
 
 [ext_resource type="Script" uid="uid://bv0hffvudv51d" path="res://addons/curved_lines_2d/assign_stroke_inspector_form.gd" id="1_j8wjx"]
 [ext_resource type="Texture2D" uid="uid://cc8salyqmquir" path="res://addons/curved_lines_2d/Collapse.svg" id="2_vq8nc"]
+[ext_resource type="Texture2D" uid="uid://31qakec1dm6y" path="res://addons/curved_lines_2d/Key.svg" id="3_2fv2a"]
 
 [sub_resource type="FontVariation" id="FontVariation_vq8nc"]
 variation_embolden = 0.8
@@ -51,12 +52,21 @@ tooltip_text = "This will set the default_color of the assigned Line2D."
 mouse_filter = 0
 text = "Stroke Color"
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="StrokeColorFieldContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="StrokeColorFieldContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="StrokeColorFieldContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "This will set the default_color of the assigned Line2D."
 text = "Stroke"
 color = Color(1, 1, 1, 1)
+
+[node name="AddStrokeColorKeyFrameButton" type="Button" parent="StrokeColorFieldContainer/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Click to add a key frame to the current animation for the Line2D's default_color property"
+icon = ExtResource("3_2fv2a")
 
 [node name="StrokeWidthFieldContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -70,10 +80,19 @@ tooltip_text = "This will set the width of the assign Line2D node"
 mouse_filter = 0
 text = "Stroke Width"
 
-[node name="StrokeWidthFloatFieldContainer" type="PanelContainer" parent="StrokeWidthFieldContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="StrokeWidthFieldContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StrokeWidthFloatFieldContainer" type="PanelContainer" parent="StrokeWidthFieldContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "This will set the width of the assign Line2D node"
+
+[node name="AddStrokeWidthKeyFrameButton" type="Button" parent="StrokeWidthFieldContainer/HBoxContainer"]
+layout_mode = 2
+tooltip_text = "Click to add a key frame to the current animation for the Line2D's width property"
+icon = ExtResource("3_2fv2a")
 
 [node name="ButtonContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -118,6 +137,8 @@ Use this for advanced features which are already built-in into godot, like gradi
 text = "Edit Line2D"
 
 [connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
-[connection signal="color_changed" from="StrokeColorFieldContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
+[connection signal="color_changed" from="StrokeColorFieldContainer/HBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
+[connection signal="pressed" from="StrokeColorFieldContainer/HBoxContainer/AddStrokeColorKeyFrameButton" to="." method="_on_add_stroke_color_key_frame_button_pressed"]
+[connection signal="pressed" from="StrokeWidthFieldContainer/HBoxContainer/AddStrokeWidthKeyFrameButton" to="." method="_on_add_stroke_width_key_frame_button_pressed"]
 [connection signal="pressed" from="ButtonContainer/CreateStrokeButton" to="." method="_on_create_stroke_button_pressed"]
 [connection signal="pressed" from="ButtonContainer2/GotoLine2DButton" to="." method="_on_goto_line_2d_button_pressed"]

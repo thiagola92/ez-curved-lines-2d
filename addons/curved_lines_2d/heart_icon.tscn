@@ -237,6 +237,30 @@ tracks/15/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0.690196), Color(1, 1, 1, 0)]
 }
+tracks/16/type = "value"
+tracks/16/imported = false
+tracks/16/enabled = true
+tracks/16/path = NodePath("Heart/Stroke:default_color")
+tracks/16/interp = 1
+tracks/16/loop_wrap = true
+tracks/16/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.129412, 0.145098, 0.196078, 1), Color(0.31, 0.2263, 0.30721, 1)]
+}
+tracks/17/type = "value"
+tracks/17/imported = false
+tracks/17/enabled = true
+tracks/17/path = NodePath("Heart/Stroke:width")
+tracks/17/interp = 1
+tracks/17/loop_wrap = true
+tracks/17/keys = {
+"times": PackedFloat32Array(0, 0.75, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [6.0, 10.0, 20.0]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_7bfrm"]
 _data = {
@@ -254,7 +278,6 @@ polygon = NodePath("Fill")
 line = NodePath("Stroke")
 curve = SubResource("Curve2D_jr52a")
 update_curve_at_runtime = true
-metadata/_select_hint_ = true
 
 [node name="Fill" type="Polygon2D" parent="Rectangle"]
 show_behind_parent = true
@@ -275,7 +298,6 @@ polygon = NodePath("Fill")
 line = NodePath("Stroke")
 curve = SubResource("Curve2D_2027v")
 update_curve_at_runtime = true
-metadata/_select_hint_ = true
 
 [node name="Fill" type="Polygon2D" parent="Rectangle/Heart"]
 show_behind_parent = true
@@ -302,6 +324,7 @@ scale = Vector2(0.564941, 0.868743)
 script = ExtResource("1_0qe1d")
 polygon = NodePath("Polygon2D")
 curve = SubResource("Curve2D_bi08n")
+update_curve_at_runtime = true
 shape_hint_color = Color(0.196078, 0.803922, 0.196078, 0.27451)
 metadata/_custom_type_script = "uid://de3jpss66xjfh"
 
