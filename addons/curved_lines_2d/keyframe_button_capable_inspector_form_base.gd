@@ -1,63 +1,63 @@
 @tool
-extends Node
+extends Control
 
-signal key_frame_capabilities_changed(val)
+class_name KeyframeButtonCapableInspectorFormBase
 
-var animation_player : AnimationPlayer
 var animation_player_editor : Control
 var animation_under_edit_button : OptionButton
 var animation_postion_spinbox : SpinBox
 
-func _enter_tree() -> void:
-	if not Engine.is_editor_hint():
-		return
-	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
+func _initialize_keyframe_capabilities():
 	animation_player_editor = EditorInterface.get_base_control().find_child("*AnimationPlayerEditor*", true, false)
 	if is_instance_valid(animation_player_editor):
 		animation_under_edit_button = animation_player_editor.find_child("*OptionButton*", true, false)
 		animation_postion_spinbox = animation_player_editor.find_child("*SpinBox*", true, false)
-		animation_player_editor.visibility_changed.connect(key_frame_capabilities_changed.emit)
+		animation_player_editor.visibility_changed.connect(_on_key_frame_capabilities_changed)
 		if is_instance_valid(animation_under_edit_button):
-			animation_under_edit_button.item_selected.connect(func(_sid): key_frame_capabilities_changed.emit())
+			animation_under_edit_button.item_selected.connect(func(_sid): _on_key_frame_capabilities_changed)
+	_on_key_frame_capabilities_changed()
 
 
-func _on_selection_changed():
-	var candidate = EditorInterface.get_selection().get_selected_nodes().pop_back()
-	if candidate is AnimationPlayer and is_instance_valid(candidate):
-		animation_player = candidate
-		key_frame_capabilities_changed.emit()
-		(animation_player as Node).tree_exiting.connect(
-				func(): key_frame_capabilities_changed.emit())
+func _on_key_frame_capabilities_changed():
+	printerr("_on_key_frame_capabilities_changed should be overridden")
 
-	if not is_instance_valid(animation_player):
-		key_frame_capabilities_changed.emit()
 
-func is_capable() -> bool:
+func _is_key_frame_capable() -> bool:
 	if not is_instance_valid(animation_player_editor):
 		return false
 	if not is_instance_valid(animation_under_edit_button):
 		return false
 	if animation_under_edit_button.get_selected_id() < 0:
 		return false
-	if not is_instance_valid(animation_player):
-		return false
 	if not animation_player_editor.visible:
+		return false
+	if not _find_animation_player(
+		animation_under_edit_button.get_item_text(animation_under_edit_button.get_selected_id())):
 		return false
 	return true
 
-func _guarded_get_path_to_node(svs : Node) -> String:
+
+func _find_animation_player(with_anim_name : String) -> AnimationPlayer:
+	for n  in EditorInterface.get_edited_scene_root().find_children("*", "AnimationPlayer", true):
+		if n is AnimationPlayer and (n as AnimationPlayer).has_animation(with_anim_name):
+			return n
+	return null
+
+
+func _guarded_get_path_to_node(animation_player : AnimationPlayer, node : Node) -> String:
 	var root_node := animation_player.get_node(animation_player.root_node)
 	if not is_instance_valid(root_node):
 		printerr("Could not find root node for %s by path: %s" % [str(animation_player), animation_player.root_node])
 		return ""
-	var path_to_node = root_node.get_path_to(svs)
+	var path_to_node = root_node.get_path_to(node)
 	if path_to_node.is_empty():
-		printerr("Could not find a path from AnimationPlayer's root node (%s) to this node (%s)" % [animation_player.root_node, str(svs)])
+		printerr("Could not find a path from AnimationPlayer's root node (%s) to this node (%s)" % [
+				animation_player.root_node, str(node)])
 		return ""
 	return path_to_node
 
 
-func _guarded_get_animation() -> Animation:
+func _guarded_get_animation(animation_player : AnimationPlayer) -> Animation:
 	if not is_instance_valid(animation_player):
 		return null
 	if not is_instance_valid(animation_under_edit_button):
@@ -80,54 +80,12 @@ func _guarded_get_track_position() -> float:
 	return 0.0
 
 
-func batch_insert_gradient_key_frames(p2d : Polygon2D):
-	var track_position := _guarded_get_track_position()
-	var animation := _guarded_get_animation()
-	var path_to_node := _guarded_get_path_to_node(p2d)
-	if not animation:
-		return
-	if path_to_node.is_empty():
-		return
-	var undo_redo := EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Batch all gradient keyframes for %s on animation %s" % [str(p2d), str(animation)])
-	_add_key_frame(undo_redo, animation, NodePath("%s:texture:gradient:colors" % path_to_node),
-		track_position, p2d.texture.gradient.colors)
-	_add_key_frame(undo_redo, animation, NodePath("%s:texture:gradient:offsets" % path_to_node),
-		track_position, p2d.texture.gradient.offsets)
-	_add_key_frame(undo_redo, animation, NodePath("%s:texture:fill_from" % path_to_node),
-		track_position, p2d.texture.fill_from)
-	_add_key_frame(undo_redo, animation, NodePath("%s:texture:fill_to" % path_to_node),
-		track_position, p2d.texture.fill_to)
-
-	undo_redo.commit_action()
-
-
-func batch_insert_key_frames(svs : ScalableVectorShape2D):
-	var track_position := _guarded_get_track_position()
-	var animation := _guarded_get_animation()
-	var path_to_node := _guarded_get_path_to_node(svs)
-	if not animation:
-		return
-	if path_to_node.is_empty():
-		return
-	var undo_redo := EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Batch insert curve keyframes for %s on animation %s" % [str(svs), str(animation)])
-	for p_idx in range(svs.curve.point_count):
-		_add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/position" % [path_to_node, p_idx]),
-				track_position, svs.curve.get_point_position(p_idx))
-		if p_idx > 0:
-			_add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/in" % [path_to_node, p_idx]),
-					track_position, svs.curve.get_point_in(p_idx))
-		if p_idx < svs.curve.point_count - 1:
-			_add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/out" % [path_to_node, p_idx]),
-					track_position, svs.curve.get_point_out(p_idx))
-	undo_redo.commit_action()
-
-
 func add_key_frame(node : Node, property_path : String, val : Variant):
+	var animation_name := animation_under_edit_button.get_item_text(animation_under_edit_button.get_selected_id())
+	var animation_player := _find_animation_player(animation_name)
 	var track_position := _guarded_get_track_position()
-	var animation := _guarded_get_animation()
-	var path_to_node := _guarded_get_path_to_node(node)
+	var animation := _guarded_get_animation(animation_player)
+	var path_to_node := _guarded_get_path_to_node(animation_player, node)
 	if not animation:
 		return
 	if path_to_node.is_empty():

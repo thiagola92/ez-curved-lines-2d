@@ -1,5 +1,5 @@
 @tool
-extends Control
+extends KeyframeButtonCapableInspectorFormBase
 
 class_name AssignFillInspectorForm
 
@@ -34,17 +34,12 @@ func _enter_tree() -> void:
 		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
 	_on_svs_assignment_changed()
-	if not BatchKeyFrameAdder.key_frame_capabilities_changed.is_connected(
-			_on_key_frame_capabilities_changed
-	):
-		BatchKeyFrameAdder.key_frame_capabilities_changed.connect(
-			_on_key_frame_capabilities_changed)
-	_on_key_frame_capabilities_changed()
+	_initialize_keyframe_capabilities()
 
 
 func _on_key_frame_capabilities_changed():
-	find_child("AddFillKeyFrameButton").visible = BatchKeyFrameAdder.is_capable()
-	find_child("BatchInsertGradientKeyFrameButton").visible = BatchKeyFrameAdder.is_capable()
+	find_child("AddFillKeyFrameButton").visible = _is_key_frame_capable()
+	find_child("BatchInsertGradientKeyFrameButton").visible = _is_key_frame_capable()
 
 
 func _on_svs_assignment_changed() -> void:
@@ -233,7 +228,7 @@ static func _initialize_gradient(box : Rect2) -> GradientTexture2D:
 
 func _on_add_fill_key_frame_button_pressed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.polygon):
-		BatchKeyFrameAdder.add_key_frame(
+		add_key_frame(
 			scalable_vector_shape_2d.polygon, "color", color_button.color
 		)
 
@@ -243,4 +238,26 @@ func _on_batch_insert_gradient_key_frame_button_pressed() -> void:
 		return
 	if not scalable_vector_shape_2d.polygon.texture is GradientTexture2D:
 		return
-	BatchKeyFrameAdder.batch_insert_gradient_key_frames(scalable_vector_shape_2d.polygon)
+
+	var p2d := scalable_vector_shape_2d.polygon
+	var animation_name := animation_under_edit_button.get_item_text(animation_under_edit_button.get_selected_id())
+	var animation_player := _find_animation_player(animation_name)
+	var track_position := _guarded_get_track_position()
+	var animation := _guarded_get_animation(animation_player)
+	var path_to_node := _guarded_get_path_to_node(animation_player, p2d)
+	if not animation:
+		return
+	if path_to_node.is_empty():
+		return
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Batch all gradient keyframes for %s on animation %s" % [str(p2d), str(animation)])
+	_add_key_frame(undo_redo, animation, NodePath("%s:texture:gradient:colors" % path_to_node),
+		track_position, p2d.texture.gradient.colors)
+	_add_key_frame(undo_redo, animation, NodePath("%s:texture:gradient:offsets" % path_to_node),
+		track_position, p2d.texture.gradient.offsets)
+	_add_key_frame(undo_redo, animation, NodePath("%s:texture:fill_from" % path_to_node),
+		track_position, p2d.texture.fill_from)
+	_add_key_frame(undo_redo, animation, NodePath("%s:texture:fill_to" % path_to_node),
+		track_position, p2d.texture.fill_to)
+
+	undo_redo.commit_action()

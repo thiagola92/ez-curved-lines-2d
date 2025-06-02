@@ -24,9 +24,6 @@ const META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX := "_hover_gradient_color_stop_idx
 const META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE := "_hover_closest_point_on_gradient_"
 const META_NAME_SELECT_HINT := "_select_hint_"
 
-const BATCH_KEY_FRAME_AUTOLOAD_NAME := "BatchKeyFrameAdder"
-
-
 const VIEWPORT_ORANGE := Color(0.737, 0.463, 0.337)
 
 enum PaintOrder {
@@ -89,15 +86,6 @@ func _enter_tree():
 		scalable_vector_shapes_2d_dock.shape_created.connect(_on_shape_created)
 	if not scalable_vector_shapes_2d_dock.set_shape_preview.is_connected(_on_shape_preview):
 		scalable_vector_shapes_2d_dock.set_shape_preview.connect(_on_shape_preview)
-
-
-func _enable_plugin() -> void:
-	add_autoload_singleton(BATCH_KEY_FRAME_AUTOLOAD_NAME, "res://addons/curved_lines_2d/batch_key_frame_adder.gd")
-
-
-func _disable_plugin() -> void:
-	remove_autoload_singleton(BATCH_KEY_FRAME_AUTOLOAD_NAME)
-
 
 
 func select_node_reversibly(target_node : Node) -> void:
