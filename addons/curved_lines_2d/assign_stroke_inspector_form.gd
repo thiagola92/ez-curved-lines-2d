@@ -1,5 +1,5 @@
 @tool
-extends Control
+extends KeyframeButtonCapableInspectorFormBase
 
 class_name AssignStrokeInspectorForm
 
@@ -22,12 +22,14 @@ func _enter_tree() -> void:
 	select_button = find_child("GotoLine2DButton")
 	title_button = find_child("TitleButton")
 	color_button = find_child("ColorPickerButton")
-	scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
+	if 'assigned_node_changed' in scalable_vector_shape_2d:
+		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
 	stroke_width_input = _make_float_input("Stroke Width", 10.0, 0.0, 100.0, "px")
 	find_child("StrokeWidthFloatFieldContainer").add_child(stroke_width_input)
 	_on_svs_assignment_changed()
 	stroke_width_input.value_changed.connect(_on_stroke_width_changed)
+	_initialize_keyframe_capabilities()
 
 
 func _on_svs_assignment_changed() -> void:
@@ -122,3 +124,20 @@ func _make_float_input(lbl : String, value : float, min_value : float, max_value
 	return x_slider
 
 
+func _on_add_stroke_width_key_frame_button_pressed() -> void:
+	if is_instance_valid(scalable_vector_shape_2d.line):
+		add_key_frame(
+			scalable_vector_shape_2d.line, "width", stroke_width_input.value
+		)
+
+
+func _on_add_stroke_color_key_frame_button_pressed() -> void:
+	if is_instance_valid(scalable_vector_shape_2d.line):
+		add_key_frame(
+			scalable_vector_shape_2d.line, "default_color", color_button.color
+		)
+
+
+func _on_key_frame_capabilities_changed():
+	find_child("AddStrokeColorKeyFrameButton").visible = _is_key_frame_capable()
+	find_child("AddStrokeWidthKeyFrameButton").visible = _is_key_frame_capable()

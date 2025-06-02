@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.4.0 - 2025-06-02
+
+### Added
+- Batch insert key frame button for entire curve
+- Batch insert key frame button for entire gradient
+- Key frame button for stroke width
+- Key frame button for fill stroke color
+- Key frame button for fill color
+
+
 ## 2.3.2 - 2025-05-31
 
 ### Added

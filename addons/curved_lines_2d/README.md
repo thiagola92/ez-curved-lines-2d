@@ -51,9 +51,16 @@ This stuff makes me zero money, so you can always branch off in your own directi
   - [Using `closed` on `Line2D`](#using-closed-on-line2d)
   - [Deleting points and control points](#deleting-points-and-control-points)
   - [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
-- [Animating / Changing shapes at runtime](#animating--changing-shapes-at-runtime)
-  - [Youtube explainer on animating](#youtube-explainer-on-animating)
-  - [Update curve at Runtime](#update-curve-at-runtime)
+- [Editing the properties of an assigned gradient (since release 2.3)](#editing-the-properties-of-an-assigned-gradient-since-release-23)
+  - [Changing the start- and endpoint of the gradient](#changing-the-start--and-endpoint-of-the-gradient)
+  - [Changing the color stop positions](#changing-the-color-stop-positions)
+  - [Add new color stops](#add-new-color-stops)
+- [Custom inspector forms (since release 2.2)](#custom-inspector-forms-since-release-22)
+  - [A preview of the updated inspector](#a-preview-of-the-updated-inspector)
+- [Animating / Changing shapes at runtime (improved in 2.4)](#animating--changing-shapes-at-runtime-improved-in-24)
+  - [Youtube explainer on animating (outdated by release 2.4!)](#youtube-explainer-on-animating-outdated-by-release-24)
+  - [A note up front (this being said)](#a-note-up-front-this-being-said)
+  - [Animating the shape and gradients at Runtime](#animating-the-shape-and-gradients-at-runtime)
   - [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
   - [Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead](#dont-duplicate-scalablevectorshape2d-use-the-path_changed-signal-in-stead)
   - [Performance impact](#performance-impact)
@@ -214,28 +221,84 @@ Like this:
 
 ![set origin 2](./screenshots/16a-set_origin.png)
 
-# Animating / Changing shapes at runtime
+# Editing the properties of an assigned gradient (since release 2.3)
 
-## Youtube explainer on animating
+Once a gradient is assigned to the 'Fill' of your shape via the inspector, its properties can be changed using the same controls as will the other handles.
+
+## Changing the start- and endpoint of the gradient
+
+Drag the outer orbit of the start- and endpoint of a the gradient line using the left mouse button to move them:
+
+![drag gradient start- and end-position](./screenshots/drag_gradient_start.png)
+
+
+## Changing the color stop positions
+
+Drag the color stops along the gradient line to change their position.
+
+Right click to remove a color stop.
+
+![changing color stops](./screenshots/drag_remove_color_stops.png)
+
+## Add new color stops
+
+Double clicking on the gradient line will add a new color stop (the assigned color will be sampled from the existing color at that point)
+
+![adding a color stop](./screenshots/add_color_stop.png)
+
+# Custom inspector forms (since release 2.2)
+
+The following custom forms were added, with extensive tooltips to help explain the actual functions they provide:
+
+- Fill (actually the assigned `Polygon2D`)
+- Stroke (actually the assigned `Line2D`)
+- Collision Polygon (just a button to generate a new `Polygon2D`)
+
+## A preview of the updated inspector
+
+![preview of the updated inspector](./screenshots/updated-inspector.png)
+
+
+
+
+# Animating / Changing shapes at runtime (improved in 2.4)
+
+## Youtube explainer on animating (outdated by release 2.4!)
+
+This explainer will still work, but from version 2.4.0 onward much work has been done to add custom keyframe buttons.
 
 [![link to Youtube explainer about animating](./screenshots/animating-youtube-thumbnail.png)](https://youtu.be/elWNu3-067A?feature=shared)
 
+## A note up front (this being said)
 
-The shapes you create will work fine with basic key-frame operations. You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning. Moreover, you probably should in 95% of the cases
+The shapes you create will work fine with basic key-frame operations. You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning. Moreover, you probably should in 95% of the cases, to optimize your performance
 
-## Update curve at Runtime
+## Animating the shape and gradients at Runtime
 
 Sometimes, however, you want your shape to change at runtime.
 
 You can use the `Update Curve at Runtime` checkbox in the inspector to enable dynamic changing of your curved shapes at runtime.
 
-![update curve at runtime](./screenshots/update-runtime.png)
+![update curve at runtime](./screenshots/update-curve-at-runtime-in-2.4.0.png)
 
 ## Add keyframes in an animation player
 
-You can then add an `AnimationPlayer` node to your scene, create a new animation and create keyframes for your `Curve > Points` (in the inspector):
+You can then add an `AnimationPlayer` node to your scene, create a new animation and (batch) insert key frames for the following this:
+- The entire shape of your `ScalableVectorShape2D`, which are:
+  - `curve:point_*/position`
+  - `curve:point_*/in`
+  - `curve:point_*/out`
+- All the gradient properties of your fill (`Polygon2D` assigned to `ScalableVectorShape2D`), which are:
+  - `texture:gradient:colors` (the entire `PackedColorArray`)
+  - `texture:gradient:offsets` (the entire `PackedFloat32Array`)
+  - `texture:fill_from`
+  - `texture:fill_to`
+- Stroke width, i.e.: the `width` property of the assigned `Line2D`
+- Stroke color, i.e.: the `default_color`  of the assigned `Line2D`
+- Fill color, i.e.: the `color` of the assigned `Polygon2D`
 
-![animating](./screenshots/animating.png)
+![the new key frame buttons in the inspector](./screenshots/animating-in-2.4.0.png)
+
 
 ## Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead
 
@@ -269,3 +332,4 @@ Lots of thanks go out to those who helped me out getting started:
 - This plugin was first inspired by [Mark Hedberg's blog on rendering curves in Godot](https://www.hedberggames.com/blog/rendering-curves-in-godot).
 - The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
 - The SVG Importer code was adapted from the script hosted on github in the [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot) repository
+

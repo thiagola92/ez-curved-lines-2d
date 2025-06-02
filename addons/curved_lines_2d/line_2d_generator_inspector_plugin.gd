@@ -3,6 +3,8 @@ extends EditorInspectorPlugin
 
 class_name  Line2DGeneratorInspectorPlugin
 
+const GROUP_NAME_CURVE_SETTINGS := "Curve settings"
+
 
 func _can_handle(obj) -> bool:
 	return obj is DrawablePath2D or obj is ScalableVectorShape2D
@@ -17,6 +19,13 @@ func _parse_begin(object: Object) -> void:
 		button.text = "Convert to ScalableVectorShape2D"
 		add_custom_control(button)
 		button.pressed.connect(func(): _on_convert_button_pressed(object))
+
+
+func _parse_group(object: Object, group: String) -> void:
+	if group == GROUP_NAME_CURVE_SETTINGS and object is ScalableVectorShape2D:
+		var key_frame_form = preload("res://addons/curved_lines_2d/batch_insert_curve_point_key_frames_inspector_form.tscn").instantiate()
+		key_frame_form.scalable_vector_shape_2d = object
+		add_custom_control(key_frame_form)
 
 
 func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: int, wide: bool) -> bool:
