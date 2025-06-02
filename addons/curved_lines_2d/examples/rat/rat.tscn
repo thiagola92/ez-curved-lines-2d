@@ -1726,15 +1726,15 @@ metadata/_edit_lock_ = true
 [node name="Tail" type="Node2D" parent="Pivot/Body_fill" node_paths=PackedStringArray("line")]
 position = Vector2(-37.6309, 5.64914)
 script = ExtResource("18_xsi10")
-curve = SubResource("Curve2D_d4tj5")
 line = NodePath("../Line2D")
+curve = SubResource("Curve2D_d4tj5")
 update_curve_at_runtime = true
 
 [node name="Tail2" type="Node2D" parent="Pivot/Body_fill" node_paths=PackedStringArray("line")]
 position = Vector2(-37.6309, 5.64914)
 script = ExtResource("18_xsi10")
-curve = SubResource("Curve2D_d4tj5")
 line = NodePath("../Line2D2")
+curve = SubResource("Curve2D_d4tj5")
 update_curve_at_runtime = true
 
 [node name="Leg_front_near_stroke" type="Node2D" parent="Pivot/Body_fill"]

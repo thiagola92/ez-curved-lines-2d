@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://c6dfjd23olqhh"]
 
 [ext_resource type="Script" uid="uid://de3jpss66xjfh" path="res://addons/curved_lines_2d/scalable_vector_shape_2d.gd" id="1_0qe1d"]
-[ext_resource type="Script" uid="uid://bq71tj10w4224" path="res://addons/curved_lines_2d/heart_icon.gd" id="1_7bfrm"]
+[ext_resource type="Script" uid="uid://bq71tj10w4224" path="res://addons/curved_lines_2d/examples/heart_icon.gd" id="1_7bfrm"]
 
 [sub_resource type="Curve2D" id="Curve2D_jr52a"]
 _data = {
