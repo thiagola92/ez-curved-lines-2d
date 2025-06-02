@@ -30,7 +30,8 @@ func _enter_tree() -> void:
 	linear_gradient_toggle_button = find_child("LinearGradientToggleButton")
 	radial_gradient_toggle_button = find_child("RadialGradientToggleButton")
 	other_texture_toggle_button = find_child("OtherTextureToggleButton")
-	scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
+	if 'assigned_node_changed' in scalable_vector_shape_2d:
+		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
 	_on_svs_assignment_changed()
 
