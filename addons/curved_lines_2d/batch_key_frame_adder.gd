@@ -33,54 +33,70 @@ func _on_selection_changed():
 		key_frame_capabilities_changed.emit()
 
 
-func batch_insert_key_frames(svs : ScalableVectorShape2D):
-	if not is_instance_valid(animation_player):
-		return
-	if not is_instance_valid(animation_under_edit_button):
-		return
-
-	var track_position : float = 0.0
-	if is_instance_valid(animation_postion_spinbox):
-		track_position = animation_postion_spinbox.value
-
-	var selected_anim_id := animation_under_edit_button.get_selected_id()
-	var selected_anim_name := ""
-	if selected_anim_id < 0:
-		return
-	else:
-		selected_anim_name = animation_under_edit_button.get_item_text(selected_anim_id)
-
-	if not animation_player.has_animation(selected_anim_name):
-		printerr("Could not find animation %s in in %s" % [selected_anim_name, str(animation_player)])
-		return
-
+func _guarded_get_path_to_node(svs : ScalableVectorShape2D) -> String:
 	var root_node := animation_player.get_node(animation_player.root_node)
 	if not is_instance_valid(root_node):
 		printerr("Could not find root node for %s by path: %s" % [str(animation_player), animation_player.root_node])
-		return
-
+		return ""
 	var path_to_node = root_node.get_path_to(svs)
 	if path_to_node.is_empty():
 		printerr("Could not find a path from AnimationPlayer's root node (%s) to this node (%s)" % [animation_player.root_node, str(svs)])
-		return
+		return ""
+	return path_to_node
 
-	var animation := animation_player.get_animation(selected_anim_name)
+
+func _guarded_get_animation() -> Animation:
+	if not is_instance_valid(animation_player):
+		return null
+	if not is_instance_valid(animation_under_edit_button):
+		return null
+	var selected_anim_id := animation_under_edit_button.get_selected_id()
+	var selected_anim_name := ""
+	if selected_anim_id < 0:
+		return null
+	else:
+		selected_anim_name = animation_under_edit_button.get_item_text(selected_anim_id)
+	if not animation_player.has_animation(selected_anim_name):
+		printerr("Could not find animation %s in in %s" % [selected_anim_name, str(animation_player)])
+		return null
+	return animation_player.get_animation(selected_anim_name)
+
+
+func _guarded_get_track_position() -> float:
+	if is_instance_valid(animation_postion_spinbox):
+		return animation_postion_spinbox.value
+	return 0.0
+
+
+func batch_insert_key_frames(svs : ScalableVectorShape2D):
+	var track_position := _guarded_get_track_position()
+	var animation := _guarded_get_animation()
+	var path_to_node := _guarded_get_path_to_node(svs)
+	if not animation:
+		return
+	if path_to_node.is_empty():
+		return
 	var undo_redo := EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Batch insert curve keyframes for %s on animation %s" % [str(svs), selected_anim_name])
+	undo_redo.create_action("Batch insert curve keyframes for %s on animation %s" % [str(svs), str(animation)])
 	for p_idx in range(svs.curve.point_count):
-		add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/position" % [path_to_node, p_idx]),
+		_add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/position" % [path_to_node, p_idx]),
 				track_position, svs.curve.get_point_position(p_idx))
 		if p_idx > 0:
-			add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/in" % [path_to_node, p_idx]),
+			_add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/in" % [path_to_node, p_idx]),
 					track_position, svs.curve.get_point_in(p_idx))
 		if p_idx < svs.curve.point_count - 1:
-			add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/out" % [path_to_node, p_idx]),
+			_add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/out" % [path_to_node, p_idx]),
 					track_position, svs.curve.get_point_out(p_idx))
 
 	undo_redo.commit_action()
 
 
-func add_key_frame(undo_redo : EditorUndoRedoManager, animation : Animation, node_path : NodePath,
+func add_key_frame(svs : ScalableVectorShape2D, property_path : String, val : Variant):
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	print("TODO")
+
+
+func _add_key_frame(undo_redo : EditorUndoRedoManager, animation : Animation, node_path : NodePath,
 			track_position : float, val : Variant):
 	if animation.find_track(node_path, Animation.TrackType.TYPE_VALUE) < 0:
 		undo_redo.add_do_method(self, 'add_anim_track_if_absent', animation, node_path)
