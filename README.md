@@ -51,19 +51,21 @@ This stuff makes me zero money, so you can always branch off in your own directi
 	- [Using `closed` on `Line2D`](#using-closed-on-line2d)
 	- [Deleting points and control points](#deleting-points-and-control-points)
 	- [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
-- [Animating / Changing shapes at runtime](#animating--changing-shapes-at-runtime)
-	- [Youtube explainer on animating](#youtube-explainer-on-animating)
-	- [Update curve at Runtime](#update-curve-at-runtime)
+- [Editing the properties of an assigned gradient (since release 2.3)](#editing-the-properties-of-an-assigned-gradient-since-release-23)
+	- [Changing the start- and endpoint of the gradient](#changing-the-start--and-endpoint-of-the-gradient)
+	- [Changing the color stop positions](#changing-the-color-stop-positions)
+	- [Add new color stops](#add-new-color-stops)
+- [Custom inspector forms (since release 2.2)](#custom-inspector-forms-since-release-22)
+	- [A preview of the updated inspector](#a-preview-of-the-updated-inspector)
+- [Animating / Changing shapes at runtime (improved in 2.4)](#animating--changing-shapes-at-runtime-improved-in-24)
+	- [Youtube explainer on animating (outdated by release 2.4!)](#youtube-explainer-on-animating-outdated-by-release-24)
+	- [A note up front (this being said)](#a-note-up-front-this-being-said)
+	- [Animating the shape and gradients at Runtime](#animating-the-shape-and-gradients-at-runtime)
 	- [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
 	- [Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead](#dont-duplicate-scalablevectorshape2d-use-the-path_changed-signal-in-stead)
 	- [Performance impact](#performance-impact)
 - [Ye Olde `DrawablePath2D` Examples](#ye-olde-drawablepath2d-examples)
 - [Attributions](#attributions)
-- [Wishlist / Roadmap](#wishlist--roadmap)
-	- [Must have (MVP)](#must-have-mvp)
-	- [Should have](#should-have)
-	- [Could have](#could-have)
-	- [Would be nice (if I learn how to)](#would-be-nice-if-i-learn-how-to)
 
 # Drawing Shapes in the Godot 2D Viewport
 
@@ -219,28 +221,86 @@ Like this:
 
 ![set origin 2](./addons/curved_lines_2d/screenshots/16a-set_origin.png)
 
-# Animating / Changing shapes at runtime
+# Editing the properties of an assigned gradient (since release 2.3)
 
-## Youtube explainer on animating
+Once a gradient is assigned to the 'Fill' of your shape via the inspector, its properties can be changed using the same controls as will the other handles.
+
+## Changing the start- and endpoint of the gradient
+
+Drag the outer orbit of the start- and endpoint of a the gradient line using the left mouse button to move them:
+
+![drag gradient start- and end-position](./addons/curved_lines_2d/screenshots/drag_gradient_start.png)
+
+
+## Changing the color stop positions
+
+Drag the color stops along the gradient line to change their position.
+
+Right click to remove a color stop.
+
+![changing color stops](./addons/curved_lines_2d/screenshots/drag_remove_color_stops.png)
+
+## Add new color stops
+
+Double clicking on the gradient line will add a new color stop (the assigned color will be sampled from the existing color at that point)
+
+![adding a color stop](./addons/curved_lines_2d/screenshots/add_color_stop.png)
+
+# Custom inspector forms (since release 2.2)
+
+The following custom forms were added, with extensive tooltips to help explain the actual functions they provide:
+
+- Fill (actually the assigned `Polygon2D`)
+- Stroke (actually the assigned `Line2D`)
+- Collision Polygon (just a button to generate a new `Polygon2D`)
+
+## A preview of the updated inspector
+
+![preview of the updated inspector](./addons/curved_lines_2d/screenshots/updated-inspector.png)
+
+
+
+
+# Animating / Changing shapes at runtime (improved in 2.4)
+
+## Youtube explainer on animating (outdated by release 2.4!)
+
+This explainer will still work, but from version 2.4.0 onward much work has been done to add custom keyframe buttons.
 
 [![link to Youtube explainer about animating](./addons/curved_lines_2d/screenshots/animating-youtube-thumbnail.png)](https://youtu.be/elWNu3-067A?feature=shared)
 
+## A note up front (this being said)
 
-The shapes you create will work fine with basic key-frame operations. You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning. Moreover, you probably should in 95% of the cases
+[Skip to animating shapes and gradients](#animating--changing-shapes-at-runtime)
 
-## Update curve at Runtime
+The shapes you create will work fine with basic key-frame operations. You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning. Moreover, you probably should in 95% of the cases, to optimize your performance
+
+## Animating the shape and gradients at Runtime
 
 Sometimes, however, you want your shape to change at runtime.
 
 You can use the `Update Curve at Runtime` checkbox in the inspector to enable dynamic changing of your curved shapes at runtime.
 
-![update curve at runtime](./addons/curved_lines_2d/screenshots/update-runtime.png)
+![update curve at runtime](./addons/curved_lines_2d/screenshots/update-curve-at-runtime-in-2.4.0.png)
 
 ## Add keyframes in an animation player
 
-You can then add an `AnimationPlayer` node to your scene, create a new animation and create keyframes for your `Curve > Points` (in the inspector):
+You can then add an `AnimationPlayer` node to your scene, create a new animation and (batch) insert key frames for the following this:
+- The entire shape of your `ScalableVectorShape2D`, which are:
+  - `curve:point_*/position`
+  - `curve:point_*/in`
+  - `curve:point_*/out`
+- All the gradient properties of your fill (`Polygon2D` assigned to `ScalableVectorShape2D`), which are:
+  - `texture:gradient:colors` (the entire `PackedColorArray`)
+  - `texture:gradient:offsets` (the entire `PackedFloat32Array`)
+  - `texture:fill_from`
+  - `texture:fill_to`
+- Stroke width, i.e.: the `width` property of the assigned `Line2D`
+- Stroke color, i.e.: the `default_color`  of the assigned `Line2D`
+- Fill color, i.e.: the `color` of the assigned `Polygon2D`
 
-![animating](./addons/curved_lines_2d/screenshots/animating.png)
+![the new key frame buttons in the inspector](./addons/curved_lines_2d/screenshots/animating-in-2.4.0.png)
+
 
 ## Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead
 
@@ -275,78 +335,3 @@ Lots of thanks go out to those who helped me out getting started:
 - The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
 - The SVG Importer code was adapted from the script hosted on github in the [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot) repository
 
-
-# Wishlist / Roadmap
-
-I tend to keep a personal list of checkboxes on the bottom of my readme's to help structure my milestones. Given time, space (and money??) I should start converting this into issues, or a CHANGELOG / RELEASE_NOTES. I guess
-
-## Must have (MVP)
-
-- [x] Rectangle to path converter (incl. rx and ry)
-- [x] Circle and ellipse to path converter
-- [x] Polygon and polyline to path converter
-- [x] Code clean up (Circle2D replaced by path conversion)
-- [x] Set node-position to path center (reset and remember node transforms, get center of computed points, set subtract center from curve points, reapply transforms)
-- [x] Style support: opacity, stroke-opacity,
-- [x] styles from style named attributes (i.e. stroke-width, stroke, etc)
-- [x] Style support: paint-order
-- [x] Show warnings and hints for unsupported stuff: unhandled nodes, arcs
-- [x] Quadratic bezier curves
-- [x] Linear Gradient Fill polygons
-- [x] Radial Gradient Fill polygons (partial)
-- [x] Inherit style from parent node (&lt;g&gt;)
-- [x] Import option: collision polygon
-- [x] Import option: lock nodes
-- [x] Import option: Keep Bezier Curves in DrawablePath2D (hides/shows lock nodes)
-
-
-## Should have
-- [x] Better path attribute string parsing (support leading and trailing whitespace, newlines)
-- [x] It should be easier to select ScalableVectorShape2D in the 2D editor window
-- [x] Set 'offset' from editor, repositioning path around this new position (hijack the offset-button?)
-- [x] Draw a more subtle path in stead of hiding the Path2D
-- [x] Draw handles for ScalableVectorShape2D bezier manipulation (like inkscape)
-- [x] Make handles interactable with mouse, closed shapes should merge begin- and endpoint (like inkscape does)
-- [x] BUG FIXES: missing / empty curve
-- [x] Right click removes a (control-) point from the selected shape
-- [x] Show a hint on closest point on curve if distance to that point is smaller that N pixels (N=15)
-- [x] Determine on which curve segment that point resides
-- [x] Double click adds a point to the selected shape's curve at either on-segment hint-point (if present) or mouse position
-- [x] Show closed curve start and end index as follows: (0 ∞ N)
-- [x] Show gui-hints next to mouse pointer ("double click adds node, hold shift does X, etc")
-- [x] Draw unselected curve
-- [x] Toggle closed curve on double click
-- [x] Drag to change segment curve using quadratic bezier
-- [x] Convert DrawablePath2D's to ScalableVectorShape2D's with button
-- [x] Update SVG importer settings
-- [x] Rename dock to "Scalable Vector Shapes 2D"
-- [x] Add a Show/Hide GUI hints toggle in edit dock
-- [x] Enable/Disable editing toggle in edit dock
-- [x] Create Rect and Ellipse in editor tab in dock
-- [x] Ditch old examples
-- [x] Updated manual in README
-- [x] Record new explainers (keep them short this time! let them read the docs, fgs :D)
-- [x] Link to explainers in readme and in the bottom panel
-- [x] Make sure the README in the addon dir is updated as well, and the config file
-- [x] New name for the plugin: Scalable Vector Shapes 2D
-
-
-## Could have
-- [ ] Curve local to scene in edit dock
-- [ ] More options in edit tab of dock (fill props/gradient? stroke props?)
-- [ ] Import inkscape pivot point to override the centered position with
-- [ ] Support Arc operations from `svg` by drawing __lots__ of extra points [see: would be nice](#would-be-nice-if-i-learn-how-to)
-- [ ] Apply paint-order to imported CollisionPolygon2D (treat it as a guide)
-- [ ] Add button to editor to call center node position func
-- [ ] Helper nodes for gradient from-, stop- and to-handles
-- [ ] SVG Import log: add button to select node with problem
-- [ ] SVG Import log: show/hide different log levels, clear log
-
-## Would be nice (if I learn how to)
-- [ ] New icon for ScalableVectorShape2D node
-- [ ] Import `<text>` (with embedded fonts? reference to ttf with a dialog?)
-- [ ] Arcs to cubic bezier curve conversion
-- [ ] Gradient fills for Line2D strokes (would probably require a shader)
-- [ ] Fix certain gradient transforms (skew, rotate, fx/fy/fr) [see: chair.svg](./addons/curved_lines_2d/tests/chair.svg)
-- [ ] Pattern fills
-- [ ] Undo/Redo SVG Import (Undo = delete SvgImport node)
