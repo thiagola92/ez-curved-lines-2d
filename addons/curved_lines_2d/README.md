@@ -271,8 +271,6 @@ This explainer will still work, but from version 2.4.0 onward much work has been
 
 ## A note up front (this being said)
 
-[Skip to animating shapes and gradients](#animating--changing-shapes-at-runtime)
-
 The shapes you create will work fine with basic key-frame operations. You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning. Moreover, you probably should in 95% of the cases, to optimize your performance
 
 ## Animating the shape and gradients at Runtime
