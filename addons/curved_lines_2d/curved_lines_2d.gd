@@ -254,22 +254,22 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 	return ""
 
 
-func _draw_rect_control_point_handle(viewport_control : Control, svs : ScalableVectorShape2D,
+func _draw_rect_control_point_handle(viewport_control : Control, svs : ScalableRect2D,
 		handle : Dictionary, prefix : String, is_hovered : bool) -> String:
-	if handle[prefix].length():
-		var prop_name := "rx" if prefix == "in" else "ry"
-		var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
-		var width := 2 if is_hovered else 1
-		viewport_control.draw_line(_vp_transform(handle['point_position']),
-				_vp_transform(handle[prefix + '_position']), Color.WEB_GRAY, 1, true)
-		viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, Color.DIM_GRAY)
-		viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, color, false, width)
-		if is_hovered:
-			var hint_txt := "Control point rounded corner (%s) " % prop_name
-			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-				hint_txt += "\n - Drag to move \n - Right click to remove rounded corners"
-				hint_txt += "\n - Hold Shift + Drag for symmetric rounding"
-			return hint_txt
+	var prop_name := "rx" if prefix == "in" else "ry"
+	var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
+	var width := 2 if is_hovered else 1
+	viewport_control.draw_line(_vp_transform(svs.to_global(svs.offset)),
+			_vp_transform(handle[prefix + '_position']), Color.WEB_GRAY, 1, true)
+	viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, Color.DIM_GRAY)
+	viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, color, false, width)
+	if is_hovered:
+		var hint_txt := "Control point rounded corners "
+		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			var dir := "right / left" if prefix == 'in' else "up / down"
+			hint_txt += "\n - Drag %s to move \n - Right click to remove rounded corners" % dir
+			hint_txt += "\n - Hold Shift + Drag to drag only this handle"
+		return hint_txt
 	return ""
 
 
@@ -319,8 +319,9 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 		if svs is ScalableRect2D:
 			hint_txt += _draw_rect_control_point_handle(viewport_control, svs, handle, 'in',
 					cp_in_is_hovered)
-			hint_txt += _draw_rect_control_point_handle(viewport_control, svs, handle, 'out',
-					cp_out_is_hovered)
+			if handle['out'].length():
+				hint_txt += _draw_rect_control_point_handle(viewport_control, svs, handle, 'out',
+						cp_out_is_hovered)
 		else:
 			hint_txt += _draw_control_point_handle(viewport_control, svs, handle, 'in',
 					is_hovered or cp_in_is_hovered, cp_in_is_hovered)
@@ -350,7 +351,10 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 				if Input.is_key_pressed(KEY_SHIFT) and not svs is ScalableRect2D:
 					hint_txt += " - Release mouse to set curve handles"
 			else:
-				hint_txt += " - Drag to move"
+				if svs is ScalableRect2D:
+					hint_txt += " - Drag to resize rectange"
+				else:
+					hint_txt += " - Drag to move"
 				if handle['is_closed'].length() > 0:
 					hint_txt += "\n - Double click to break loop"
 				elif not svs is ScalableRect2D:
@@ -360,9 +364,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 						(i == handles.size() - 1 and i > 1)
 					):
 						hint_txt += "\n - Double click to close loop"
-				if svs is ScalableRect2D:
-					hint_txt += "\n - Hold Shift + Drag to create rounded corners"
-				else:
+				if svs is not ScalableRect2D:
 					hint_txt += "\n - Hold Shift + Drag to create curve handles"
 
 	var gradient_handles := svs.get_gradient_handles()
@@ -624,6 +626,27 @@ func _update_rect_dimensions(svs : ScalableRect2D, mouse_pos : Vector2) -> void:
 		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS] = [[svs, 'size', svs.size]]
 	svs.size = svs.to_local(mouse_pos) - svs.get_bounding_rect().position
 	undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [[svs, 'size', svs.size]]
+
+
+func _update_rect_corner_radius(svs : ScalableRect2D, mouse_pos : Vector2, prop_name : String, is_symmetrical : bool) -> void:
+	if not in_undo_redo_transaction:
+		_start_undo_redo_transaction("Change rect " + prop_name + " on " + str(svs))
+		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS] = [
+			[svs, 'rx', svs.rx], [svs, 'ry', svs.ry]
+		]
+	if prop_name == 'rx':
+		svs.rx = svs.to_local(mouse_pos).x - svs.get_bounding_rect().position.x
+		if is_symmetrical:
+			svs.ry = svs.rx
+	if prop_name == 'ry':
+		svs.ry = svs.to_local(mouse_pos).y - svs.get_bounding_rect().position.y
+		if is_symmetrical:
+			svs.rx = svs.ry
+
+	undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [
+		[svs, 'rx', svs.rx],
+		[svs, 'ry', svs.ry]
+	]
 
 
 func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
@@ -1001,19 +1024,25 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			if _handle_has_hover(current_selection):
 				if current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
 					var pt_idx : int = current_selection.get_meta(META_NAME_HOVER_POINT_IDX)
-					if Input.is_key_pressed(KEY_SHIFT):
+					if current_selection is ScalableRect2D:
+						_update_rect_dimensions(current_selection, mouse_pos)
+					elif Input.is_key_pressed(KEY_SHIFT):
 						if pt_idx == 0:
 							_update_curve_cp_out_position(current_selection, mouse_pos, pt_idx)
 						else:
 							_update_curve_cp_in_position(current_selection, mouse_pos, pt_idx)
-					elif current_selection is ScalableRect2D:
-						_update_rect_dimensions(current_selection, mouse_pos)
 					else:
 						_update_curve_point_position(current_selection, mouse_pos, pt_idx)
 				elif current_selection.has_meta(META_NAME_HOVER_CP_IN_IDX):
-					_update_curve_cp_in_position(current_selection, mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
+					if current_selection is ScalableRect2D:
+						_update_rect_corner_radius(current_selection, mouse_pos, "rx", !Input.is_key_pressed(KEY_SHIFT))
+					else:
+						_update_curve_cp_in_position(current_selection, mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_IN_IDX))
 				elif current_selection.has_meta(META_NAME_HOVER_CP_OUT_IDX):
-					_update_curve_cp_out_position(current_selection, mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
+					if current_selection is ScalableRect2D:
+						_update_rect_corner_radius(current_selection, mouse_pos, "ry", !Input.is_key_pressed(KEY_SHIFT))
+					else:
+						_update_curve_cp_out_position(current_selection, mouse_pos, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
 				elif current_selection.has_meta(META_NAME_HOVER_GRADIENT_FROM):
 					_update_gradient_from_position(current_selection, mouse_pos)
 				elif current_selection.has_meta(META_NAME_HOVER_GRADIENT_TO):

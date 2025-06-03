@@ -14,12 +14,12 @@ const R_TO_CP = 0.5523
 
 @export var size : Vector2 = Vector2(100.0, 100.0):
 	set(sz):
-		if sz.x < rx * 2:
-			sz.x = rx * 2
+		if sz.x < rx * 2.001:
+			sz.x = rx * 2.001
 		if sz.x < 0:
 			sz.x = 0.001
-		if sz.y < ry * 2:
-			sz.y = ry * 2
+		if sz.y < ry * 2.001:
+			sz.y = ry * 2.001
 		if sz.y < 0:
 			sz.y = 0.001
 		size = sz
@@ -28,11 +28,15 @@ const R_TO_CP = 0.5523
 @export var rx : float = 0.0:
 	set(_rx):
 		rx = _rx if _rx > 0 else 0
+		if rx > size.x * 0.49:
+			rx = size.x * 0.49
 		dimensions_changed.emit()
 
 @export var ry : float = 0.0:
 	set(_ry):
 		ry = _ry if _ry > 0 else 0
+		if ry > size.y * 0.49:
+			ry = size.y * 0.49
 		dimensions_changed.emit()
 
 
@@ -73,14 +77,6 @@ func get_curve_handles() -> Array:
 	return [{
 		"point_position": to_global(point_pos),
 		"mirrored": true,
-		"in": Vector2.ZERO,
-		"out": Vector2.ZERO,
-		"in_position": to_global(offset),
-		"out_position": to_global(offset),
-		"is_closed": ""
-	}, {
-		"point_position": to_global(offset),
-		"mirrored": false,
 		"in": rx_handle,
 		"out": ry_handle,
 		"in_position": to_global(offset + rx_handle),
