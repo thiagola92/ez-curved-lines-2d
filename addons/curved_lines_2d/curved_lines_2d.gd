@@ -621,15 +621,9 @@ func _update_curve_point_position(current_selection : ScalableVectorShape2D, mou
 func _update_rect_dimensions(svs : ScalableRect2D, mouse_pos : Vector2) -> void:
 	if not in_undo_redo_transaction:
 		_start_undo_redo_transaction("Change rect size on " + str(svs))
-		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS] = [
-			[svs, 'width', svs.width], [svs, 'height', svs.height]
-		]
-	svs.width = svs.to_local(mouse_pos).x - svs.get_bounding_rect().position.x
-	svs.height = svs.to_local(mouse_pos).y - svs.get_bounding_rect().position.y
-	undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [
-		[svs, 'width', svs.width],
-		[svs, 'height', svs.height]
-	]
+		undo_redo_transaction[UndoRedoEntry.UNDO_PROPS] = [[svs, 'size', svs.size]]
+	svs.size = svs.to_local(mouse_pos) - svs.get_bounding_rect().position
+	undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [[svs, 'size', svs.size]]
 
 
 func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:

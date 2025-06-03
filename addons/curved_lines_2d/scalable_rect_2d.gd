@@ -7,24 +7,32 @@ signal dimensions_changed()
 
 const R_TO_CP = 0.5523
 
-@export_range(1.0, 10_000.0) var width : float:
-	set(w):
-		width = w
+@export var offset : Vector2 = Vector2(0.0, 0.0):
+	set(ofs):
+		offset = ofs
 		dimensions_changed.emit()
 
-@export_range(1.0, 10_000.0) var height : float:
-	set(h):
-		height = h
+@export var size : Vector2 = Vector2(100.0, 100.0):
+	set(sz):
+		if sz.x < rx * 2:
+			sz.x = rx * 2
+		if sz.x < 0:
+			sz.x = 0.001
+		if sz.y < ry * 2:
+			sz.y = ry * 2
+		if sz.y < 0:
+			sz.y = 0.001
+		size = sz
 		dimensions_changed.emit()
 
-@export_range(0.0, 5_000.0) var rx : float:
+@export var rx : float = 0.0:
 	set(_rx):
-		rx = _rx
+		rx = _rx if _rx > 0 else 0
 		dimensions_changed.emit()
 
-@export_range(0.0, 5_000.0) var ry : float:
+@export var ry : float = 0.0:
 	set(_ry):
-		ry = _ry
+		ry = _ry if _ry > 0 else 0
 		dimensions_changed.emit()
 
 
@@ -37,6 +45,8 @@ func _enter_tree() -> void:
 
 func _on_dimensions_changed():
 	curve.clear_points()
+	var width = size.x
+	var height = size.y
 	if rx == 0 and ry == 0:
 		curve.add_point(Vector2.ZERO)
 		curve.add_point(Vector2(width, 0))
@@ -57,16 +67,23 @@ func _on_dimensions_changed():
 
 
 func get_curve_handles() -> Array:
-	var point_pos := Vector2(width, height) + get_bounding_rect().position
-	var rx_handle := -Vector2(rx, 0)
-	var ry_handle := -Vector2(0, ry)
+	var point_pos := size + get_bounding_rect().position
+	var rx_handle := Vector2(rx, 0)
+	var ry_handle := Vector2(0, ry)
 	return [{
-		"is_rect": true,
 		"point_position": to_global(point_pos),
 		"mirrored": true,
+		"in": Vector2.ZERO,
+		"out": Vector2.ZERO,
+		"in_position": to_global(offset),
+		"out_position": to_global(offset),
+		"is_closed": ""
+	}, {
+		"point_position": to_global(offset),
+		"mirrored": false,
 		"in": rx_handle,
 		"out": ry_handle,
-		"in_position": to_global(point_pos + rx_handle),
-		"out_position": to_global(point_pos + ry_handle),
+		"in_position": to_global(offset + rx_handle),
+		"out_position": to_global(offset + ry_handle),
 		"is_closed": ""
 	}]
