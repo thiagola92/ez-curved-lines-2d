@@ -86,6 +86,8 @@ func _enter_tree():
 		scalable_vector_shapes_2d_dock.shape_created.connect(_on_shape_created)
 	if not scalable_vector_shapes_2d_dock.set_shape_preview.is_connected(_on_shape_preview):
 		scalable_vector_shapes_2d_dock.set_shape_preview.connect(_on_shape_preview)
+	if not scalable_vector_shapes_2d_dock.edit_tab.rect_created.is_connected(_on_rect_created):
+		scalable_vector_shapes_2d_dock.edit_tab.rect_created.connect(_on_rect_created)
 
 
 func select_node_reversibly(target_node : Node) -> void:
@@ -98,14 +100,25 @@ func _on_shape_preview(curve : Curve2D):
 	update_overlays()
 
 
+func _on_rect_created(width : float, height : float, rx : float, ry : float, scene_root : Node2D) -> void:
+	var new_rect := ScalableRect2D.new()
+	new_rect.size = Vector2(width, height)
+	new_rect.rx = rx
+	new_rect.ry = ry
+	_create_shape(new_rect, scene_root, "Rectangle")
+
+
 func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String) -> void:
-	var undo_redo := EditorInterface.get_editor_undo_redo()
 	var new_shape := ScalableVectorShape2D.new()
+	new_shape.curve = curve
+	_create_shape(new_shape, scene_root, node_name)
+
+
+func _create_shape(new_shape : Node2D, scene_root : Node2D, node_name : String) -> void:
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 	var parent = current_selection if current_selection is Node2D else scene_root
 	new_shape.name = node_name
 	new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
-	new_shape.curve = curve
 	undo_redo.create_action("Add a %s to the scene " % node_name)
 	undo_redo.add_do_method(parent, 'add_child', new_shape, true)
 	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
