@@ -48,21 +48,21 @@ func _on_dimensions_changed():
 	var width = size.x
 	var height = size.y
 	if rx == 0 and ry == 0:
-		curve.add_point(Vector2.ZERO)
-		curve.add_point(Vector2(width, 0))
-		curve.add_point(Vector2(width, height))
-		curve.add_point(Vector2(0, height))
-		curve.add_point(Vector2.ZERO)
+		curve.add_point(offset)
+		curve.add_point(offset + Vector2(width, 0))
+		curve.add_point(offset + Vector2(width, height))
+		curve.add_point(offset + Vector2(0, height))
+		curve.add_point(offset)
 	else:
-		curve.add_point(Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
-		curve.add_point(Vector2(width, ry), Vector2(0, -ry * R_TO_CP))
-		curve.add_point(Vector2(width, height - ry), Vector2.ZERO, Vector2(0, ry * R_TO_CP))
-		curve.add_point(Vector2(width - rx, height), Vector2(rx * R_TO_CP, 0))
-		curve.add_point(Vector2(rx, height), Vector2.ZERO, Vector2(-rx * R_TO_CP, 0))
-		curve.add_point(Vector2(0, height - ry), Vector2(0, ry * R_TO_CP))
-		curve.add_point(Vector2(0, ry), Vector2.ZERO, Vector2(0, -ry *  R_TO_CP))
-		curve.add_point(Vector2(rx, 0), Vector2(-rx * R_TO_CP, 0))
-		curve.add_point(Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
+		curve.add_point(offset + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
+		curve.add_point(offset + Vector2(width, ry), Vector2(0, -ry * R_TO_CP))
+		curve.add_point(offset + Vector2(width, height - ry), Vector2.ZERO, Vector2(0, ry * R_TO_CP))
+		curve.add_point(offset + Vector2(width - rx, height), Vector2(rx * R_TO_CP, 0))
+		curve.add_point(offset + Vector2(rx, height), Vector2.ZERO, Vector2(-rx * R_TO_CP, 0))
+		curve.add_point(offset + Vector2(0, height - ry), Vector2(0, ry * R_TO_CP))
+		curve.add_point(offset + Vector2(0, ry), Vector2.ZERO, Vector2(0, -ry *  R_TO_CP))
+		curve.add_point(offset + Vector2(rx, 0), Vector2(-rx * R_TO_CP, 0))
+		curve.add_point(offset + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
 	path_changed.emit()
 
 
@@ -87,3 +87,12 @@ func get_curve_handles() -> Array:
 		"out_position": to_global(offset + ry_handle),
 		"is_closed": ""
 	}]
+
+
+func set_origin(global_pos : Vector2) -> void:
+	var local_pos = to_local(global_pos)
+	offset = offset - to_local(global_pos)
+	global_position = global_pos
+	if is_instance_valid(polygon) and polygon.texture is GradientTexture2D:
+		polygon.texture_offset = -get_bounding_rect().position
+
