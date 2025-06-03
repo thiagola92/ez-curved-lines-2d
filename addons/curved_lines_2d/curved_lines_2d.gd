@@ -701,16 +701,26 @@ func _update_gradient_stop_color_pos(svs : ScalableVectorShape2D, mouse_pos : Ve
 
 func _add_color_stop(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
 	var new_offset := _get_gradient_offset(svs, mouse_pos)
-	var undo_idx := 0
-	for ofs in svs.polygon.texture.gradient.offsets:
-		if ofs > new_offset:
-			break
-		undo_idx += 1
+	var colors = Array(svs.polygon.texture.gradient.colors)
+	var offsets = Array(svs.polygon.texture.gradient.offsets)
+	var stops = {}
+	for idx in range(colors.size()):
+		stops[offsets[idx]] = colors[idx]
+	stops[new_offset] = svs.polygon.texture.gradient.sample(new_offset)
+	var stop_keys := stops.keys()
+	stop_keys.sort()
+	var new_colors = []
+	var new_offsets = []
+	for offset in stop_keys:
+		new_colors.append(stops[offset])
+		new_offsets.append(offset)
+
 	undo_redo.create_action("Add color stop to %s " % str(svs))
-	undo_redo.add_do_method(svs.polygon.texture.gradient, 'add_point', new_offset,
-			svs.polygon.texture.gradient.sample(new_offset))
+	undo_redo.add_do_property(svs.polygon.texture.gradient, 'colors', new_colors)
+	undo_redo.add_do_property(svs.polygon.texture.gradient, 'offsets', new_offsets)
 	undo_redo.add_do_method(svs, 'notify_assigned_node_change')
-	undo_redo.add_undo_method(svs.polygon.texture.gradient, 'remove_point', undo_idx)
+	undo_redo.add_undo_property(svs.polygon.texture.gradient, 'colors', colors)
+	undo_redo.add_undo_property(svs.polygon.texture.gradient, 'offsets', offsets)
 	undo_redo.add_undo_method(svs, 'notify_assigned_node_change')
 	undo_redo.commit_action()
 
