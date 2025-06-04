@@ -41,7 +41,13 @@ enum ShapeType {
 
 ## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
 ## properties [member size], [member offset], [member rx], and [member ry].
-@export var shape_type := ShapeType.PATH
+@export var shape_type := ShapeType.PATH:
+	set(st):
+		shape_type = st
+		if st == ShapeType.PATH:
+			assigned_node_changed.emit()
+		else:
+			dimensions_changed.emit()
 
 
 @export var offset : Vector2 = Vector2(0.0, 0.0):
@@ -149,6 +155,8 @@ func _ready():
 	if update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+	if not dimensions_changed.is_connected(_on_dimensions_changed):
+		dimensions_changed.connect(_on_dimensions_changed)
 
 
 # Wire up signals on enter tree for the editor
@@ -165,12 +173,39 @@ func _enter_tree():
 	if update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
-
+	# updates the curve points when size, offset, rx, or ry prop changes
+	# (used for ShapeType.RECT and ShapeType.ELLIPSE)
+	if not dimensions_changed.is_connected(_on_dimensions_changed):
+		dimensions_changed.connect(_on_dimensions_changed)
+	_on_dimensions_changed()
 
 # Clean up signals (ie. when closing scene) to prevent error messages in the editor
 func _exit_tree():
 	if curve.changed.is_connected(curve_changed):
 		curve.changed.disconnect(curve_changed)
+
+
+func _on_dimensions_changed():
+	if shape_type == ShapeType.RECT:
+		curve.clear_points()
+		var width = size.x
+		var height = size.y
+		if rx == 0 and ry == 0:
+			curve.add_point(offset)
+			curve.add_point(offset + Vector2(width, 0))
+			curve.add_point(offset + Vector2(width, height))
+			curve.add_point(offset + Vector2(0, height))
+			curve.add_point(offset)
+		else:
+			curve.add_point(offset + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
+			curve.add_point(offset + Vector2(width, ry), Vector2(0, -ry * R_TO_CP))
+			curve.add_point(offset + Vector2(width, height - ry), Vector2.ZERO, Vector2(0, ry * R_TO_CP))
+			curve.add_point(offset + Vector2(width - rx, height), Vector2(rx * R_TO_CP, 0))
+			curve.add_point(offset + Vector2(rx, height), Vector2.ZERO, Vector2(-rx * R_TO_CP, 0))
+			curve.add_point(offset + Vector2(0, height - ry), Vector2(0, ry * R_TO_CP))
+			curve.add_point(offset + Vector2(0, ry), Vector2.ZERO, Vector2(0, -ry *  R_TO_CP))
+			curve.add_point(offset + Vector2(rx, 0), Vector2(-rx * R_TO_CP, 0))
+			curve.add_point(offset + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
 
 
 func _on_assigned_node_changed():
@@ -267,11 +302,18 @@ func set_position_to_center() -> void:
 
 func set_origin(global_pos : Vector2) -> void:
 	var local_pos = to_local(global_pos)
-	for i in range(curve.get_point_count()):
-		curve.set_point_position(i, curve.get_point_position(i) - local_pos)
-	global_position = global_pos
-	if is_instance_valid(polygon) and polygon.texture is GradientTexture2D:
-		polygon.texture_offset = -get_bounding_rect().position
+	match shape_type:
+		ShapeType.RECT:
+			offset = offset - to_local(global_pos)
+			global_position = global_pos
+			if is_instance_valid(polygon) and polygon.texture is GradientTexture2D:
+				polygon.texture_offset = -get_bounding_rect().position
+		ShapeType.PATH, _:
+			for i in range(curve.get_point_count()):
+				curve.set_point_position(i, curve.get_point_position(i) - local_pos)
+			global_position = global_pos
+			if is_instance_valid(polygon) and polygon.texture is GradientTexture2D:
+				polygon.texture_offset = -get_bounding_rect().position
 
 
 
@@ -306,6 +348,20 @@ func is_curve_closed() -> bool:
 
 
 func get_curve_handles() -> Array:
+	if shape_type == ShapeType.RECT:
+		var point_pos := size + get_bounding_rect().position
+		var rx_handle := Vector2(rx, 0)
+		var ry_handle := Vector2(0, ry)
+		return [{
+			"point_position": to_global(point_pos),
+			"mirrored": true,
+			"in": rx_handle,
+			"out": ry_handle,
+			"in_position": to_global(offset + rx_handle),
+			"out_position": to_global(offset + ry_handle),
+			"is_closed": ""
+		}]
+
 	var n = curve.point_count
 	var is_closed := is_curve_closed()
 	var result := []
