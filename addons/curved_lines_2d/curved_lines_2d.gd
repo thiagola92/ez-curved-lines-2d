@@ -88,6 +88,8 @@ func _enter_tree():
 		scalable_vector_shapes_2d_dock.set_shape_preview.connect(_on_shape_preview)
 	if not scalable_vector_shapes_2d_dock.edit_tab.rect_created.is_connected(_on_rect_created):
 		scalable_vector_shapes_2d_dock.edit_tab.rect_created.connect(_on_rect_created)
+	if not scalable_vector_shapes_2d_dock.edit_tab.ellipse_created.is_connected(_on_ellipse_created):
+		scalable_vector_shapes_2d_dock.edit_tab.ellipse_created.connect(_on_ellipse_created)
 
 
 func select_node_reversibly(target_node : Node) -> void:
@@ -108,6 +110,13 @@ func _on_rect_created(width : float, height : float, rx : float, ry : float, sce
 	new_rect.ry = ry
 	_create_shape(new_rect, scene_root, "Rectangle")
 
+
+func _on_ellipse_created(rx : float, ry : float, scene_root : Node2D) -> void:
+	var new_ellipse := ScalableVectorShape2D.new()
+	new_ellipse.shape_type = ScalableVectorShape2D.ShapeType.ELLIPSE
+	new_ellipse.size = Vector2(rx * 2, ry * 2)
+
+	_create_shape(new_ellipse, scene_root, "Ellipse")
 
 func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String) -> void:
 	var new_shape := ScalableVectorShape2D.new()
@@ -806,23 +815,29 @@ func _get_curve_backup(curve_in : Curve2D) -> Curve2D:
 
 
 func _resize_shape(svs : ScalableVectorShape2D, s : float) -> void:
+	if svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
+		if not in_undo_redo_transaction:
+			_start_undo_redo_transaction("Resize shape %s" % str(svs))
+			undo_redo_transaction[UndoRedoEntry.UNDOS].append([
+					svs, 'replace_curve_points', _get_curve_backup(svs.curve)])
 
-	if not in_undo_redo_transaction:
-		_start_undo_redo_transaction("Resize shape %s" % str(svs))
-		undo_redo_transaction[UndoRedoEntry.UNDOS].append([
-				svs, 'replace_curve_points', _get_curve_backup(svs.curve)])
-
-	undo_redo_transaction[UndoRedoEntry.DOS] = []
-	for idx in range(svs.curve.point_count):
-		svs.curve.set_point_position(idx, svs.curve.get_point_position(idx) * s)
-		svs.curve.set_point_in(idx, svs.curve.get_point_in(idx) * s)
-		svs.curve.set_point_out(idx, svs.curve.get_point_out(idx) * s)
-		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
-				'set_point_position', idx, svs.curve.get_point_position(idx) * s])
-		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
-				'set_point_in', idx, svs.curve.get_point_in(idx) * s])
-		undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
-				'set_point_out', idx, svs.curve.get_point_out(idx) * s])
+		undo_redo_transaction[UndoRedoEntry.DOS] = []
+		for idx in range(svs.curve.point_count):
+			svs.curve.set_point_position(idx, svs.curve.get_point_position(idx) * s)
+			svs.curve.set_point_in(idx, svs.curve.get_point_in(idx) * s)
+			svs.curve.set_point_out(idx, svs.curve.get_point_out(idx) * s)
+			undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+					'set_point_position', idx, svs.curve.get_point_position(idx) * s])
+			undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+					'set_point_in', idx, svs.curve.get_point_in(idx) * s])
+			undo_redo_transaction[UndoRedoEntry.DOS].append([svs.curve,
+					'set_point_out', idx, svs.curve.get_point_out(idx) * s])
+	else:
+		if not in_undo_redo_transaction:
+			_start_undo_redo_transaction("Resize shape %s" % str(svs))
+			undo_redo_transaction[UndoRedoEntry.UNDO_PROPS] = [[svs, 'size', svs.size]]
+		undo_redo_transaction[UndoRedoEntry.DO_PROPS] = [[svs, 'size', svs.size * s]]
+		svs.size *= s
 
 
 func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : int) -> void:

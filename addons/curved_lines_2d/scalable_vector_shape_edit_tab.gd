@@ -5,6 +5,7 @@ class_name ScalableVectorShapeEditTab
 
 signal shape_created(curve : Curve2D, scene_root : Node2D, node_name : String)
 signal rect_created(width : float, height : float, rx : float, ry : float, scene_root : Node2D)
+signal ellipse_created(rx : float, ry : float, scene_root : Node2D)
 signal set_shape_preview(curve : Curve2D)
 
 var stroke_width_input : EditorSpinSlider
@@ -116,6 +117,20 @@ func _on_create_rect_button_pressed() -> void:
 		return
 	rect_created.emit(rect_width_input.value, rect_height_input.value,
 		rect_rx_input.value, rect_ry_input.value, scene_root)
+
+
+func _on_create_ellipse_button_pressed() -> void:
+	var scene_root := EditorInterface.get_edited_scene_root()
+	if not is_instance_valid(scene_root):
+		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+		warning_dialog.popup_centered()
+		return
+
+	if not scene_root is Node2D:
+		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+		warning_dialog.popup_centered()
+		return
+	ellipse_created.emit(ellipse_rx_input.value, ellipse_ry_input.value, scene_root)
 
 
 func _get_ellipse_curve() -> Curve2D:

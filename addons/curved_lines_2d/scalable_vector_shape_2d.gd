@@ -39,60 +39,6 @@ enum ShapeType {
 	ELLIPSE
 }
 
-## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
-## properties [member size], [member offset], [member rx], and [member ry].
-@export var shape_type := ShapeType.PATH:
-	set(st):
-		shape_type = st
-		if st == ShapeType.PATH:
-			assigned_node_changed.emit()
-		else:
-			if shape_type == ShapeType.RECT:
-				rx = 0.0
-				ry = 0.0
-			dimensions_changed.emit()
-
-
-@export var offset : Vector2 = Vector2(0.0, 0.0):
-	set(ofs):
-		offset = ofs
-		dimensions_changed.emit()
-
-@export var size : Vector2 = Vector2(100.0, 100.0):
-	set(sz):
-		if sz.x < 0:
-			sz.x = 0.001
-		if sz.y < 0:
-			sz.y = 0.001
-		if shape_type == ShapeType.RECT:
-			if sz.x < rx * 2.001:
-				sz.x = rx * 2.001
-			if sz.y < ry * 2.001:
-				sz.y = ry * 2.001
-			size = sz
-			dimensions_changed.emit()
-		elif shape_type == ShapeType.ELLIPSE:
-			size = sz
-			rx = sz.x * 0.5
-			ry = sz.y * 0.5
-
-
-@export var rx : float = 0.0:
-	set(_rx):
-		rx = _rx if _rx > 0 else 0
-		if shape_type == ShapeType.RECT:
-			if rx > size.x * 0.49:
-				rx = size.x * 0.49
-		dimensions_changed.emit()
-
-@export var ry : float = 0.0:
-	set(_ry):
-		ry = _ry if _ry > 0 else 0
-		if shape_type == ShapeType.RECT:
-			if ry > size.y * 0.49:
-				ry = size.y * 0.49
-		dimensions_changed.emit()
-
 
 ## The 'Fill' of a [ScalableVectorShape2D] is simply an instance of a [Polygon2D] node
 ## assigned to the `polygon` property.
@@ -151,6 +97,60 @@ enum ShapeType {
 	set(_tolerance_degrees):
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
+
+
+@export_group("Shape Type Settings")
+## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
+## properties [member size], [member offset], [member rx], and [member ry].
+@export var shape_type := ShapeType.PATH:
+	set(st):
+		shape_type = st
+		if st == ShapeType.PATH:
+			assigned_node_changed.emit()
+		else:
+			if shape_type == ShapeType.RECT:
+				rx = 0.0
+				ry = 0.0
+			dimensions_changed.emit()
+
+@export var offset : Vector2 = Vector2(0.0, 0.0):
+	set(ofs):
+		offset = ofs
+		dimensions_changed.emit()
+
+@export var size : Vector2 = Vector2(100.0, 100.0):
+	set(sz):
+		if sz.x < 0:
+			sz.x = 0.001
+		if sz.y < 0:
+			sz.y = 0.001
+		if shape_type == ShapeType.RECT:
+			if sz.x < rx * 2.001:
+				sz.x = rx * 2.001
+			if sz.y < ry * 2.001:
+				sz.y = ry * 2.001
+			size = sz
+			dimensions_changed.emit()
+		elif shape_type == ShapeType.ELLIPSE:
+			size = sz
+			rx = sz.x * 0.5
+			ry = sz.y * 0.5
+
+@export var rx : float = 0.0:
+	set(_rx):
+		rx = _rx if _rx > 0 else 0
+		if shape_type == ShapeType.RECT:
+			if rx > size.x * 0.49:
+				rx = size.x * 0.49
+		dimensions_changed.emit()
+
+@export var ry : float = 0.0:
+	set(_ry):
+		ry = _ry if _ry > 0 else 0
+		if shape_type == ShapeType.RECT:
+			if ry > size.y * 0.49:
+				ry = size.y * 0.49
+		dimensions_changed.emit()
 
 @export_group("Editor settings")
 ## The [Color] used to draw the this shape's curve in the editor
