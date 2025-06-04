@@ -4,12 +4,77 @@ extends Node2D
 ## Original adapted code: https://www.hedberggames.com/blog/rendering-curves-in-godot
 class_name ScalableVectorShape2D
 
-## Emitted when a new set of points was calculated for a connected Line2D, Polygon2D, or CollisionPolygon2D
+## Emitted when a new set of points was calculated for the [member curve].
 signal path_changed(new_points : PackedVector2Array)
 
 ## This signal is used internally in editor-mode to tell the DrawablePath2D tool that
-## the instance of assigned Line2D, Polygon2D, or CollisionPolygon2D has changed
+## the instance of assigned [member line], [member polygon], or [member collision_polygon] has changed.
 signal assigned_node_changed()
+
+## This signal is emitted when the properties for describing an ellipse or rectangle change.
+## Further reading: [member shape_type]
+signal dimensions_changed()
+
+## The constant used to convert a radius unit to the equivalent cubic Beziér control point length
+const R_TO_CP = 0.5523
+
+
+enum ShapeType {
+	## Gives every point in the [member curve] a handle, as well as their in- and out- control points.
+	## Ignores the [member size], [member offset], [member rx] and [member ry] properties when
+	## drawing the shape.
+	PATH,
+	## Keeps the shape of the [member curve] as a rectangle, based on the [member offset],
+	## [member size], [member rx] and [member ry].
+	## Provides one handle to change [member size],	and two handles to change [member rx] and
+	## [member ry] for rounded corners.
+	## The [member offset] can change by using the pivot-tool in the 2D Editor
+	RECT,
+	## Keeps the shape of the [member curve] as an ellipse, based on the [member offset] and
+	## [member size]
+	## Provides one handle to change [member size]. The [member size] determines the radii of the
+	## ellipse on the y- and x- axis, so [member rx] and [member ry] are always sync'ed with
+	## [member size] (and vice-versa)
+		## The [member offset] can change by using the pivot-tool in the 2D Editor
+	ELLIPSE
+}
+
+## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
+## properties [member size], [member offset], [member rx], and [member ry].
+@export var shape_type := ShapeType.PATH
+
+
+@export var offset : Vector2 = Vector2(0.0, 0.0):
+	set(ofs):
+		offset = ofs
+		dimensions_changed.emit()
+
+@export var size : Vector2 = Vector2(100.0, 100.0):
+	set(sz):
+		if sz.x < rx * 2.001:
+			sz.x = rx * 2.001
+		if sz.x < 0:
+			sz.x = 0.001
+		if sz.y < ry * 2.001:
+			sz.y = ry * 2.001
+		if sz.y < 0:
+			sz.y = 0.001
+		size = sz
+		dimensions_changed.emit()
+
+@export var rx : float = 0.0:
+	set(_rx):
+		rx = _rx if _rx > 0 else 0
+		if rx > size.x * 0.49:
+			rx = size.x * 0.49
+		dimensions_changed.emit()
+
+@export var ry : float = 0.0:
+	set(_ry):
+		ry = _ry if _ry > 0 else 0
+		if ry > size.y * 0.49:
+			ry = size.y * 0.49
+		dimensions_changed.emit()
 
 
 ## The 'Fill' of a [ScalableVectorShape2D] is simply an instance of a [Polygon2D] node
@@ -88,6 +153,9 @@ func _ready():
 
 # Wire up signals on enter tree for the editor
 func _enter_tree():
+	# ensure forward compatibility by assigning the default ShapeType
+	if shape_type == null:
+		shape_type = ShapeType.PATH
 	if Engine.is_editor_hint():
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
