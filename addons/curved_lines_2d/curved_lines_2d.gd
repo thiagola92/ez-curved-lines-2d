@@ -336,6 +336,11 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			if handle['out'].length():
 				hint_txt += _draw_rect_control_point_handle(viewport_control, svs, handle, 'out',
 						cp_out_is_hovered)
+		elif svs.shape_type == ScalableVectorShape2D.ShapeType.ELLIPSE:
+			viewport_control.draw_circle(_vp_transform(handle['in_position']), 5, Color.DIM_GRAY)
+			viewport_control.draw_circle(_vp_transform(handle['in_position']), 5, color, false, width)
+			viewport_control.draw_circle(_vp_transform(handle['out_position']), 5, Color.DIM_GRAY)
+			viewport_control.draw_circle(_vp_transform(handle['out_position']), 5, color, false, width)
 		else:
 			hint_txt += _draw_control_point_handle(viewport_control, svs, handle, 'in',
 					is_hovered or cp_in_is_hovered, cp_in_is_hovered)
@@ -358,7 +363,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			viewport_control.draw_polyline(pts, color, width)
 
 		if is_hovered:
-			if not svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+			if svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 				point_txt = str(i) + handle['is_closed']
 				point_hint_pos = handle['point_position']
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -367,18 +372,20 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			else:
 				if svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
 					hint_txt += " - Drag to resize rectange"
+				elif svs.shape_type == ScalableVectorShape2D.ShapeType.ELLIPSE:
+					hint_txt += " - Drag to resize ellipse"
 				else:
 					hint_txt += " - Drag to move"
 				if handle['is_closed'].length() > 0:
 					hint_txt += "\n - Double click to break loop"
-				elif not svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+				elif svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 					hint_txt += "\n - Right click to delete"
 					if not svs.is_curve_closed() and (
 						(i == 0 and handles.size() > 2) or
 						(i == handles.size() - 1 and i > 1)
 					):
 						hint_txt += "\n - Double click to close loop"
-				if svs.shape_type != ScalableVectorShape2D.ShapeType.RECT:
+				if svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 					hint_txt += "\n - Hold Shift + Drag to create curve handles"
 
 	var gradient_handles := svs.get_gradient_handles()

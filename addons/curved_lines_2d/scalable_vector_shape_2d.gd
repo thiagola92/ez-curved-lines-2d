@@ -57,29 +57,37 @@ enum ShapeType {
 
 @export var size : Vector2 = Vector2(100.0, 100.0):
 	set(sz):
-		if sz.x < rx * 2.001:
-			sz.x = rx * 2.001
 		if sz.x < 0:
 			sz.x = 0.001
-		if sz.y < ry * 2.001:
-			sz.y = ry * 2.001
 		if sz.y < 0:
 			sz.y = 0.001
-		size = sz
-		dimensions_changed.emit()
+		if shape_type == ShapeType.RECT:
+			if sz.x < rx * 2.001:
+				sz.x = rx * 2.001
+			if sz.y < ry * 2.001:
+				sz.y = ry * 2.001
+			size = sz
+			dimensions_changed.emit()
+		elif shape_type == ShapeType.ELLIPSE:
+			size = sz
+			rx = sz.x * 0.5
+			ry = sz.y * 0.5
+
 
 @export var rx : float = 0.0:
 	set(_rx):
 		rx = _rx if _rx > 0 else 0
-		if rx > size.x * 0.49:
-			rx = size.x * 0.49
+		if shape_type == ShapeType.RECT:
+			if rx > size.x * 0.49:
+				rx = size.x * 0.49
 		dimensions_changed.emit()
 
 @export var ry : float = 0.0:
 	set(_ry):
 		ry = _ry if _ry > 0 else 0
-		if ry > size.y * 0.49:
-			ry = size.y * 0.49
+		if shape_type == ShapeType.RECT:
+			if ry > size.y * 0.49:
+				ry = size.y * 0.49
 		dimensions_changed.emit()
 
 
@@ -206,6 +214,13 @@ func _on_dimensions_changed():
 			curve.add_point(offset + Vector2(0, ry), Vector2.ZERO, Vector2(0, -ry *  R_TO_CP))
 			curve.add_point(offset + Vector2(rx, 0), Vector2(-rx * R_TO_CP, 0))
 			curve.add_point(offset + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
+	elif shape_type == ShapeType.ELLIPSE:
+		curve.clear_points()
+		curve.add_point(Vector2(rx, 0), Vector2.ZERO, Vector2(0, ry * SvgImporterDock.R_TO_CP))
+		curve.add_point(Vector2(0, ry), Vector2(rx * SvgImporterDock.R_TO_CP, 0), Vector2(-rx * SvgImporterDock.R_TO_CP, 0))
+		curve.add_point(Vector2(-rx, 0), Vector2(0, ry * SvgImporterDock.R_TO_CP), Vector2(0, -ry * SvgImporterDock.R_TO_CP))
+		curve.add_point(Vector2(0, -ry), Vector2(-rx * SvgImporterDock.R_TO_CP, 0), Vector2(rx * SvgImporterDock.R_TO_CP, 0))
+		curve.add_point(Vector2(rx, 0), Vector2(0, -ry * SvgImporterDock.R_TO_CP))
 
 
 func _on_assigned_node_changed():
@@ -348,7 +363,7 @@ func is_curve_closed() -> bool:
 
 
 func get_curve_handles() -> Array:
-	if shape_type == ShapeType.RECT:
+	if shape_type == ShapeType.RECT or shape_type == ShapeType.ELLIPSE:
 		var point_pos := size + get_bounding_rect().position
 		var rx_handle := Vector2(rx, 0)
 		var ry_handle := Vector2(0, ry)
@@ -361,6 +376,7 @@ func get_curve_handles() -> Array:
 			"out_position": to_global(offset + ry_handle),
 			"is_closed": ""
 		}]
+
 
 	var n = curve.point_count
 	var is_closed := is_curve_closed()
