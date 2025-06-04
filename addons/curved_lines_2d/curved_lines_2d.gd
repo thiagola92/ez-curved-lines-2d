@@ -336,12 +336,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			if handle['out'].length():
 				hint_txt += _draw_rect_control_point_handle(viewport_control, svs, handle, 'out',
 						cp_out_is_hovered)
-		elif svs.shape_type == ScalableVectorShape2D.ShapeType.ELLIPSE:
-			viewport_control.draw_circle(_vp_transform(handle['in_position']), 5, Color.DIM_GRAY)
-			viewport_control.draw_circle(_vp_transform(handle['in_position']), 5, color, false, width)
-			viewport_control.draw_circle(_vp_transform(handle['out_position']), 5, Color.DIM_GRAY)
-			viewport_control.draw_circle(_vp_transform(handle['out_position']), 5, color, false, width)
-		else:
+		elif svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 			hint_txt += _draw_control_point_handle(viewport_control, svs, handle, 'in',
 					is_hovered or cp_in_is_hovered, cp_in_is_hovered)
 			hint_txt +=_draw_control_point_handle(viewport_control, svs, handle, 'out',
@@ -367,7 +362,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 				point_txt = str(i) + handle['is_closed']
 				point_hint_pos = handle['point_position']
 			if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-				if Input.is_key_pressed(KEY_SHIFT) and not svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+				if Input.is_key_pressed(KEY_SHIFT) and svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 					hint_txt += " - Release mouse to set curve handles"
 			else:
 				if svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
@@ -551,7 +546,7 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 					VIEWPORT_ORANGE, 2.0)
 			_draw_curve(viewport_control, result)
 			_draw_handles(viewport_control, result)
-			if not _handle_has_hover(result) and not result.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+			if not _handle_has_hover(result) and result.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 				if result.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 					_draw_closest_point_on_curve(viewport_control, result)
 				else:
@@ -884,13 +879,13 @@ func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
 
 
 func _add_point_on_position(svs : ScalableVectorShape2D, pos : Vector2) -> void:
-	if svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+	if svs.shape_type != ScalableVectorShape2D.ShapeType.PATH:
 		return
 	_add_point_to_curve(svs, svs.to_local(pos))
 
 
 func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
-	if svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+	if svs.shape_type != ScalableVectorShape2D.ShapeType.PATH:
 		return
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
@@ -904,7 +899,7 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 
 
 func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
-	if svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+	if svs.shape_type != ScalableVectorShape2D.ShapeType.PATH:
 		return
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
@@ -937,7 +932,7 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 
 
 func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
-	if svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+	if svs.shape_type != ScalableVectorShape2D.ShapeType.PATH:
 		return
 	if svs.curve.point_count < 3:
 		return
@@ -1003,7 +998,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
 		if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
 			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
-				if current_selection.has_meta(META_NAME_HOVER_POINT_IDX) and current_selection.shape_type != ScalableVectorShape2D.ShapeType.RECT:
+				if current_selection.has_meta(META_NAME_HOVER_POINT_IDX) and current_selection.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 					_remove_point_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_POINT_IDX))
 				elif current_selection.has_meta(META_NAME_HOVER_CP_IN_IDX):
 					if current_selection.shape_type == ScalableVectorShape2D.ShapeType.RECT:
@@ -1045,7 +1040,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			if _handle_has_hover(current_selection):
 				if current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
 					var pt_idx : int = current_selection.get_meta(META_NAME_HOVER_POINT_IDX)
-					if current_selection.shape_type == ScalableVectorShape2D.ShapeType.RECT:
+					if current_selection.shape_type != ScalableVectorShape2D.ShapeType.PATH:
 						_update_rect_dimensions(current_selection, mouse_pos)
 					elif Input.is_key_pressed(KEY_SHIFT):
 						if pt_idx == 0:

@@ -47,6 +47,9 @@ enum ShapeType {
 		if st == ShapeType.PATH:
 			assigned_node_changed.emit()
 		else:
+			if shape_type == ShapeType.RECT:
+				rx = 0.0
+				ry = 0.0
 			dimensions_changed.emit()
 
 
@@ -216,11 +219,11 @@ func _on_dimensions_changed():
 			curve.add_point(offset + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
 	elif shape_type == ShapeType.ELLIPSE:
 		curve.clear_points()
-		curve.add_point(Vector2(rx, 0), Vector2.ZERO, Vector2(0, ry * SvgImporterDock.R_TO_CP))
-		curve.add_point(Vector2(0, ry), Vector2(rx * SvgImporterDock.R_TO_CP, 0), Vector2(-rx * SvgImporterDock.R_TO_CP, 0))
-		curve.add_point(Vector2(-rx, 0), Vector2(0, ry * SvgImporterDock.R_TO_CP), Vector2(0, -ry * SvgImporterDock.R_TO_CP))
-		curve.add_point(Vector2(0, -ry), Vector2(-rx * SvgImporterDock.R_TO_CP, 0), Vector2(rx * SvgImporterDock.R_TO_CP, 0))
-		curve.add_point(Vector2(rx, 0), Vector2(0, -ry * SvgImporterDock.R_TO_CP))
+		curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2.ZERO, Vector2(0, size.y * 0.5 * SvgImporterDock.R_TO_CP))
+		curve.add_point(offset + Vector2(0, size.y * 0.5), Vector2(size.x * 0.5 * SvgImporterDock.R_TO_CP, 0), Vector2(-size.x * 0.5 * SvgImporterDock.R_TO_CP, 0))
+		curve.add_point(offset + Vector2(-size.x * 0.5, 0), Vector2(0, size.y * 0.5 * SvgImporterDock.R_TO_CP), Vector2(0, -size.y * 0.5 * SvgImporterDock.R_TO_CP))
+		curve.add_point(offset + Vector2(0, -size.y * 0.5), Vector2(-size.x * 0.5 * SvgImporterDock.R_TO_CP, 0), Vector2(size.x * 0.5 * SvgImporterDock.R_TO_CP, 0))
+		curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2(0, -size.y * 0.5 * SvgImporterDock.R_TO_CP))
 
 
 func _on_assigned_node_changed():
@@ -318,7 +321,7 @@ func set_position_to_center() -> void:
 func set_origin(global_pos : Vector2) -> void:
 	var local_pos = to_local(global_pos)
 	match shape_type:
-		ShapeType.RECT:
+		ShapeType.RECT, ShapeType.ELLIPSE:
 			offset = offset - to_local(global_pos)
 			global_position = global_pos
 			if is_instance_valid(polygon) and polygon.texture is GradientTexture2D:
