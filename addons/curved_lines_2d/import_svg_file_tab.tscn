@@ -141,3 +141,4 @@ uri = "https://youtu.be/3j_OEfU8qbo?feature=shared"
 [connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/AntialiasedCheckBox" to="." method="_on_antialiased_check_box_toggled"]
 [connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/ImportCollisionPolygonsCheckBox" to="." method="_on_import_collision_polygons_check_box_toggled"]
 [connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/ImportCollisionPolygonsForAllShapesCheckBox" to="." method="_on_import_collision_polygons_for_all_shapes_check_box_toggled"]
+[connection signal="pressed" from="VBoxContainer2/PanelContainer/VBoxContainer2/OpenFileDialogButton" to="." method="_on_open_file_dialog_button_pressed"]
