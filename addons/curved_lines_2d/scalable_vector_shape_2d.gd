@@ -39,36 +39,6 @@ enum ShapeType {
 	ELLIPSE
 }
 
-
-## The 'Fill' of a [ScalableVectorShape2D] is simply an instance of a [Polygon2D] node
-## assigned to the `polygon` property.
-## If you remove that [Polygon2D] node, you need to unassign it here as well, before
-## you can add a new 'Fill' with the 'Add Fill' button
-## The polygon's shape is controlled by this node's curve ([Curve2D]) property,
-## it does _not_ have to be the child of this ScalableVectorShape2D
-@export var polygon: Polygon2D:
-	set(_poly):
-		polygon = _poly
-		assigned_node_changed.emit()
-
-
-## The 'Stroke' of a [ScalableVectorShape2D] is simply an instance of a [Line2D] node
-## assigned to the `line` property.
-## If you remove that Line2D node, you need to unassign it here as well, before
-## you can add a new 'Stroke' with the 'Add Stroke' button
-## The line's shape is controlled by this node's curve ([Curve2D]) pproperty, it
-## does _not_ have to be the child of this [ScalableVectorShape2D]
-@export var line: Line2D:
-	set(_line):
-		line = _line
-		assigned_node_changed.emit()
-
-## The CollisionPolygon2D controlled by this node's curve property
-@export var collision_polygon: CollisionPolygon2D:
-	set(_poly):
-		collision_polygon = _poly
-		assigned_node_changed.emit()
-
 ## Controls the paramaters used to divide up the line  in segments.
 ## These settings are prefilled with the default values.
 @export_group("Curve settings")
@@ -98,6 +68,36 @@ enum ShapeType {
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
+@export_group("Fill")
+## The 'Fill' of a [ScalableVectorShape2D] is simply an instance of a [Polygon2D] node
+## assigned to the `polygon` property.
+## If you remove that [Polygon2D] node, you need to unassign it here as well, before
+## you can add a new 'Fill' with the 'Add Fill' button
+## The polygon's shape is controlled by this node's curve ([Curve2D]) property,
+## it does _not_ have to be the child of this ScalableVectorShape2D
+@export var polygon: Polygon2D:
+	set(_poly):
+		polygon = _poly
+		assigned_node_changed.emit()
+
+@export_group("Stroke")
+## The 'Stroke' of a [ScalableVectorShape2D] is simply an instance of a [Line2D] node
+## assigned to the `line` property.
+## If you remove that Line2D node, you need to unassign it here as well, before
+## you can add a new 'Stroke' with the 'Add Stroke' button
+## The line's shape is controlled by this node's curve ([Curve2D]) pproperty, it
+## does _not_ have to be the child of this [ScalableVectorShape2D]
+@export var line: Line2D:
+	set(_line):
+		line = _line
+		assigned_node_changed.emit()
+
+@export_group("Collision Polygon")
+## The CollisionPolygon2D controlled by this node's curve property
+@export var collision_polygon: CollisionPolygon2D:
+	set(_poly):
+		collision_polygon = _poly
+		assigned_node_changed.emit()
 
 @export_group("Shape Type Settings")
 ## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
