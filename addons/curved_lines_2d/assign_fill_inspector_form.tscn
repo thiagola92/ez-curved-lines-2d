@@ -256,6 +256,7 @@ text = "Edit Polygon2D"
 
 [connection signal="toggled" from="TitleButton" to="." method="_on_title_button_toggled"]
 [connection signal="color_changed" from="FillColorFieldContainer/HBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_color_changed"]
+[connection signal="toggled" from="FillColorFieldContainer/HBoxContainer/ColorPickerButton" to="." method="_on_color_picker_button_toggled"]
 [connection signal="pressed" from="FillColorFieldContainer/HBoxContainer/AddFillKeyFrameButton" to="." method="_on_add_fill_key_frame_button_pressed"]
 [connection signal="button_down" from="GradientFieldContainer/HBoxContainer/RemoveGradientToggleButton" to="." method="_on_remove_gradient_toggle_button_button_down"]
 [connection signal="button_down" from="GradientFieldContainer/HBoxContainer/LinearGradientToggleButton" to="." method="_on_linear_gradient_toggle_button_button_down"]
