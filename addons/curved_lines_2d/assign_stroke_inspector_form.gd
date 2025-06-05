@@ -6,25 +6,17 @@ class_name AssignStrokeInspectorForm
 var scalable_vector_shape_2d : ScalableVectorShape2D
 var create_button : Button
 var select_button : Button
-var title_button : Button
-var collapse_icon : Texture2D
-var expand_icon : Texture2D
-var collapsible_siblings : Array[Node]
 var color_button : ColorPickerButton
 var stroke_width_input : EditorSpinSlider
 
 func _enter_tree() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
-	collapse_icon = preload("res://addons/curved_lines_2d/Collapse.svg")
-	expand_icon = preload("res://addons/curved_lines_2d/Expand.svg")
 	create_button = find_child("CreateStrokeButton")
 	select_button = find_child("GotoLine2DButton")
-	title_button = find_child("TitleButton")
 	color_button = find_child("ColorPickerButton")
 	if 'assigned_node_changed' in scalable_vector_shape_2d:
 		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
-	collapsible_siblings = get_children().filter(func(x): return x != title_button and not x is Label)
 	stroke_width_input = _make_float_input("Stroke Width", 10.0, 0.0, 100.0, "px")
 	find_child("StrokeWidthFloatFieldContainer").add_child(stroke_width_input)
 	_on_svs_assignment_changed()
@@ -99,17 +91,6 @@ func _on_create_stroke_button_pressed():
 	undo_redo.commit_action()
 
 
-func _on_title_button_toggled(toggled_on: bool) -> void:
-	if toggled_on:
-		title_button.icon = collapse_icon
-		for n in collapsible_siblings:
-			n.show()
-	else:
-		title_button.icon = expand_icon
-		for n in collapsible_siblings:
-			n.hide()
-
-
 func _make_float_input(lbl : String, value : float, min_value : float, max_value : float, suffix : String) -> EditorSpinSlider:
 	var x_slider := EditorSpinSlider.new()
 	x_slider.value = value
@@ -148,6 +129,8 @@ func _on_color_picker_button_toggled(toggled_on: bool) -> void:
 	if toggled_on:
 		undo_redo.create_action("Adjust Line2D default_color for %s" % str(scalable_vector_shape_2d))
 		undo_redo.add_undo_property(scalable_vector_shape_2d.line, 'default_color', scalable_vector_shape_2d.line.default_color)
+		undo_redo.add_undo_property(color_button, 'color', scalable_vector_shape_2d.line.default_color)
 	else:
 		undo_redo.add_do_property(scalable_vector_shape_2d.line, 'default_color', color_button.color)
+		undo_redo.add_do_property(color_button, 'color', color_button.color)
 		undo_redo.commit_action(false)

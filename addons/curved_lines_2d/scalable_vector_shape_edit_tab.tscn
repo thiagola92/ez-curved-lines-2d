@@ -137,7 +137,7 @@ custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
-color = Color(1, 0.435294, 0.286275, 1)
+color = Color(1, 1, 1, 1)
 
 [node name="CollisionCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer2"]
 layout_mode = 2
