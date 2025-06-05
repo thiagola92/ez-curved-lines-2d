@@ -118,6 +118,7 @@ func _on_ellipse_created(rx : float, ry : float, scene_root : Node2D) -> void:
 
 	_create_shape(new_ellipse, scene_root, "Ellipse")
 
+
 func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String) -> void:
 	var new_shape := ScalableVectorShape2D.new()
 	new_shape.curve = curve
@@ -282,7 +283,7 @@ func _draw_rect_control_point_handle(viewport_control : Control, svs : ScalableV
 	var prop_name := "rx" if prefix == "in" else "ry"
 	var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 	var width := 2 if is_hovered else 1
-	viewport_control.draw_line(_vp_transform(svs.to_global(svs.offset)),
+	viewport_control.draw_line(_vp_transform(svs.to_global(svs.get_bounding_rect().position)),
 			_vp_transform(handle[prefix + '_position']), Color.WEB_GRAY, 1, true)
 	viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, Color.DIM_GRAY)
 	viewport_control.draw_circle(_vp_transform(handle[prefix + '_position']), 5, color, false, width)

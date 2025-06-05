@@ -198,32 +198,13 @@ func _exit_tree():
 
 func _on_dimensions_changed():
 	if shape_type == ShapeType.RECT:
-		curve.clear_points()
 		var width = size.x
 		var height = size.y
-		if rx == 0 and ry == 0:
-			curve.add_point(offset)
-			curve.add_point(offset + Vector2(width, 0))
-			curve.add_point(offset + Vector2(width, height))
-			curve.add_point(offset + Vector2(0, height))
-			curve.add_point(offset)
-		else:
-			curve.add_point(offset + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
-			curve.add_point(offset + Vector2(width, ry), Vector2(0, -ry * R_TO_CP))
-			curve.add_point(offset + Vector2(width, height - ry), Vector2.ZERO, Vector2(0, ry * R_TO_CP))
-			curve.add_point(offset + Vector2(width - rx, height), Vector2(rx * R_TO_CP, 0))
-			curve.add_point(offset + Vector2(rx, height), Vector2.ZERO, Vector2(-rx * R_TO_CP, 0))
-			curve.add_point(offset + Vector2(0, height - ry), Vector2(0, ry * R_TO_CP))
-			curve.add_point(offset + Vector2(0, ry), Vector2.ZERO, Vector2(0, -ry *  R_TO_CP))
-			curve.add_point(offset + Vector2(rx, 0), Vector2(-rx * R_TO_CP, 0))
-			curve.add_point(offset + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
+		# curve is passed by reference to trigger changed on existing instance
+		set_rect_points(curve, width, height, rx, ry, offset)
 	elif shape_type == ShapeType.ELLIPSE:
-		curve.clear_points()
-		curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2.ZERO, Vector2(0, size.y * 0.5 * SvgImporterDock.R_TO_CP))
-		curve.add_point(offset + Vector2(0, size.y * 0.5), Vector2(size.x * 0.5 * SvgImporterDock.R_TO_CP, 0), Vector2(-size.x * 0.5 * SvgImporterDock.R_TO_CP, 0))
-		curve.add_point(offset + Vector2(-size.x * 0.5, 0), Vector2(0, size.y * 0.5 * SvgImporterDock.R_TO_CP), Vector2(0, -size.y * 0.5 * SvgImporterDock.R_TO_CP))
-		curve.add_point(offset + Vector2(0, -size.y * 0.5), Vector2(-size.x * 0.5 * SvgImporterDock.R_TO_CP, 0), Vector2(size.x * 0.5 * SvgImporterDock.R_TO_CP, 0))
-		curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2(0, -size.y * 0.5 * SvgImporterDock.R_TO_CP))
+		# curve is passed by reference to trigger changed on existing instance
+		set_ellipse_points(curve, size, offset)
 
 
 func _on_assigned_node_changed():
@@ -370,13 +351,14 @@ func get_curve_handles() -> Array:
 		var point_pos := size + get_bounding_rect().position
 		var rx_handle := Vector2(rx, 0)
 		var ry_handle := Vector2(0, ry)
+		var top_left := offset + Vector2(-size.x, -size.y) * 0.5
 		return [{
 			"point_position": to_global(point_pos),
 			"mirrored": true,
 			"in": rx_handle,
 			"out": ry_handle,
-			"in_position": to_global(offset + rx_handle),
-			"out_position": to_global(offset + ry_handle),
+			"in_position": to_global(top_left + rx_handle),
+			"out_position": to_global(top_left + ry_handle),
 			"is_closed": ""
 		}]
 
@@ -503,3 +485,42 @@ func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
 		"point_position": to_global(closest_result),
 		"before_segment": before_segment
 	}
+
+## Convert an existing [Curve2D] instance to a (rounded) rectangle.
+## [param curve] is passed by reference so the curve's [signal Resource.changed]
+## signal is emitted.
+static func set_rect_points(curve : Curve2D, width : float, height : float, rx := 0.0, ry := 0.0,
+		offset := Vector2.ZERO) -> void:
+	curve.clear_points()
+	var top_left := offset + Vector2(-width, -height) * 0.5
+	var top_right := offset + Vector2(width, -height) * 0.5
+	var bottom_right := offset + Vector2(width, height) * 0.5
+	var bottom_left := offset + Vector2(-width, height) * 0.5
+	if rx == 0 and ry == 0:
+		curve.add_point(top_left)
+		curve.add_point(top_right)
+		curve.add_point(bottom_right)
+		curve.add_point(bottom_left)
+		curve.add_point(top_left)
+	else:
+		curve.add_point(top_left + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
+		curve.add_point(top_left + Vector2(width, ry), Vector2(0, -ry * R_TO_CP))
+		curve.add_point(top_left + Vector2(width, height - ry), Vector2.ZERO, Vector2(0, ry * R_TO_CP))
+		curve.add_point(top_left + Vector2(width - rx, height), Vector2(rx * R_TO_CP, 0))
+		curve.add_point(top_left + Vector2(rx, height), Vector2.ZERO, Vector2(-rx * R_TO_CP, 0))
+		curve.add_point(top_left + Vector2(0, height - ry), Vector2(0, ry * R_TO_CP))
+		curve.add_point(top_left + Vector2(0, ry), Vector2.ZERO, Vector2(0, -ry *  R_TO_CP))
+		curve.add_point(top_left + Vector2(rx, 0), Vector2(-rx * R_TO_CP, 0))
+		curve.add_point(top_left + Vector2(width - rx, 0), Vector2.ZERO, Vector2(rx * R_TO_CP, 0))
+
+
+## Convert an existing [Curve2D] instance to an ellipse.
+## [param curve] is passed by reference so the curve's [signal Resource.changed]
+## signal is emitted.
+static func set_ellipse_points(curve : Curve2D, size: Vector2, offset := Vector2.ZERO):
+	curve.clear_points()
+	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2.ZERO, Vector2(0, size.y * 0.5 * SvgImporterDock.R_TO_CP))
+	curve.add_point(offset + Vector2(0, size.y * 0.5), Vector2(size.x * 0.5 * SvgImporterDock.R_TO_CP, 0), Vector2(-size.x * 0.5 * SvgImporterDock.R_TO_CP, 0))
+	curve.add_point(offset + Vector2(-size.x * 0.5, 0), Vector2(0, size.y * 0.5 * SvgImporterDock.R_TO_CP), Vector2(0, -size.y * 0.5 * SvgImporterDock.R_TO_CP))
+	curve.add_point(offset + Vector2(0, -size.y * 0.5), Vector2(-size.x * 0.5 * SvgImporterDock.R_TO_CP, 0), Vector2(size.x * 0.5 * SvgImporterDock.R_TO_CP, 0))
+	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2(0, -size.y * 0.5 * SvgImporterDock.R_TO_CP))

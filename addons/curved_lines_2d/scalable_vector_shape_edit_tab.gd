@@ -71,22 +71,7 @@ func _make_number_input(lbl : String, value : float, min_value : float, max_valu
 
 func _get_rect_curve() -> Curve2D:
 	var curve := Curve2D.new()
-	if rect_rx_input.value == 0 and rect_ry_input.value == 0:
-		curve.add_point(Vector2.ZERO)
-		curve.add_point(Vector2(rect_width_input.value, 0))
-		curve.add_point(Vector2(rect_width_input.value, rect_height_input.value))
-		curve.add_point(Vector2(0, rect_height_input.value))
-		curve.add_point(Vector2.ZERO)
-	else:
-		curve.add_point(Vector2(rect_width_input.value - rect_rx_input.value, 0), Vector2.ZERO, Vector2(rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-		curve.add_point(Vector2(rect_width_input.value, rect_ry_input.value), Vector2(0, -rect_ry_input.value * SvgImporterDock.R_TO_CP))
-		curve.add_point(Vector2(rect_width_input.value, rect_height_input.value - rect_ry_input.value), Vector2.ZERO, Vector2(0, rect_ry_input.value * SvgImporterDock.R_TO_CP))
-		curve.add_point(Vector2(rect_width_input.value - rect_rx_input.value, rect_height_input.value), Vector2(rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-		curve.add_point(Vector2(rect_rx_input.value, rect_height_input.value), Vector2.ZERO, Vector2(-rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-		curve.add_point(Vector2(0, rect_height_input.value - rect_ry_input.value), Vector2(0, rect_ry_input.value * SvgImporterDock.R_TO_CP))
-		curve.add_point(Vector2(0, rect_ry_input.value), Vector2.ZERO, Vector2(0, -rect_ry_input.value *  SvgImporterDock.R_TO_CP))
-		curve.add_point(Vector2(rect_rx_input.value, 0), Vector2(-rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-		curve.add_point(Vector2(rect_width_input.value - rect_rx_input.value, 0), Vector2.ZERO, Vector2(rect_rx_input.value * SvgImporterDock.R_TO_CP, 0))
+	ScalableVectorShape2D.set_rect_points(curve, rect_width_input.value, rect_height_input.value, rect_rx_input.value, rect_ry_input.value)
 	return curve
 
 
@@ -135,11 +120,7 @@ func _on_create_ellipse_button_pressed() -> void:
 
 func _get_ellipse_curve() -> Curve2D:
 	var curve := Curve2D.new()
-	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2.ZERO, Vector2(0, ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
-	curve.add_point(Vector2(0, ellipse_ry_input.value), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-	curve.add_point(Vector2(-ellipse_rx_input.value, 0), Vector2(0, ellipse_ry_input.value * SvgImporterDock.R_TO_CP), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
-	curve.add_point(Vector2(0, -ellipse_ry_input.value), Vector2(-ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0), Vector2(ellipse_rx_input.value * SvgImporterDock.R_TO_CP, 0))
-	curve.add_point(Vector2(ellipse_rx_input.value, 0), Vector2(0, -ellipse_ry_input.value * SvgImporterDock.R_TO_CP))
+	ScalableVectorShape2D.set_ellipse_points(curve, Vector2(ellipse_rx_input.value * 2, ellipse_ry_input.value * 2))
 	return curve
 
 
