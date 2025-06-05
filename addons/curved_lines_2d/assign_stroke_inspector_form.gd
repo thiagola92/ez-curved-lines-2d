@@ -55,18 +55,16 @@ func _on_stroke_width_changed(new_value : float) -> void:
 	var undo_redo = EditorInterface.get_editor_undo_redo()
 	undo_redo.create_action("Adjust Line2D width for %s" % str(scalable_vector_shape_2d))
 	undo_redo.add_do_property(scalable_vector_shape_2d.line, 'width', new_value)
+	undo_redo.add_do_method(stroke_width_input, 'set_value_no_signal', new_value)
 	undo_redo.add_undo_property(scalable_vector_shape_2d.line, 'width', scalable_vector_shape_2d.line.width)
+	undo_redo.add_undo_method(stroke_width_input, 'set_value_no_signal', scalable_vector_shape_2d.line.width)
 	undo_redo.commit_action()
 
 
 func _on_color_picker_button_color_changed(color: Color) -> void:
 	if not is_instance_valid(scalable_vector_shape_2d.line):
 		return
-	var undo_redo = EditorInterface.get_editor_undo_redo()
-	undo_redo.create_action("Adjust Line2D default_color for %s" % str(scalable_vector_shape_2d))
-	undo_redo.add_do_property(scalable_vector_shape_2d.line, 'default_color', color)
-	undo_redo.add_undo_property(scalable_vector_shape_2d.line, 'default_color', scalable_vector_shape_2d.line.default_color)
-	undo_redo.commit_action()
+	scalable_vector_shape_2d.line.default_color = color
 
 
 func _on_goto_line_2d_button_pressed() -> void:
@@ -141,3 +139,15 @@ func _on_add_stroke_color_key_frame_button_pressed() -> void:
 func _on_key_frame_capabilities_changed():
 	find_child("AddStrokeColorKeyFrameButton").visible = _is_key_frame_capable()
 	find_child("AddStrokeWidthKeyFrameButton").visible = _is_key_frame_capable()
+
+
+func _on_color_picker_button_toggled(toggled_on: bool) -> void:
+	if not is_instance_valid(scalable_vector_shape_2d.line):
+		return
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	if toggled_on:
+		undo_redo.create_action("Adjust Line2D default_color for %s" % str(scalable_vector_shape_2d))
+		undo_redo.add_undo_property(scalable_vector_shape_2d.line, 'default_color', scalable_vector_shape_2d.line.default_color)
+	else:
+		undo_redo.add_do_property(scalable_vector_shape_2d.line, 'default_color', color_button.color)
+		undo_redo.commit_action(false)
