@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.4.0 - 2025-06-02
+## 2.4.2 - 2025-06-05
 
 ### Added
 - Batch insert key frame button for entire curve
@@ -9,6 +9,9 @@
 - Key frame button for fill stroke color
 - Key frame button for fill color
 
+### Changed
+- Fixes ordering bug of gradient stop color buttons
+- Reconnects import svg button to file dialog in svg importer panel
 
 ## 2.3.2 - 2025-05-31
 
