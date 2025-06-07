@@ -23,22 +23,22 @@ func _parse_begin(object: Object) -> void:
 
 func _parse_group(object: Object, group: String) -> void:
 	if group == GROUP_NAME_CURVE_SETTINGS and object is ScalableVectorShape2D:
-		var key_frame_form = preload("res://addons/curved_lines_2d/batch_insert_curve_point_key_frames_inspector_form.tscn").instantiate()
+		var key_frame_form = load("res://addons/curved_lines_2d/batch_insert_curve_point_key_frames_inspector_form.tscn").instantiate()
 		key_frame_form.scalable_vector_shape_2d = object
 		add_custom_control(key_frame_form)
 
 
 func _parse_property(object: Object, type: Variant.Type, name: String, hint_type: PropertyHint, hint_string: String, usage_flags: int, wide: bool) -> bool:
 	if name == "line" and (object is  ScalableVectorShape2D):
-		var assign_stroke_inspector_form = preload("res://addons/curved_lines_2d/assign_stroke_inspector_form.tscn").instantiate()
+		var assign_stroke_inspector_form = load("res://addons/curved_lines_2d/assign_stroke_inspector_form.tscn").instantiate()
 		assign_stroke_inspector_form.scalable_vector_shape_2d = object
 		add_custom_control(assign_stroke_inspector_form)
 	elif name == "polygon" and (object  is ScalableVectorShape2D):
-		var assign_fill_inspector_form = preload("res://addons/curved_lines_2d/assign_fill_inspector_form.tscn").instantiate()
+		var assign_fill_inspector_form = load("res://addons/curved_lines_2d/assign_fill_inspector_form.tscn").instantiate()
 		assign_fill_inspector_form.scalable_vector_shape_2d = object
 		add_custom_control(assign_fill_inspector_form)
 	elif name == "collision_polygon" and (object is ScalableVectorShape2D):
-		var assign_collision_inspector_form = preload("res://addons/curved_lines_2d/assign_collision_inspector_form.tscn").instantiate()
+		var assign_collision_inspector_form = load("res://addons/curved_lines_2d/assign_collision_inspector_form.tscn").instantiate()
 		assign_collision_inspector_form.scalable_vector_shape_2d = object
 		add_custom_control(assign_collision_inspector_form)
 	return false
