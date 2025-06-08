@@ -394,6 +394,7 @@ Lots of thanks go out to those who helped me out getting started:
 # Reaching out / Contributing
 If you have feedback on this project, feel free to post an [issue](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues) on github, or to:
 
+- Follow my channel on youtube: [@zucht2.bsky.social](https://www.youtube.com/@zucht2.bsky.social)
 - Contact me on bluesky: [@zucht2.bsky.social](https://bsky.app/profile/zucht2.bsky.social).
 - Try my free to play games on itch.io: [@renevanderark.itch.io](https://renevanderark.itch.io)
 
