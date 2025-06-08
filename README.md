@@ -231,7 +231,7 @@ The following custom forms were added, with extensive tooltips to help explain t
 
 - [Fill](#the-fill-inspector-form) (actually the assigned `Polygon2D`)
 - [Stroke](#the-stroke-inspector-form) (actually the assigned `Line2D`)
-- [Collision](#the-collision-polygon-inspector-form) Polygon (just a button to generate a new `CollisionPolygon2D`)
+- [Collision Polygon](#the-collision-polygon-inspector-form) (just a button to generate a new `CollisionPolygon2D`)
 - [Curve Settings](#the-curve-settings-inspector-form)
 - [Shape Type Settings](#the-shape-type-inspector-form)
 - [Editor Settings](#the-editor-settings-inspector-form)
