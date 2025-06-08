@@ -33,7 +33,6 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [Bending a curve](#bending-a-curve)
 	- [Creating, mirroring and dragging control point handles](#creating-mirroring-and-dragging-control-point-handles)
 	- [Closing the loop and breaking the loop](#closing-the-loop-and-breaking-the-loop)
-	- [Using `closed` on `Line2D`](#using-closed-on-line2d)
 	- [Deleting points and control points](#deleting-points-and-control-points)
 	- [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
 - [Manipulating gradients](#manipulating-gradients)
@@ -167,15 +166,6 @@ Double clicking on the start-/endpoint again will break the loop back up:
 
 You can recognise the start-/endpoint(s) by the infinity symbol: ∞
 
-## Using `closed` on `Line2D`
-
-You do not always _need_ to close the `ScalableVectorShape2D` shape to draw a polygon, or a closed `Line2D`.
-
-
-Setting the `closed` property on an assigned `Line2D` will display a dotted line over your shape:
-
-![a closed line2d over an unclosed shape](./addons/curved_lines_2d/screenshots/11-line2d-closed.png) ![in the inspector](./addons/curved_lines_2d/screenshots/11a-line2d-closed.png)
-
 ## Deleting points and control points
 
 You can delete points and control points by using right click.
@@ -233,7 +223,6 @@ A couple of settings in the bottom panel are stored across sessions to represent
   - Stroke color (when creating new shapes in the bottom panel)
   - Enable/Disable Collisions (when creating new shapes via the bottom panel)
 - Paint order: a toggle which represent what comes in front of what (when creating new shapes in the bottom panel)
-
 
 
 # Using the Inspector Form for `ScalableVectorShape2D`
