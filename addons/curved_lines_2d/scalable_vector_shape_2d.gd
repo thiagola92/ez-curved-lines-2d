@@ -39,35 +39,6 @@ enum ShapeType {
 	ELLIPSE
 }
 
-## Controls the paramaters used to divide up the line  in segments.
-## These settings are prefilled with the default values.
-@export_group("Curve settings")
-## The [Curve2D] that dynamically triggers updates of the shapes assigned to this node
-## Changes to this curve will also emit the path_changed signal with the updated points array
-@export var curve: Curve2D = Curve2D.new():
-	set(_curve):
-		curve = _curve
-		assigned_node_changed.emit()
-
-## Controls whether the path is treated as static (only update in editor) or dynamic (can be updated during runtime)
-## If you set this to true, be alert for potential performance issues
-@export var update_curve_at_runtime: bool = false
-
-## Controls how many subdivisions a curve segment may face before it is considered approximate enough.
-## Each subdivision splits the segment in half, so the default 5 stages may mean up to 32 subdivisions
-## per curve segment. Increase with care!
-@export_range(1, 10) var max_stages : int = 5:
-	set(_max_stages):
-		max_stages = _max_stages
-		assigned_node_changed.emit()
-
-## Controls how many degrees the midpoint of a segment may deviate from the real curve, before the
-## segment has to be subdivided.
-@export_range(0.0, 180.0) var tolerance_degrees := 4.0:
-	set(_tolerance_degrees):
-		tolerance_degrees = _tolerance_degrees
-		assigned_node_changed.emit()
-
 @export_group("Fill")
 ## The 'Fill' of a [ScalableVectorShape2D] is simply an instance of a [Polygon2D] node
 ## assigned to the `polygon` property.
@@ -98,6 +69,36 @@ enum ShapeType {
 	set(_poly):
 		collision_polygon = _poly
 		assigned_node_changed.emit()
+
+## Controls the paramaters used to divide up the line  in segments.
+## These settings are prefilled with the default values.
+@export_group("Curve settings")
+## The [Curve2D] that dynamically triggers updates of the shapes assigned to this node
+## Changes to this curve will also emit the path_changed signal with the updated points array
+@export var curve: Curve2D = Curve2D.new():
+	set(_curve):
+		curve = _curve
+		assigned_node_changed.emit()
+
+## Controls whether the path is treated as static (only update in editor) or dynamic (can be updated during runtime)
+## If you set this to true, be alert for potential performance issues
+@export var update_curve_at_runtime: bool = false
+
+## Controls how many subdivisions a curve segment may face before it is considered approximate enough.
+## Each subdivision splits the segment in half, so the default 5 stages may mean up to 32 subdivisions
+## per curve segment. Increase with care!
+@export_range(1, 10) var max_stages : int = 5:
+	set(_max_stages):
+		max_stages = _max_stages
+		assigned_node_changed.emit()
+
+## Controls how many degrees the midpoint of a segment may deviate from the real curve, before the
+## segment has to be subdivided.
+@export_range(0.0, 180.0) var tolerance_degrees := 4.0:
+	set(_tolerance_degrees):
+		tolerance_degrees = _tolerance_degrees
+		assigned_node_changed.emit()
+
 
 @export_group("Shape Type Settings")
 ## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
