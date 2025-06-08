@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.5.0 - 2025-06-08
+
+### Added
+- Makes Rectangles editable using one size handle and two rounded corner handles
+- Makes Ellipses editable using one size handle
+- Adds create buttons for Rectangle as Rectangle and Ellipse as Ellipse
+- ..next to exists create buttons for them as Path
+- Adds a "convert to path" button in the inspector when `shape_type` is a rectangle or ellipse
+
+### Changed
+
+- Enhancement: newly created Rectangle has its origin at its natural center, in stead of its top/left corner
+- Bugfix: gradient stop color order stays in tact after undo remove
+- Bugfix: Bottom Panel is more visible after fresh install
+- Bugfix: preloading replaced by loading to fix busy resource issues in inspector plugin code
+
+### Removed
+- Custom collapse / expand titles from inspector plugin forms in favour of `@export_group` annotations on `ScalableVectorShape2D`
 
 ## 2.4.3 - 2025-06-07
 
