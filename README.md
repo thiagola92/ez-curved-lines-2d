@@ -1,19 +1,15 @@
 # Scalable Vector Shapes 2D plugin for Godot 4.4
 
-Scalable Vector Shapes 2D lets you do 2 things:
-1. Draw seamless vector shapes using a Path Editor inspired by the awesome [Inkscape](https://inkscape.org/)
-2. Import [.svg](https://www.w3.org/TR/SVG/) files as seamless vector shapes in stead of as raster images
+Scalable Vector Shapes 2D lets you do 3 things:
+1. Draw seamless vector shapes using a Path Editor inspired by the awesome [Inkscape](https://inkscape.org/) with a new node type: [`ScalableVectorShape2D`](./addons/curved_lines_2d/scalable_vector_shape_2d.gd)[^1]
+2. Animate the shape of the curve using keyframes on a [property-track](https://docs.godotengine.org/en/stable/tutorials/animation/introduction.html#doc-introduction-animation)  in an [`AnimationPlayer`](https://docs.godotengine.org/en/stable/classes/class_animationplayer.html#class-animationplayer)
+3. Import [.svg](https://www.w3.org/TR/SVG/) files as seamless vector shapes in stead of as raster images[^2]
 
-*__Important sidenote__: _This plugin only supports a small - yet relevant - subset of the huge [SVG Specification](https://www.w3.org/TR/SVG/struct.html)_
+[^2]: __Important sidenote__: _This plugin only supports a small - yet relevant - subset of the huge [SVG Specification](https://www.w3.org/TR/SVG/struct.html)_
 
 ![a blue heart in a godot scene](./addons/curved_lines_2d/screenshots/01-heart-scene.png)
 
-## Looking for EZ Curved Lines 2D?
-The renamed plugin deprecates the old `DrawablePath2D` custom node in favor of `ScalableVectorShape2D`. A Conversion button is provided:
-
-![converter button](./addons/curved_lines_2d/screenshots/00-converter.png)
-
-The reason is that `ScalableVectorShape2D` inherits directly from `Node2D` giving much more control to the plugin over how you can draw.
+[^1]: Looking for EZ Curved Lines 2D? The renamed plugin deprecates the old [`DrawablePath2D`](./addons/curved_lines_2d/drawable_path_2d.gd) custom node in favor of `ScalableVectorShape2D`. A Conversion button is provided: [converter button](./addons/curved_lines_2d/screenshots/00-converter.png). The reason is that [`ScalableVectorShape2D`](./addons/curved_lines_2d/scalable_vector_shape_2d.gd) inherits directly from `Node2D` giving much more control to the plugin over how you can draw.
 
 ## Reaching out / Contributing
 If you have feedback on this project, feel free to post an [issue](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues) on github, or to:
@@ -28,7 +24,6 @@ This stuff makes me zero money, so you can always branch off in your own directi
 # Table of Contents
 
 - [Scalable Vector Shapes 2D plugin for Godot 4.4](#scalable-vector-shapes-2d-plugin-for-godot-44)
-	- [Looking for EZ Curved Lines 2D?](#looking-for-ez-curved-lines-2d)
 	- [Reaching out / Contributing](#reaching-out--contributing)
 - [Table of Contents](#table-of-contents)
 - [Drawing Shapes in the Godot 2D Viewport](#drawing-shapes-in-the-godot-2d-viewport)
