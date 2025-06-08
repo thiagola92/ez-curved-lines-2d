@@ -229,12 +229,12 @@ A couple of settings in the bottom panel are stored across sessions to represent
 
 The following custom forms were added, with extensive tooltips to help explain the actual functions they provide:
 
-- Fill (actually the assigned `Polygon2D`)
-- Stroke (actually the assigned `Line2D`)
-- Collision Polygon (just a button to generate a new `CollisionPolygon2D`)
-- Curve Settings
-- Shape Type Settings
-- Editor Settings
+- [Fill](#the-fill-inspector-form) (actually the assigned `Polygon2D`)
+- [Stroke](#the-stroke-inspector-form) (actually the assigned `Line2D`)
+- [Collision](#the-collision-polygon-inspector-form) Polygon (just a button to generate a new `CollisionPolygon2D`)
+- [Curve Settings](#the-curve-settings-inspector-form)
+- [Shape Type Settings](#the-shape-type-inspector-form)
+- [Editor Settings](#the-editor-settings-inspector-form)
 
 When a primitive shape (basic rectangle or ellipse) is selected, a `Convert to Path` button is also provided up top.
 
