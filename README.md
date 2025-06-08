@@ -52,8 +52,8 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [Yet they still respond to changes to your `ScalableVectorShape2D`](#yet-they-still-respond-to-changes-to-your-scalablevectorshape2d)
 	- [Because you assigned them to it using the inspector](#because-you-assigned-them-to-it-using-the-inspector)
 	- [Watch the chapter about working with collisions, paint order and the node hierarchy on youtube](#watch-the-chapter-about-working-with-collisions-paint-order-and-the-node-hierarchy-on-youtube)
-- [Animating / Changing shapes at runtime (improved in 2.4)](#animating--changing-shapes-at-runtime-improved-in-24)
-	- [Youtube explainer on animating (outdated by release 2.4!)](#youtube-explainer-on-animating-outdated-by-release-24)
+- [Animating / Changing shapes at runtime](#animating--changing-shapes-at-runtime)
+	- [Youtube explainer on animating](#youtube-explainer-on-animating)
 	- [A note up front (this being said)](#a-note-up-front-this-being-said)
 	- [Animating the shape and gradients at Runtime](#animating-the-shape-and-gradients-at-runtime)
 	- [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
@@ -323,21 +323,23 @@ This video gives more context on how `Line2D`, `Polygon2D` and `CollisionPolygon
 [![working with collisions, paint order and the node hierarchy on youtube](./addons/curved_lines_2d/screenshots/more-on-node-hierarchy.png)](https://youtu.be/_QOnMRrlIMk?t=371&feature=shared)
 
 
-# Animating / Changing shapes at runtime (improved in 2.4)
+# Animating / Changing shapes at runtime
 
-## Youtube explainer on animating (outdated by release 2.4!)
+## Youtube explainer on animating
 
-This explainer will still work, but from version 2.4.0 onward much work has been done to add custom keyframe buttons.
+Watch this explainer on youtube on animating:
 
-[![link to Youtube explainer about animating](./addons/curved_lines_2d/screenshots/animating-youtube-thumbnail.png)](https://youtu.be/elWNu3-067A?feature=shared)
+[![link to Youtube explainer about animating](./addons/curved_lines_2d/screenshots/animating-youtube-thumbnail.png)](https://youtu.be/IwS2Rf65i18?feature=shared)
 
 ## A note up front (this being said)
 
-The shapes you create will work fine with basic key-frame operations. You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning. Moreover, you probably should in 95% of the cases, to optimize your performance
+The shapes you create will work fine with basic key-frame operations.
+
+You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning, and change the `ScalableVectorShape2D` to a simple `Node2D` if necessary.
 
 ## Animating the shape and gradients at Runtime
 
-Sometimes, however, you want your shape to change at runtime.
+Sometimes, however, you want your shape to change at runtime (or even your collision shape!)
 
 You can use the `Update Curve at Runtime` checkbox in the inspector to enable dynamic changing of your curved shapes at runtime.
 
@@ -372,14 +374,14 @@ If however you want to, for instance, animate 100 blades of grass, just use __on
 
 ![path_changed signal](./addons/curved_lines_2d/screenshots/10-path_changed-signal.png)
 
+This very short section of the youtube video illustrates how to do this: https://youtu.be/IwS2Rf65i18?feature=shared&t=55
+
 
 ## Performance impact
+
 Animating curve points at runtime does, however, impact performance of your game, because calculating segments is an expensive operation.
 
-Also, the old [OpenGL / Compatibility](https://docs.godotengine.org/en/stable/contributing/development/core_and_modules/internal_rendering_architecture.html#compatibility) rendering engine seems to perform noticably better for these operations in 2D than the [Vulkan / Forward+](https://docs.godotengine.org/en/stable/contributing/development/core_and_modules/internal_rendering_architecture.html#forward) mode.
-
-Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance Degrees` to reduce curve smoothness and increase performance.
-
+Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance Degrees` to reduce curve smoothness and increase performance (and vice-versa)
 
 
 # Attributions
