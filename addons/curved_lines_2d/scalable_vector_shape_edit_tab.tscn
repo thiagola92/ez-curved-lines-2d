@@ -336,6 +336,7 @@ size_flags_vertical = 3
 layout_mode = 2
 tooltip_text = "This link will open a webpage in your browser: https://www.youtube.com/watch?v=q_NaZq1zZdY
 Right click to copy this link"
+uri = "https://youtu.be/_QOnMRrlIMk?t=126&feature=shared"
 
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableEditingCheckbox" to="." method="_on_enable_editing_checkbox_toggled"]
 [connection signal="toggled" from="VBoxContainer/EditorSettingsContainer/EnableHintsCheckbox" to="." method="_on_enable_hints_checkbox_toggled"]
