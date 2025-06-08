@@ -7,35 +7,25 @@ Scalable Vector Shapes 2D lets you do 3 things:
 
 [^2]: __Important sidenote__: _This plugin only supports a small - yet relevant - subset of the huge [SVG Specification](https://www.w3.org/TR/SVG/struct.html)_
 
-![a blue heart in a godot scene](./addons/curved_lines_2d/screenshots/01-heart-scene.png)
+## Watch the A-Z explainer on Youtube
+
+In this 10 minute video I explain how to use all the features of Scalable Vector Shapes 2D in short succession:
+
+[![link to the explainer](./addons/curved_lines_2d/screenshots/a-z-explainer-youtube-thumbnail.png)](https://youtu.be/_QOnMRrlIMk?feature=shared)
 
 [^1]: Looking for EZ Curved Lines 2D? The renamed plugin deprecates the old [`DrawablePath2D`](./addons/curved_lines_2d/drawable_path_2d.gd) custom node in favor of `ScalableVectorShape2D`. A Conversion button is provided: [converter button](./addons/curved_lines_2d/screenshots/00-converter.png). The reason is that [`ScalableVectorShape2D`](./addons/curved_lines_2d/scalable_vector_shape_2d.gd) inherits directly from `Node2D` giving much more control to the plugin over how you can draw.
 
-## Reaching out / Contributing
-If you have feedback on this project, feel free to post an [issue](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues) on github, or to:
-
-- Contact me on bluesky: [@zucht2.bsky.social](https://bsky.app/profile/zucht2.bsky.social).
-- Try my free to play games on itch.io: [@renevanderark.itch.io](https://renevanderark.itch.io)
-
-If you'd like to improve on the code yourself, ideally use a fork and make a pull request.
-
-This stuff makes me zero money, so you can always branch off in your own direction if you're in a hurry.
 
 # Table of Contents
 
 - [Scalable Vector Shapes 2D plugin for Godot 4.4](#scalable-vector-shapes-2d-plugin-for-godot-44)
-	- [Reaching out / Contributing](#reaching-out--contributing)
+	- [Watch the A-Z explainer on Youtube](#watch-the-a-z-explainer-on-youtube)
 - [Table of Contents](#table-of-contents)
 - [Drawing Shapes in the Godot 2D Viewport](#drawing-shapes-in-the-godot-2d-viewport)
 	- [Basic Drawing Explainer on youtube](#basic-drawing-explainer-on-youtube)
-	- [Adding a `ScalableVectorShape2D` node to your scene](#adding-a-scalablevectorshape2d-node-to-your-scene)
-	- [Ctrl + click to add points](#ctrl--click-to-add-points)
-	- [Add a `Line2D` as stroke and a `Polygon2D` as fill](#add-a-line2d-as-stroke-and-a-polygon2d-as-fill)
-		- [More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`](#more-about-assigned-line2d-polygon2d-and-collisionpolygon2d)
-			- [The assigned shapes are now siblings](#the-assigned-shapes-are-now-siblings)
-			- [Yet they still respond to changes to your `ScalableVectorShape2D`](#yet-they-still-respond-to-changes-to-your-scalablevectorshape2d)
-			- [Because you assigned them to it using the inspector](#because-you-assigned-them-to-it-using-the-inspector)
 - [Generating a Circle, Ellipse or Rectangle using the bottom panel item](#generating-a-circle-ellipse-or-rectangle-using-the-bottom-panel-item)
+	- [Creating Paths based on Bézier curves](#creating-paths-based-on-bézier-curves)
+	- [Creating 'primitive' scapes: Rectangle and Ellipse](#creating-primitive-scapes-rectangle-and-ellipse)
 - [Using the `.svg` importer](#using-the-svg-importer)
 	- [Known issues explainer on Youtube:](#known-issues-explainer-on-youtube)
 - [Manipulating shapes](#manipulating-shapes)
@@ -46,12 +36,23 @@ This stuff makes me zero money, so you can always branch off in your own directi
 	- [Using `closed` on `Line2D`](#using-closed-on-line2d)
 	- [Deleting points and control points](#deleting-points-and-control-points)
 	- [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
-- [Editing the properties of an assigned gradient (since release 2.3)](#editing-the-properties-of-an-assigned-gradient-since-release-23)
+- [Manipulating gradients](#manipulating-gradients)
 	- [Changing the start- and endpoint of the gradient](#changing-the-start--and-endpoint-of-the-gradient)
 	- [Changing the color stop positions](#changing-the-color-stop-positions)
 	- [Add new color stops](#add-new-color-stops)
-- [Custom inspector forms (since release 2.2)](#custom-inspector-forms-since-release-22)
-	- [A preview of the updated inspector](#a-preview-of-the-updated-inspector)
+- [The Project Settings in the Scalable Vector Shapes panel](#the-project-settings-in-the-scalable-vector-shapes-panel)
+- [Using the Inspector Form for `ScalableVectorShape2D`](#using-the-inspector-form-for-scalablevectorshape2d)
+	- [The Fill inspector form](#the-fill-inspector-form)
+	- [The Stroke inspector form](#the-stroke-inspector-form)
+	- [The Collision Polygon inspector form](#the-collision-polygon-inspector-form)
+	- [The Curve settings inspector form](#the-curve-settings-inspector-form)
+	- [The Shape type inspector form](#the-shape-type-inspector-form)
+	- [The Editor settings inspector form](#the-editor-settings-inspector-form)
+- [More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`](#more-about-assigned-line2d-polygon2d-and-collisionpolygon2d)
+	- [The assigned shapes are now siblings](#the-assigned-shapes-are-now-siblings)
+	- [Yet they still respond to changes to your `ScalableVectorShape2D`](#yet-they-still-respond-to-changes-to-your-scalablevectorshape2d)
+	- [Because you assigned them to it using the inspector](#because-you-assigned-them-to-it-using-the-inspector)
+	- [Watch the chapter about working with collisions, paint order and the node hierarchy on youtube](#watch-the-chapter-about-working-with-collisions-paint-order-and-the-node-hierarchy-on-youtube)
 - [Animating / Changing shapes at runtime (improved in 2.4)](#animating--changing-shapes-at-runtime-improved-in-24)
 	- [Youtube explainer on animating (outdated by release 2.4!)](#youtube-explainer-on-animating-outdated-by-release-24)
 	- [A note up front (this being said)](#a-note-up-front-this-being-said)
@@ -59,72 +60,45 @@ This stuff makes me zero money, so you can always branch off in your own directi
 	- [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
 	- [Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead](#dont-duplicate-scalablevectorshape2d-use-the-path_changed-signal-in-stead)
 	- [Performance impact](#performance-impact)
-- [Ye Olde `DrawablePath2D` Examples](#ye-olde-drawablepath2d-examples)
 - [Attributions](#attributions)
+- [Reaching out / Contributing](#reaching-out--contributing)
 
 # Drawing Shapes in the Godot 2D Viewport
 
 ## Basic Drawing Explainer on youtube
 
-[![Explainer basic drawing on youtube](./addons/curved_lines_2d/screenshots/basic-drawing-youtube-thumnail.png)](https://youtu.be/q_NaZq1zZdY?feature=shared)
+[![Explainer basic drawing on youtube](./addons/curved_lines_2d/screenshots/basic-drawing-youtube-thumnail.png)](https://youtu.be/_QOnMRrlIMk?t=126&feature=shared)
 
 After activating this plugin a new bottom panel item appears, called "Scalable Vector Graphics".
 
-There are 3 ways to start drawing:
-1. [Add a `ScalableVectorShape2D` node to your scene](#adding-a-scalablevectorshape2d-node-to-your-scene)
-2. [Generating a Circle or Rectangle using the bottom panel item](#generating-a-circle-or-rectangle-using-the-bottom-panel-item)
-3. [Using the `.svg` importer](#using-the-svg-importer)
+There are 2 recommended ways to start drawing:
+1. [Creating a Circle/Ellipse, Rectangle or empty Path using the bottom panel item](#generating-a-circle-ellipse-or-rectangle-using-the-bottom-panel-item)
+2. [Using the `.svg` importer](#using-the-svg-importer)
 
-## Adding a `ScalableVectorShape2D` node to your scene
-
-This works exactly the same way as adding a normal godot node, using `Ctrl-A` or using right-click inside the 2D viewport and choosing `Add Node here`:
-
-![create node](./addons/curved_lines_2d/screenshots/02-create-node.png)
-
-## Ctrl + click to add points
-
-Once you added your new node, a hint should suggest you can start adding points by holding down the `Ctrl` key:
-
-![hold ctrl to start adding points](./addons/curved_lines_2d/screenshots/17-hold-ctrl-to-start-adding.png)
-
-And once your are holding `Ctrl` down you can use `Left Click` to add points
-
-
-## Add a `Line2D` as stroke and a `Polygon2D` as fill
-
-After adding at least 2 points you can use the `Inspector` panel to generate a `Line2D` and/or a `Polygon2D` to serve as stroke and fill:
-
-![add stroke and fill](./addons/curved_lines_2d/screenshots/04-generate.png)
-
-[Skip to further reading about manipulating shapes](#manipulating-shapes)
-
-### More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`
-
-Using the `Generate ...` buttons in the inspector simply adds a new node as a child to `ScalableVectorShape2D` but it does __not need to be__ a child. The important bit is that the new node is _assigned_ to it via its properties: `polygon`, `line` and `collision_polygon`:
-
-#### The assigned shapes are now siblings
-
-![assigned tree](./addons/curved_lines_2d/screenshots/12a-assigned.png)
-
-#### Yet they still respond to changes to your `ScalableVectorShape2D`
-
-![assigned viewport](./addons/curved_lines_2d/screenshots/12b-assigned.png)
-
-#### Because you assigned them to it using the inspector
-
-![assigned inspector](./addons/curved_lines_2d/screenshots/12c-assigned.png)
 
 # Generating a Circle, Ellipse or Rectangle using the bottom panel item
 
-It's probably easier to start out with a basic primitive shape (like you would in Inkscape <3)
 
-The second tab in the `Scalable Vector Shapes` panel gives you some basic choices:
+The  `Scalable Vector Shapes` bottom panel gives you some basic choices:
 
 ![the bottom panel](./addons/curved_lines_2d/screenshots/06-scalable-vector-shapes-panel.png)
 
-This youtube short shows what adding a circle looks like:
+## Creating Paths based on Bézier curves
 
-[![thumb](./addons/curved_lines_2d/screenshots/yt_short_thumb.png)](https://youtu.be/WdXfcnx-I9w?feature=shared&t=41)
+Pressing the `Create Empty Path` or one of the `Create Path` buttons will add a new shape to an open `2D Scene` in 'Path' mode, meaning all points in the 'Bézier' curve are editable.
+
+![create ellipse as path](./addons/curved_lines_2d/screenshots/create-ellipse-as-path.png)
+
+
+## Creating 'primitive' scapes: Rectangle and Ellipse
+
+It's probably easier to start out with a basic primitive shape (like you would in Inkscape <3) using the `Create Rectangle` or `Create Ellipse` button. This will expose less features, but will make it a lot easier to manipulate shapes:
+
+![create rect as rect](./addons/curved_lines_2d/screenshots/create-rect-as-rect.png)
+
+Ellipses will only have one handle to change the `size` property with (representing the x and y diameter). This will set the `rx` and `ry` property indirectly.
+
+Rectangles will have a handle for `size` and 2 handles for rounded corners `rx` and `ry` property.
 
 # Using the `.svg` importer
 
@@ -152,7 +126,10 @@ Don't let that stop you, though, your future infinite zoomer and key-frame anima
 
 # Manipulating shapes
 
-The hints in the 2D viewport should have you covered, but this section lists all the operations available to you.
+The hints in the 2D viewport should have you covered, but this section lists all the operations available to you. You can also watch the chapter on sculpting paths on youtube:
+
+[![sculpting paths on youtube](./addons/curved_lines_2d/screenshots/sculpting-paths-on-youtube.png)](https://youtu.be/_QOnMRrlIMk?t=295&feature=shared)
+
 
 ## Adding a point to a shape
 
@@ -216,7 +193,7 @@ Like this:
 
 ![set origin 2](./addons/curved_lines_2d/screenshots/16a-set_origin.png)
 
-# Editing the properties of an assigned gradient (since release 2.3)
+# Manipulating gradients
 
 Once a gradient is assigned to the 'Fill' of your shape via the inspector, its properties can be changed using the same controls as will the other handles.
 
@@ -241,19 +218,120 @@ Double clicking on the gradient line will add a new color stop (the assigned col
 
 ![adding a color stop](./addons/curved_lines_2d/screenshots/add_color_stop.png)
 
-# Custom inspector forms (since release 2.2)
+# The Project Settings in the Scalable Vector Shapes panel
+
+A couple of settings in the bottom panel are stored across sessions to represent your preferences:
+- Editor settings (how the 2D Viewport should behave):
+  - Enable/Disable ScalableVectorShape2D Editing (when checked off, you can edit nodes the normal, built-in, godot-way. You _are_ going to need this)
+  - Show/Hide Edit hints
+  - Show Point Numbers (which are the exact _indices_ of each point on the `Curve2D` of this shape)
+- Draw Settings:
+  - Stroke Width
+  - Enable/Disable Fill (when creating new shapes via the bottom panel)
+  - Fill color (when creating new shapes in the bottom panel)
+  - Enable/Disable Stroke (when creating new shapes via the bottom panel)
+  - Stroke color (when creating new shapes in the bottom panel)
+  - Enable/Disable Collisions (when creating new shapes via the bottom panel)
+- Paint order: a toggle which represent what comes in front of what (when creating new shapes in the bottom panel)
+
+
+
+# Using the Inspector Form for `ScalableVectorShape2D`
 
 The following custom forms were added, with extensive tooltips to help explain the actual functions they provide:
 
 - Fill (actually the assigned `Polygon2D`)
 - Stroke (actually the assigned `Line2D`)
-- Collision Polygon (just a button to generate a new `Polygon2D`)
+- Collision Polygon (just a button to generate a new `CollisionPolygon2D`)
+- Curve Settings
+- Shape Type Settings
+- Editor Settings
 
-## A preview of the updated inspector
+When a primitive shape (basic rectangle or ellipse) is selected, a `Convert to Path` button is also provided up top.
 
-![preview of the updated inspector](./addons/curved_lines_2d/screenshots/updated-inspector.png)
+![screenshot of the inspector](./addons/curved_lines_2d/screenshots/inspector-in-2.5.png)
+
+## The Fill inspector form
+
+When the selected shape has no fill, an `Add Fill` button is provided. Clicking that will create and assign a new `Polygon2D` to the selected `ScalableVectorShape2D`:
+
+![screenshot of fill form without fill](./addons/curved_lines_2d/screenshots/fill-form-no-fill.png)
+
+Once assigned, the following options are available:
+- Fill color, changes the `color` property of the assigned `Polygon2D`
+- Gradient, will assign or remove a `GradientTexture2D` to the `Polygon2D`
+- Stop colors (if a gradient is set), one color button per color
+- A `Edit Polygon2D` button, which will make the editor select the assigned `Polygon2D`
+
+Below that, a standard godot `Assign ...`-field is also available to set the `polygon`-property directly with and to enable unassignment.
+
+## The Stroke inspector form
+
+When the selected shape has no stroke, an `Add Stroke` button is provided. Clicking that will create and assign a new `Line2D` to the selected `ScalableVectorShape2D`:
+
+![screenshot of stroke form without stroke](./addons/curved_lines_2d/screenshots/stroke-form-no-stroke.png)
+
+Once assigned, the following options are available:
+- Stroke color, changes the `default_color` property of the assigned `Line2D`
+- Stroke width, changing the `width` property of the assigned `Line2D`
+
+Below that, a standard godot `Assign ...`-field is also available to set the `line`-property directly with and to enable unassignment.
+
+## The Collision Polygon inspector form
+
+This works the same as the Fill- and Stroke forms, but in this case a `CollisionPolygon2D` is assigned to the `collision_polygon`-property.
+
+## The Curve settings inspector form
+
+The curve settings inspector form provides the following options
+- A `Batch insert` keyframes button for all the `Curve2D`'s control points (the whole shape). This will be active when a valid track is being edited in a `AnimationPlayer` via the bottom panel
+- The standard godot built-in editor for `Curve2D` resources, assigned to the `curve` property of the selected `ScalableVectorShape2D`
+- The `update_curve_at_runtime` checkbox, which enables animating the entire shape
+- The `max_stages` property which influences smoothness (and performance!) of curve drawing; a higher value means smoother lines
+- The `tolerance_degrees` property, which also influences smoothness (and performance) of curve drawing: a lower value adds a smoother curve, especially for very subtle bends
+
+## The Shape type inspector form
+
+This form allows manipulation of the properties of primitive shape types (rectangle, ellipsis):
+- Shape type, here you can selected the type of the shape: Path, Rect and Ellipse. (Be warned: changing a shape from a path to a primitive shape is a destructive action and cannot be undone)
+- Offset: this represents the position of the pivot relative to the shape's natural center.
+- Size: the box size of the entire shape (stroke thickness excluded)
+- Rx: the x-radius of the shape
+- Ry: the y-radius of the shape
+
+It is best to change these properties via the handles in the 2D editor. They are, however, quite useful for animating key frames.
 
 
+## The Editor settings inspector form
+
+This form exposes 2 settings:
+
+- Shape Hint Color: the color of the line with which this shape is drawn, when selected
+- Lock Assigned Shapes: when this is checked, added strokes, fills and collision polygons will be locked in the editor, once created.
+
+
+
+# More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`
+
+Using the `Add ...` buttons in the inspector simply adds a new node as a child to `ScalableVectorShape2D` but it does __not need to be__ a child. The important bit is that the new node is _assigned_ to it via its properties: `polygon`, `line` and `collision_polygon`:
+
+## The assigned shapes are now siblings
+
+![assigned tree](./addons/curved_lines_2d/screenshots/12a-assigned.png)
+
+## Yet they still respond to changes to your `ScalableVectorShape2D`
+
+![assigned viewport](./addons/curved_lines_2d/screenshots/12b-assigned.png)
+
+## Because you assigned them to it using the inspector
+
+![assigned inspector](./addons/curved_lines_2d/screenshots/12c-assigned.png)
+
+## Watch the chapter about working with collisions, paint order and the node hierarchy on youtube
+
+This video gives more context on how `Line2D`, `Polygon2D` and `CollisionPolygon2D` are _assigned_ to the `ScalableVectorShape2D`:
+
+[![working with collisions, paint order and the node hierarchy on youtube](./addons/curved_lines_2d/screenshots/more-on-node-hierarchy.png)](https://youtu.be/_QOnMRrlIMk?t=371&feature=shared)
 
 
 # Animating / Changing shapes at runtime (improved in 2.4)
@@ -314,12 +392,6 @@ Also, the old [OpenGL / Compatibility](https://docs.godotengine.org/en/stable/co
 Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance Degrees` to reduce curve smoothness and increase performance.
 
 
-# Ye Olde `DrawablePath2D` Examples
-
-Wondering where my beautiful rat, the leopard and butterfly net went?
-
-I felt the installation started to become too cluttered, so I pruned them in this new release. Of course feel free to look them up in the [1.3.0.zip](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/archive/refs/tags/1.3.0.zip) / [1.3.0 source](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/tree/1.3.0/addons/curved_lines_2d/examples)
-
 
 # Attributions
 
@@ -328,3 +400,12 @@ Lots of thanks go out to those who helped me out getting started:
 - The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
 - The SVG Importer code was adapted from the script hosted on github in the [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot) repository
 
+# Reaching out / Contributing
+If you have feedback on this project, feel free to post an [issue](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues) on github, or to:
+
+- Contact me on bluesky: [@zucht2.bsky.social](https://bsky.app/profile/zucht2.bsky.social).
+- Try my free to play games on itch.io: [@renevanderark.itch.io](https://renevanderark.itch.io)
+
+If you'd like to improve on the code yourself, ideally use a fork and make a pull request.
+
+This stuff makes me zero money, so you can always branch off in your own direction if you're in a hurry.
