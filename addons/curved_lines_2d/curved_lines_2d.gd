@@ -572,7 +572,8 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 	if shape_preview:
 		var points := Array(shape_preview.tessellate())
 		var pos = _get_viewport_center()
-		var stroke_width = _get_default_stroke_width()
+		var stroke_width = (_get_default_stroke_width() * EditorInterface.get_editor_viewport_2d()
+				.get_final_transform().get_scale().x)
 		if _is_svs_valid(current_selection):
 			points = points.map(current_selection.to_global)
 			pos = Vector2.ZERO
