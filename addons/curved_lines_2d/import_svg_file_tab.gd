@@ -534,6 +534,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 		line.end_cap_mode = Line2D.LINE_CAP_ROUND
 		line.begin_cap_mode = Line2D.LINE_CAP_ROUND
 		line.joint_mode = Line2D.LINE_JOINT_ROUND
+		line.sharp_limit = 90.0
 
 
 func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene_root : Node2D,
