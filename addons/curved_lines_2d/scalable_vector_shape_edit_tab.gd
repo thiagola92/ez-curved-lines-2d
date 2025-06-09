@@ -29,7 +29,7 @@ func _enter_tree() -> void:
 	rect_ry_input = _make_number_input("Corner Radius Y", 0, 0, 500, "")
 	stroke_color_button = find_child("StrokePickerButton")
 	fill_color_button = find_child("FillPickerButton")
-	stroke_width_input = _make_number_input("Stroke Width", 10.0, 0.0, 100.0, "", 0.01)
+	stroke_width_input = _make_number_input("Width", 10.0, 0.0, 100.0, "", 0.01)
 	find_child("WidthSliderContainer").add_child(rect_width_input)
 	find_child("HeightSliderContainer").add_child(rect_height_input)
 	find_child("XRadiusSliderContainer").add_child(rect_rx_input)
