@@ -166,7 +166,7 @@ custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
-color = Color(0.746094, 0.131149, 0.131149, 1)
+color = Color(1, 1, 1, 1)
 
 [node name="CollisionCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer"]
 layout_mode = 2
@@ -307,7 +307,7 @@ size_flags_horizontal = 3
 [node name="Label2" type="Label" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer"]
 clip_contents = true
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
 tooltip_text = "This will set the begin_cap_mode of the assigned Line2D node to:
 - Line Cap None
 - Line Cap Box
@@ -457,13 +457,14 @@ size_flags_horizontal = 3
 [node name="Label" type="Label" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
 clip_contents = true
 layout_mode = 2
-size_flags_horizontal = 2
+size_flags_horizontal = 3
 tooltip_text = "This will set the joint_mode of the assigned Line2D node to:
 - Sharp
 - Bevel
 - Round"
 mouse_filter = 0
 text = "Joint Mode*"
+horizontal_alignment = 2
 
 [node name="LineJointSharpToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
 clip_contents = true
@@ -625,6 +626,15 @@ uri = "https://youtu.be/_QOnMRrlIMk?t=126&feature=shared"
 [connection signal="toggled" from="VBoxContainer/DrawSettingsContainer/PaintOrderButton4" to="." method="_on_paint_order_button_4_toggled"]
 [connection signal="toggled" from="VBoxContainer/DrawSettingsContainer/PaintOrderButton5" to="." method="_on_paint_order_button_5_toggled"]
 [connection signal="pressed" from="VBoxContainer/DrawSettingsContainer/CreateEmptyShapeButton" to="." method="_on_create_empty_shape_button_pressed"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer/BeginNoCapToggleButton" to="." method="_on_begin_no_cap_toggle_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer/BeginBoxCapToggleButton" to="." method="_on_begin_box_cap_toggle_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer/BeginRoundCapToggleButton" to="." method="_on_begin_round_cap_toggle_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer2/EndNoCapToggleButton" to="." method="_on_end_no_cap_toggle_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer2/EndBoxCapToggleButton" to="." method="_on_end_box_cap_toggle_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer2/EndRoundCapToggleButton" to="." method="_on_end_round_cap_toggle_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer3/LineJointSharpToggleButton" to="." method="_on_line_joint_sharp_toggle_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer3/LineJointBevelToggleButton" to="." method="_on_line_joint_bevel_toggle_button_toggled"]
+[connection signal="toggled" from="VBoxContainer/StrokeSettingsContainer/HBoxContainer3/LineJointRoundToggleButton" to="." method="_on_line_joint_round_toggle_button_toggled"]
 [connection signal="mouse_entered" from="VBoxContainer/RectBuilderContainer/CreateRectButton" to="." method="_on_create_rect_button_mouse_entered"]
 [connection signal="mouse_exited" from="VBoxContainer/RectBuilderContainer/CreateRectButton" to="." method="_on_create_rect_button_mouse_exited"]
 [connection signal="pressed" from="VBoxContainer/RectBuilderContainer/CreateRectButton" to="." method="_on_create_rect_button_pressed"]

@@ -22,6 +22,10 @@ var ellipse_ry_input : EditorSpinSlider
 
 var warning_dialog : AcceptDialog = null
 
+var begin_cap_button_map = {}
+var end_cap_button_map = {}
+var joint_button_map = {}
+
 func _enter_tree() -> void:
 	rect_width_input = _make_number_input("Width", 100, 2, 1000, "")
 	rect_height_input = _make_number_input("Height", 100, 2, 1000, "")
@@ -49,6 +53,21 @@ func _enter_tree() -> void:
 	find_child("StrokeCheckButton").button_pressed = CurvedLines2D._is_add_stroke_enabled()
 	find_child("FillCheckButton").button_pressed = CurvedLines2D._is_add_fill_enabled()
 	find_child("CollisionCheckButton").button_pressed = CurvedLines2D._is_add_collision_enabled()
+
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("BeginNoCapToggleButton")
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("BeginBoxCapToggleButton")
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("BeginRoundCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("EndNoCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("EndBoxCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("EndRoundCapToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_SHARP] = find_child("LineJointSharpToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_BEVEL] = find_child("LineJointBevelToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_ROUND] = find_child("LineJointRoundToggleButton")
+	begin_cap_button_map[CurvedLines2D._get_default_begin_cap()].button_pressed = true
+	end_cap_button_map[CurvedLines2D._get_default_end_cap()].button_pressed = true
+	joint_button_map[CurvedLines2D._get_default_joint_mode()].button_pressed = true
+
+
 	if not stroke_width_input.value_focus_exited.is_connected(ProjectSettings.save):
 		stroke_width_input.value_focus_exited.connect(ProjectSettings.save)
 	if not stroke_color_button.focus_exited.is_connected(ProjectSettings.save):

@@ -118,7 +118,6 @@ func _on_ellipse_created(rx : float, ry : float, scene_root : Node2D) -> void:
 	var new_ellipse := ScalableVectorShape2D.new()
 	new_ellipse.shape_type = ScalableVectorShape2D.ShapeType.ELLIPSE
 	new_ellipse.size = Vector2(rx * 2, ry * 2)
-
 	_create_shape(new_ellipse, scene_root, "Ellipse")
 
 
@@ -166,6 +165,7 @@ func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root 
 		line.begin_cap_mode = _get_default_begin_cap()
 		line.end_cap_mode = _get_default_end_cap()
 		line.joint_mode = _get_default_joint_mode()
+		line.sharp_limit = 90.0
 		undo_redo.add_do_property(new_shape, 'line', line)
 		undo_redo.add_do_method(new_shape, 'add_child', line, true)
 		undo_redo.add_do_method(line, 'set_owner', scene_root)
@@ -1154,10 +1154,12 @@ static func _get_default_end_cap() -> Line2D.LineCapMode:
 		return ProjectSettings.get_setting(SETTING_NAME_DEFAULT_LINE_END_CAP)
 	return Line2D.LineCapMode.LINE_CAP_NONE
 
+
 static func _get_default_joint_mode() -> Line2D.LineJointMode:
 	if ProjectSettings.has_setting(SETTING_NAME_DEFAULT_LINE_JOINT_MODE):
 		return ProjectSettings.get_setting(SETTING_NAME_DEFAULT_LINE_JOINT_MODE)
 	return Line2D.LineJointMode.LINE_JOINT_SHARP
+
 
 static func _get_default_fill_color() -> Color:
 	if ProjectSettings.has_setting(SETTING_NAME_FILL_COLOR):
