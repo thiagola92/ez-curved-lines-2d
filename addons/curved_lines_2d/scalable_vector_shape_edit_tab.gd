@@ -245,3 +245,56 @@ func _on_paint_order_button_5_toggled(toggled_on: bool) -> void:
 			CurvedLines2D.PaintOrder.MARKERS_STROKE_FILL)
 	ProjectSettings.save()
 
+
+func _on_begin_no_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_BEGIN_CAP,
+			Line2D.LineCapMode.LINE_CAP_NONE)
+	ProjectSettings.save()
+
+
+func _on_begin_box_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_BEGIN_CAP,
+			Line2D.LineCapMode.LINE_CAP_BOX)
+	ProjectSettings.save()
+
+
+func _on_begin_round_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_BEGIN_CAP,
+			Line2D.LineCapMode.LINE_CAP_ROUND)
+	ProjectSettings.save()
+
+
+func _on_end_no_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_END_CAP,
+			Line2D.LineCapMode.LINE_CAP_NONE)
+	ProjectSettings.save()
+
+
+func _on_end_box_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_END_CAP,
+			Line2D.LineCapMode.LINE_CAP_BOX)
+	ProjectSettings.save()
+
+
+func _on_end_round_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_END_CAP,
+			Line2D.LineCapMode.LINE_CAP_ROUND)
+	ProjectSettings.save()
+
+
+func _on_line_joint_sharp_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_JOINT_MODE,
+			Line2D.LineJointMode.LINE_JOINT_SHARP)
+	ProjectSettings.save()
+
+
+func _on_line_joint_bevel_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_JOINT_MODE,
+			Line2D.LineJointMode.LINE_JOINT_BEVEL)
+	ProjectSettings.save()
+
+
+func _on_line_joint_round_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_JOINT_MODE,
+			Line2D.LineJointMode.LINE_JOINT_ROUND)
+	ProjectSettings.save()

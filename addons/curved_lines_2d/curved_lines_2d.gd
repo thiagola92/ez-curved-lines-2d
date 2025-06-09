@@ -163,6 +163,9 @@ func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root 
 		line.name = "Stroke"
 		line.default_color = _get_default_stroke_color()
 		line.width = _get_default_stroke_width()
+		line.begin_cap_mode = _get_default_begin_cap()
+		line.end_cap_mode = _get_default_end_cap()
+		line.joint_mode = _get_default_joint_mode()
 		undo_redo.add_do_property(new_shape, 'line', line)
 		undo_redo.add_do_method(new_shape, 'add_child', line, true)
 		undo_redo.add_do_method(line, 'set_owner', scene_root)
