@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://dwns40mbgt82s"]
+[gd_scene load_steps=25 format=3 uid="uid://dwns40mbgt82s"]
 
 [ext_resource type="Script" uid="uid://tl3hcapnk7lb" path="res://addons/curved_lines_2d/scalable_vector_shape_edit_tab.gd" id="1_nt5in"]
 [ext_resource type="StyleBox" uid="uid://v0ueesjbdyrk" path="res://addons/curved_lines_2d/snazzy_toggle_button.stylebox" id="2_3cgh6"]
@@ -37,29 +37,43 @@ region = Rect2(64, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_85hwe"]
 atlas = ExtResource("4_xku8w")
-region = Rect2(0, 0, 32, 0)
+region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nh347"]
 atlas = ExtResource("4_xku8w")
-region = Rect2(64, 0, 32, 0)
+region = Rect2(64, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_exygk"]
 atlas = ExtResource("4_xku8w")
-region = Rect2(32, 0, 32, 0)
+region = Rect2(32, 0, 32, 32)
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_k2toy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2t4g6"]
 atlas = ExtResource("4_xku8w")
-region = Rect2(0, 0, 32, 0)
+region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pf6gx"]
 atlas = ExtResource("4_xku8w")
-region = Rect2(64, 0, 32, 0)
+region = Rect2(64, 0, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jph0d"]
 atlas = ExtResource("4_xku8w")
-region = Rect2(32, 0, 32, 0)
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_xku8w"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k2toy"]
+atlas = ExtResource("4_xku8w")
+region = Rect2(64, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_em7di"]
+atlas = ExtResource("4_xku8w")
+region = Rect2(0, 32, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_84wj1"]
+atlas = ExtResource("4_xku8w")
+region = Rect2(32, 32, 32, 32)
 
 [node name="ScalableVectorShapeEditTab" type="ScrollContainer"]
 anchors_preset = 15
@@ -261,7 +275,7 @@ button_group = SubResource("ButtonGroup_qgati")
 icon = SubResource("AtlasTexture_hip06")
 
 [node name="CreateEmptyShapeButton" type="Button" parent="VBoxContainer/DrawSettingsContainer"]
-custom_minimum_size = Vector2(180, 0)
+custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 size_flags_horizontal = 10
 tooltip_text = "Will create a ScalableVectorShape2D with zero points"
@@ -282,20 +296,22 @@ mouse_filter = 0
 text = "Stroke Settings*"
 
 [node name="StrokeWidthContainer" type="PanelContainer" parent="VBoxContainer/StrokeSettingsContainer"]
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/StrokeSettingsContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Label2" type="Label" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 2
 tooltip_text = "This will set the begin_cap_mode of the assigned Line2D node to:
-- LINE_CAP_NONE
-- LINE_CAP_BOX
-- LINE_CAP_ROUND
+- Line Cap None
+- Line Cap Box
+- Line Cap Round
 
 "
 mouse_filter = 0
@@ -307,7 +323,7 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "This will set the begin_cap_mode of the assigned Line2D node to:
-- LINE_CAP_NONE
+- Line Cap None
 "
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
@@ -326,7 +342,7 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "This will set the begin_cap_mode of the assigned Line2D node to:
-- LINE_CAP_BOX
+- Line Cap Box
 
 "
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
@@ -345,7 +361,7 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "This will set the begin_cap_mode of the assigned Line2D node to:
-- LINE_CAP_ROUND
+- Line Cap Round
 
 "
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
@@ -361,15 +377,16 @@ icon = SubResource("AtlasTexture_exygk")
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/StrokeSettingsContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Label3" type="Label" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer2"]
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "This will set the end_cap_mode of the assigned Line2D node to:
-- LINE_CAP_NONE
-- LINE_CAP_BOX
-- LINE_CAP_ROUND
+- Line Cap None
+- Line Cap Box
+- Line Cap Round
 
 "
 mouse_filter = 0
@@ -381,7 +398,7 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "This will set the end_cap_mode of the assigned Line2D node to:
-- LINE_CAP_NONE
+- Line Cap None
 "
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
@@ -400,7 +417,7 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "This will set the end_cap_mode of the assigned Line2D node to:
-- LINE_CAP_BOX
+- Line Cap Box
 
 "
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
@@ -419,7 +436,7 @@ clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "This will set the end_cap_mode of the assigned Line2D node to:
-- LINE_CAP_ROUND
+- Line Cap Round
 
 "
 theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
@@ -433,10 +450,72 @@ keep_pressed_outside = true
 button_group = SubResource("ButtonGroup_k2toy")
 icon = SubResource("AtlasTexture_jph0d")
 
-[node name="Control2" type="Control" parent="VBoxContainer/StrokeSettingsContainer"]
-custom_minimum_size = Vector2(286, 0)
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer/StrokeSettingsContainer"]
 layout_mode = 2
-size_flags_horizontal = 10
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 2
+tooltip_text = "This will set the joint_mode of the assigned Line2D node to:
+- Sharp
+- Bevel
+- Round"
+mouse_filter = 0
+text = "Joint Mode*"
+
+[node name="LineJointSharpToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "This will set the joint_mode of the assigned Line2D node to:
+- Sharp"
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = ExtResource("2_3cgh6")
+toggle_mode = true
+button_pressed = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_xku8w")
+icon = SubResource("AtlasTexture_k2toy")
+
+[node name="LineJointBevelToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "This will set the joint_mode of the assigned Line2D node to:
+- Bevel"
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = ExtResource("2_3cgh6")
+toggle_mode = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_xku8w")
+icon = SubResource("AtlasTexture_em7di")
+
+[node name="LineJointRoundToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 0
+tooltip_text = "This will set the joint_mode of the assigned Line2D node to:
+- Round"
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_styles/pressed = ExtResource("2_3cgh6")
+toggle_mode = true
+keep_pressed_outside = true
+button_group = SubResource("ButtonGroup_xku8w")
+icon = SubResource("AtlasTexture_84wj1")
 
 [node name="HSeparator4" type="HSeparator" parent="VBoxContainer"]
 layout_mode = 2
