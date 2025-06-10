@@ -46,6 +46,8 @@ func _enter_tree() -> void:
 	find_child("EnableEditingCheckbox").button_pressed = CurvedLines2D._is_editing_enabled()
 	find_child("EnableHintsCheckbox").button_pressed = CurvedLines2D._are_hints_enabled()
 	find_child("EnablePointNumbersCheckbox").button_pressed = CurvedLines2D._am_showing_point_numbers()
+	find_child("SnapToPixelCheckBox").button_pressed = CurvedLines2D._is_snapped_to_pixel()
+
 	stroke_width_input.value = CurvedLines2D._get_default_stroke_width()
 	stroke_width_input.value_changed.connect(_on_stroke_width_input_value_changed)
 	stroke_color_button.color = CurvedLines2D._get_default_stroke_color()
@@ -316,4 +318,10 @@ func _on_line_joint_bevel_toggle_button_toggled(toggled_on: bool) -> void:
 func _on_line_joint_round_toggle_button_toggled(toggled_on: bool) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_JOINT_MODE,
 			Line2D.LineJointMode.LINE_JOINT_ROUND)
+	ProjectSettings.save()
+
+
+func _on_snap_to_pixel_check_box_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_SNAP_TO_PIXEL,
+			toggled_on)
 	ProjectSettings.save()
