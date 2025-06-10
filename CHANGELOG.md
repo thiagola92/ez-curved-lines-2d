@@ -1,6 +1,14 @@
 # Changelog
 
-## 2.5.0 - 2025-06-08
+## 2.6.0
+
+## Added
+- Change line-capping of strokes via inspector
+- Change line-joining of strokes via inspector
+- Pick default line-cap and line-join modes for creating new strokes
+- Maps line-join modes and line-cap modes from SVG to Godot using the importer
+
+## 2.5.2 - 2025-06-08
 
 ### Added
 - Makes Rectangles editable using one size handle and two rounded corner handles
@@ -15,10 +23,10 @@
 - Bugfix: gradient stop color order stays in tact after undo remove
 - Bugfix: Bottom Panel is more visible after fresh install
 - Bugfix: preloading replaced by loading to fix busy resource issues in inspector plugin code
+- Bugfix: previewed shape has scaled stroke
 
 ### Removed
 - Custom collapse / expand titles from inspector plugin forms in favour of `@export_group` annotations on `ScalableVectorShape2D`
-
 ## 2.4.3 - 2025-06-07
 
 ### Changed

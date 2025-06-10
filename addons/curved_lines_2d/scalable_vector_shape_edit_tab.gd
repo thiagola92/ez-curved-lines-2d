@@ -22,6 +22,10 @@ var ellipse_ry_input : EditorSpinSlider
 
 var warning_dialog : AcceptDialog = null
 
+var begin_cap_button_map = {}
+var end_cap_button_map = {}
+var joint_button_map = {}
+
 func _enter_tree() -> void:
 	rect_width_input = _make_number_input("Width", 100, 2, 1000, "")
 	rect_height_input = _make_number_input("Height", 100, 2, 1000, "")
@@ -29,7 +33,7 @@ func _enter_tree() -> void:
 	rect_ry_input = _make_number_input("Corner Radius Y", 0, 0, 500, "")
 	stroke_color_button = find_child("StrokePickerButton")
 	fill_color_button = find_child("FillPickerButton")
-	stroke_width_input = _make_number_input("Stroke Width", 10.0, 0.0, 100.0, "", 0.01)
+	stroke_width_input = _make_number_input("Width", 10.0, 0.0, 100.0, "", 0.01)
 	find_child("WidthSliderContainer").add_child(rect_width_input)
 	find_child("HeightSliderContainer").add_child(rect_height_input)
 	find_child("XRadiusSliderContainer").add_child(rect_rx_input)
@@ -49,6 +53,21 @@ func _enter_tree() -> void:
 	find_child("StrokeCheckButton").button_pressed = CurvedLines2D._is_add_stroke_enabled()
 	find_child("FillCheckButton").button_pressed = CurvedLines2D._is_add_fill_enabled()
 	find_child("CollisionCheckButton").button_pressed = CurvedLines2D._is_add_collision_enabled()
+
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("BeginNoCapToggleButton")
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("BeginBoxCapToggleButton")
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("BeginRoundCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("EndNoCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("EndBoxCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("EndRoundCapToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_SHARP] = find_child("LineJointSharpToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_BEVEL] = find_child("LineJointBevelToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_ROUND] = find_child("LineJointRoundToggleButton")
+	begin_cap_button_map[CurvedLines2D._get_default_begin_cap()].button_pressed = true
+	end_cap_button_map[CurvedLines2D._get_default_end_cap()].button_pressed = true
+	joint_button_map[CurvedLines2D._get_default_joint_mode()].button_pressed = true
+
+
 	if not stroke_width_input.value_focus_exited.is_connected(ProjectSettings.save):
 		stroke_width_input.value_focus_exited.connect(ProjectSettings.save)
 	if not stroke_color_button.focus_exited.is_connected(ProjectSettings.save):
@@ -245,3 +264,56 @@ func _on_paint_order_button_5_toggled(toggled_on: bool) -> void:
 			CurvedLines2D.PaintOrder.MARKERS_STROKE_FILL)
 	ProjectSettings.save()
 
+
+func _on_begin_no_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_BEGIN_CAP,
+			Line2D.LineCapMode.LINE_CAP_NONE)
+	ProjectSettings.save()
+
+
+func _on_begin_box_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_BEGIN_CAP,
+			Line2D.LineCapMode.LINE_CAP_BOX)
+	ProjectSettings.save()
+
+
+func _on_begin_round_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_BEGIN_CAP,
+			Line2D.LineCapMode.LINE_CAP_ROUND)
+	ProjectSettings.save()
+
+
+func _on_end_no_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_END_CAP,
+			Line2D.LineCapMode.LINE_CAP_NONE)
+	ProjectSettings.save()
+
+
+func _on_end_box_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_END_CAP,
+			Line2D.LineCapMode.LINE_CAP_BOX)
+	ProjectSettings.save()
+
+
+func _on_end_round_cap_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_END_CAP,
+			Line2D.LineCapMode.LINE_CAP_ROUND)
+	ProjectSettings.save()
+
+
+func _on_line_joint_sharp_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_JOINT_MODE,
+			Line2D.LineJointMode.LINE_JOINT_SHARP)
+	ProjectSettings.save()
+
+
+func _on_line_joint_bevel_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_JOINT_MODE,
+			Line2D.LineJointMode.LINE_JOINT_BEVEL)
+	ProjectSettings.save()
+
+
+func _on_line_joint_round_toggle_button_toggled(toggled_on: bool) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_DEFAULT_LINE_JOINT_MODE,
+			Line2D.LineJointMode.LINE_JOINT_ROUND)
+	ProjectSettings.save()

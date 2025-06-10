@@ -9,6 +9,10 @@ var select_button : Button
 var color_button : ColorPickerButton
 var stroke_width_input : EditorSpinSlider
 
+var begin_cap_button_map = {}
+var end_cap_button_map = {}
+var joint_button_map = {}
+
 func _enter_tree() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
@@ -19,6 +23,15 @@ func _enter_tree() -> void:
 		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	stroke_width_input = _make_float_input("Stroke Width", 10.0, 0.0, 100.0, "px")
 	find_child("StrokeWidthFloatFieldContainer").add_child(stroke_width_input)
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("BeginNoCapToggleButton")
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("BeginBoxCapToggleButton")
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("BeginRoundCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("EndNoCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("EndBoxCapToggleButton")
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("EndRoundCapToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_SHARP] = find_child("LineJointSharpToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_BEVEL] = find_child("LineJointBevelToggleButton")
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_ROUND] = find_child("LineJointRoundToggleButton")
 	_on_svs_assignment_changed()
 	stroke_width_input.value_changed.connect(_on_stroke_width_changed)
 	_initialize_keyframe_capabilities()
@@ -32,6 +45,9 @@ func _on_svs_assignment_changed() -> void:
 		select_button.disabled = false
 		stroke_width_input.value = scalable_vector_shape_2d.line.width
 		color_button.color = scalable_vector_shape_2d.line.default_color
+		begin_cap_button_map[scalable_vector_shape_2d.line.begin_cap_mode].button_pressed = true
+		end_cap_button_map[scalable_vector_shape_2d.line.end_cap_mode].button_pressed = true
+		joint_button_map[scalable_vector_shape_2d.line.joint_mode].button_pressed = true
 	else:
 		create_button.get_parent().show()
 		select_button.get_parent().hide()
@@ -39,6 +55,9 @@ func _on_svs_assignment_changed() -> void:
 		select_button.disabled = true
 		stroke_width_input.value = CurvedLines2D._get_default_stroke_width()
 		color_button.color = CurvedLines2D._get_default_stroke_color()
+		begin_cap_button_map[CurvedLines2D._get_default_begin_cap()].button_pressed = true
+		end_cap_button_map[CurvedLines2D._get_default_end_cap()].button_pressed = true
+		joint_button_map[CurvedLines2D._get_default_joint_mode()].button_pressed = true
 
 
 func _on_stroke_width_changed(new_value : float) -> void:
@@ -67,6 +86,27 @@ func _on_goto_line_2d_button_pressed() -> void:
 	EditorInterface.call_deferred('edit_node', scalable_vector_shape_2d.line)
 
 
+func _get_selected_begin_cap_mode() -> Line2D.LineCapMode:
+	for map_key : Line2D.LineCapMode in begin_cap_button_map.keys():
+		if begin_cap_button_map[map_key].button_pressed:
+			return map_key
+	return CurvedLines2D._get_default_begin_cap()
+
+
+func _get_selected_end_cap_mode() -> Line2D.LineCapMode:
+	for map_key : Line2D.LineCapMode in end_cap_button_map.keys():
+		if end_cap_button_map[map_key].button_pressed:
+			return map_key
+	return CurvedLines2D._get_default_end_cap()
+
+
+func _get_selected_joint_mode() -> Line2D.LineJointMode:
+	for map_key : Line2D.LineJointMode in joint_button_map.keys():
+		if joint_button_map[map_key].button_pressed:
+			return map_key
+	return CurvedLines2D._get_default_joint_mode()
+
+
 func _on_create_stroke_button_pressed():
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
@@ -78,9 +118,10 @@ func _on_create_stroke_button_pressed():
 	var undo_redo = EditorInterface.get_editor_undo_redo()
 	line_2d.default_color = color_button.color
 	line_2d.width = stroke_width_input.value
-	line_2d.begin_cap_mode = Line2D.LINE_CAP_ROUND
-	line_2d.end_cap_mode = Line2D.LINE_CAP_ROUND
-	line_2d.joint_mode = Line2D.LINE_JOINT_ROUND
+	line_2d.begin_cap_mode = _get_selected_begin_cap_mode()
+	line_2d.end_cap_mode = _get_selected_end_cap_mode()
+	line_2d.joint_mode = _get_selected_joint_mode()
+	line_2d.sharp_limit = 90.0
 	undo_redo.create_action("Add Line2D to %s " % str(scalable_vector_shape_2d))
 	undo_redo.add_do_method(scalable_vector_shape_2d, 'add_child', line_2d, true)
 	undo_redo.add_do_method(line_2d, 'set_owner', root)
@@ -134,3 +175,61 @@ func _on_color_picker_button_toggled(toggled_on: bool) -> void:
 		undo_redo.add_do_property(scalable_vector_shape_2d.line, 'default_color', color_button.color)
 		undo_redo.add_do_property(color_button, 'color', color_button.color)
 		undo_redo.commit_action(false)
+
+
+func _set_cap_mode(prop_name : StringName, new_cap_mode : Line2D.LineCapMode) -> void:
+	if not is_instance_valid(scalable_vector_shape_2d.line):
+		return
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Set Line2D %s for %s" % [prop_name, str(scalable_vector_shape_2d)])
+	undo_redo.add_do_property(scalable_vector_shape_2d.line, prop_name, new_cap_mode)
+	undo_redo.add_undo_property(scalable_vector_shape_2d.line, prop_name, scalable_vector_shape_2d.line.get(prop_name))
+	undo_redo.commit_action()
+	_on_svs_assignment_changed()
+
+
+func _on_begin_no_cap_toggle_button_button_down() -> void:
+	_set_cap_mode('begin_cap_mode', Line2D.LineCapMode.LINE_CAP_NONE)
+
+
+func _on_begin_box_cap_toggle_button_button_down() -> void:
+	_set_cap_mode('begin_cap_mode', Line2D.LineCapMode.LINE_CAP_BOX)
+
+
+func _on_begin_round_cap_toggle_button_button_down() -> void:
+	_set_cap_mode('begin_cap_mode', Line2D.LineCapMode.LINE_CAP_ROUND)
+
+
+func _on_end_no_cap_toggle_button_button_down() -> void:
+	_set_cap_mode('end_cap_mode', Line2D.LineCapMode.LINE_CAP_NONE)
+
+
+func _on_end_box_cap_toggle_button_button_down() -> void:
+	_set_cap_mode('end_cap_mode', Line2D.LineCapMode.LINE_CAP_BOX)
+
+
+func _on_end_round_cap_toggle_button_button_down() -> void:
+	_set_cap_mode('end_cap_mode', Line2D.LineCapMode.LINE_CAP_ROUND)
+
+
+func _set_joint_mode(new_mode : Line2D.LineJointMode) -> void:
+	if not is_instance_valid(scalable_vector_shape_2d.line):
+		return
+	var undo_redo = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Set Line2D joint_mode for %s" % str(scalable_vector_shape_2d))
+	undo_redo.add_do_property(scalable_vector_shape_2d.line, 'joint_mode', new_mode)
+	undo_redo.add_undo_property(scalable_vector_shape_2d.line, 'joint_mode', scalable_vector_shape_2d.line.joint_mode)
+	undo_redo.commit_action()
+	_on_svs_assignment_changed()
+
+
+func _on_line_joint_sharp_toggle_button_button_down() -> void:
+	_set_joint_mode(Line2D.LineJointMode.LINE_JOINT_SHARP)
+
+
+func _on_line_joint_bevel_toggle_button_button_down() -> void:
+	_set_joint_mode(Line2D.LineJointMode.LINE_JOINT_BEVEL)
+
+
+func _on_line_joint_round_toggle_button_button_down() -> void:
+	_set_joint_mode(Line2D.LineJointMode.LINE_JOINT_ROUND)

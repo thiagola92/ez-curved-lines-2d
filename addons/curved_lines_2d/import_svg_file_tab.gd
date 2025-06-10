@@ -6,7 +6,7 @@ class_name SvgImporterDock
 # Fraction of a radius for a bezier control point
 const R_TO_CP = 0.5523
 const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "stroke-opacity",
-		"fill", "fill-opacity", "paint-order"]
+		"fill", "fill-opacity", "paint-order", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit"]
 const SVG_ROOT_META_NAME := "svg_root"
 const SVG_STYLE_META_NAME := "svg_style"
 const PAINT_ORDER_MAP := {
@@ -17,6 +17,18 @@ const PAINT_ORDER_MAP := {
 	"markers fill stroke": ['add_collision_to_path', 'add_fill_to_path', 'add_stroke_to_path'],
 	"stroke markers fill": ['add_stroke_to_path', 'add_collision_to_path', 'add_fill_to_path'],
 	"markers stroke fill": ['add_collision_to_path', 'add_stroke_to_path', 'add_fill_to_path']
+}
+const STROKE_CAP_MAP := {
+	"butt": Line2D.LineCapMode.LINE_CAP_NONE,
+	"round": Line2D.LineCapMode.LINE_CAP_ROUND,
+	"square": Line2D.LineCapMode.LINE_CAP_BOX
+}
+const STROKE_JOINT_MAP := {
+	"miter": Line2D.LineJointMode.LINE_JOINT_SHARP,
+	"miter-clip": Line2D.LineJointMode.LINE_JOINT_SHARP,
+	"round": Line2D.LineJointMode.LINE_JOINT_ROUND,
+	"bevel": Line2D.LineJointMode.LINE_JOINT_BEVEL,
+	"arc": Line2D.LineJointMode.LINE_JOINT_SHARP
 }
 
 enum LogLevel { DEBUG, INFO, WARN, ERROR }
@@ -531,9 +543,24 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 			line.width = float(style['stroke-width'])
 		if style.has("stroke-opacity"):
 			line.self_modulate.a = float(style["stroke-opacity"])
-		line.end_cap_mode = Line2D.LINE_CAP_ROUND
-		line.begin_cap_mode = Line2D.LINE_CAP_ROUND
-		line.joint_mode = Line2D.LINE_JOINT_ROUND
+
+		if style.has("stroke-linecap") and style["stroke-linecap"] in  STROKE_CAP_MAP:
+			line.end_cap_mode = STROKE_CAP_MAP[style["stroke-linecap"]]
+			line.begin_cap_mode = STROKE_CAP_MAP[style["stroke-linecap"]]
+		else:
+			line.end_cap_mode = Line2D.LINE_CAP_NONE
+			line.begin_cap_mode = Line2D.LINE_CAP_NONE
+
+		if style.has("stroke-linejoin") and style["stroke-linejoin"] in STROKE_JOINT_MAP:
+			line.joint_mode = STROKE_JOINT_MAP[style["stroke-linejoin"]]
+		else:
+			line.joint_mode = Line2D.LINE_JOINT_SHARP
+
+		if style.has("stroke-miterlimit"):
+			line.sharp_limit = float(style["stroke-miterlimit"])
+		else:
+			line.sharp_limit = 4.0 # svg default
+
 
 
 func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene_root : Node2D,

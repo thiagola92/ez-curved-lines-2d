@@ -13,6 +13,9 @@ const SETTING_NAME_ADD_STROKE_ENABLED := "addons/curved_lines_2d/add_stroke_enab
 const SETTING_NAME_ADD_FILL_ENABLED := "addons/curved_lines_2d/add_fill_enabled"
 const SETTING_NAME_ADD_COLLISION_ENABLED := "addons/curved_lines_2d/add_collision_enabled"
 const SETTING_NAME_PAINT_ORDER := "addons/curved_lines_2d/paint_order"
+const SETTING_NAME_DEFAULT_LINE_BEGIN_CAP := "addons/curved_lines_2d/line_begin_cap"
+const SETTING_NAME_DEFAULT_LINE_END_CAP := "addons/curved_lines_2d/line_end_cap"
+const SETTING_NAME_DEFAULT_LINE_JOINT_MODE := "addons/curved_lines_2d/line_joint_mode"
 
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
@@ -115,7 +118,6 @@ func _on_ellipse_created(rx : float, ry : float, scene_root : Node2D) -> void:
 	var new_ellipse := ScalableVectorShape2D.new()
 	new_ellipse.shape_type = ScalableVectorShape2D.ShapeType.ELLIPSE
 	new_ellipse.size = Vector2(rx * 2, ry * 2)
-
 	_create_shape(new_ellipse, scene_root, "Ellipse")
 
 
@@ -160,6 +162,10 @@ func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root 
 		line.name = "Stroke"
 		line.default_color = _get_default_stroke_color()
 		line.width = _get_default_stroke_width()
+		line.begin_cap_mode = _get_default_begin_cap()
+		line.end_cap_mode = _get_default_end_cap()
+		line.joint_mode = _get_default_joint_mode()
+		line.sharp_limit = 90.0
 		undo_redo.add_do_property(new_shape, 'line', line)
 		undo_redo.add_do_method(new_shape, 'add_child', line, true)
 		undo_redo.add_do_method(line, 'set_owner', scene_root)
@@ -1135,6 +1141,24 @@ static func _get_default_stroke_color() -> Color:
 	if ProjectSettings.has_setting(SETTING_NAME_STROKE_COLOR):
 		return ProjectSettings.get_setting(SETTING_NAME_STROKE_COLOR)
 	return Color.WHITE
+
+
+static func _get_default_begin_cap() -> Line2D.LineCapMode:
+	if ProjectSettings.has_setting(SETTING_NAME_DEFAULT_LINE_BEGIN_CAP):
+		return ProjectSettings.get_setting(SETTING_NAME_DEFAULT_LINE_BEGIN_CAP)
+	return Line2D.LineCapMode.LINE_CAP_NONE
+
+
+static func _get_default_end_cap() -> Line2D.LineCapMode:
+	if ProjectSettings.has_setting(SETTING_NAME_DEFAULT_LINE_END_CAP):
+		return ProjectSettings.get_setting(SETTING_NAME_DEFAULT_LINE_END_CAP)
+	return Line2D.LineCapMode.LINE_CAP_NONE
+
+
+static func _get_default_joint_mode() -> Line2D.LineJointMode:
+	if ProjectSettings.has_setting(SETTING_NAME_DEFAULT_LINE_JOINT_MODE):
+		return ProjectSettings.get_setting(SETTING_NAME_DEFAULT_LINE_JOINT_MODE)
+	return Line2D.LineJointMode.LINE_JOINT_SHARP
 
 
 static func _get_default_fill_color() -> Color:
