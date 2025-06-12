@@ -1,0 +1,47 @@
+@tool
+extends PopupPanel
+
+signal value_changed(value : Vector2, meta_name : String, point_idx : int)
+
+var x_pos_input : EditorSpinSlider
+var y_pos_input : EditorSpinSlider
+var meta_name := CurvedLines2D.META_NAME_HOVER_POINT_IDX
+var point_idx : int = 0
+
+func _enter_tree() -> void:
+	x_pos_input = _mk_input()
+	y_pos_input = _mk_input()
+	find_child("XPosInputContainer").add_child(x_pos_input)
+	find_child("YPosInputContainer").add_child(y_pos_input)
+	if not x_pos_input.value_changed.is_connected(_on_value_changed):
+		x_pos_input.value_changed.connect(_on_value_changed)
+	if not y_pos_input.value_changed.is_connected(_on_value_changed):
+		y_pos_input.value_changed.connect(_on_value_changed)
+
+
+func _on_button_pressed() -> void:
+	hide()
+
+
+func _on_value_changed(_v : Variant):
+	value_changed.emit(Vector2(x_pos_input.value, y_pos_input.value), meta_name, point_idx)
+
+
+func popup_with_value(metadata : Dictionary):
+	x_pos_input.set_value_no_signal(metadata['global_pos'].x)
+	y_pos_input.set_value_no_signal(metadata['global_pos'].y)
+	point_idx = metadata['point_idx']
+	meta_name = metadata['meta_name']
+	popup_centered()
+
+
+func _mk_input() -> EditorSpinSlider:
+	var num_input := EditorSpinSlider.new()
+	num_input.suffix = "px"
+	num_input.hide_slider = true
+	num_input.value = 0.0
+	num_input.editing_integer = false
+	num_input.allow_lesser = true
+	num_input.allow_greater = true
+	num_input.step = 0.001
+	return num_input
