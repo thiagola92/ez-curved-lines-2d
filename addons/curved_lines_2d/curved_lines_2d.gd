@@ -665,11 +665,17 @@ func _update_curve_point_position(current_selection : ScalableVectorShape2D, mou
 	if idx == 0 and current_selection.is_curve_closed():
 		var idx_1 = current_selection.curve.point_count - 1
 		undo_redo_transaction[UndoRedoEntry.DOS].append([
-				current_selection, 'set_global_curve_point_position', mouse_pos, idx_1, _is_snapped_to_pixel()])
-		current_selection.set_global_curve_point_position(mouse_pos, idx_1, _is_snapped_to_pixel())
+				current_selection, 'set_global_curve_point_position', mouse_pos, idx_1,
+				_is_snapped_to_pixel(), _get_snap_resolution()
+		])
+		current_selection.set_global_curve_point_position(mouse_pos, idx_1,
+				_is_snapped_to_pixel(), _get_snap_resolution())
 	undo_redo_transaction[UndoRedoEntry.DOS].append([
-				current_selection, 'set_global_curve_point_position', mouse_pos, idx, _is_snapped_to_pixel()])
-	current_selection.set_global_curve_point_position(mouse_pos, idx, _is_snapped_to_pixel())
+			current_selection, 'set_global_curve_point_position', mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution()
+	])
+	current_selection.set_global_curve_point_position(mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution())
 
 
 func _update_rect_dimensions(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
@@ -716,8 +722,12 @@ func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mou
 			var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
 			undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_out', idx_1, current_selection.curve.get_point_out(idx_1)])
 
-	current_selection.set_global_curve_cp_in_position(mouse_pos, idx, _is_snapped_to_pixel())
-	undo_redo_transaction[UndoRedoEntry.DOS] = [[current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx, _is_snapped_to_pixel()]]
+	current_selection.set_global_curve_cp_in_position(mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution())
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[
+			current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution()
+	]]
 	if cp_in_is_cp_out_of_loop_start:
 		var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
 		current_selection.curve.set_point_out(idx_1, -current_selection.curve.get_point_in(idx))
@@ -831,8 +841,12 @@ func _update_curve_cp_out_position(current_selection : ScalableVectorShape2D, mo
 			var idx_1 = current_selection.curve.point_count - 1 if idx == 0 else idx
 			undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_in', idx_1, current_selection.curve.get_point_in(idx_1)])
 
-	current_selection.set_global_curve_cp_out_position(mouse_pos, idx, _is_snapped_to_pixel())
-	undo_redo_transaction[UndoRedoEntry.DOS] = [[current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx, _is_snapped_to_pixel()]]
+	current_selection.set_global_curve_cp_out_position(mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution())
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[
+			current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution()
+	]]
 	if cp_out_is_cp_in_of_loop_end:
 		var idx_1 = current_selection.curve.point_count - 1 if idx == 0 else idx
 		current_selection.curve.set_point_in(idx_1, -current_selection.curve.get_point_out(idx))
