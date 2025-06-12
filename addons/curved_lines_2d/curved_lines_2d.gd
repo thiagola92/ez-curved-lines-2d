@@ -17,6 +17,7 @@ const SETTING_NAME_DEFAULT_LINE_BEGIN_CAP := "addons/curved_lines_2d/line_begin_
 const SETTING_NAME_DEFAULT_LINE_END_CAP := "addons/curved_lines_2d/line_end_cap"
 const SETTING_NAME_DEFAULT_LINE_JOINT_MODE := "addons/curved_lines_2d/line_joint_mode"
 const SETTING_NAME_SNAP_TO_PIXEL := "addons/curved_lines_2d/snap_to_pixel"
+const SETTING_NAME_SNAP_RESOLUTION := "addons/curved_lines_2d/snap_resolution"
 
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
@@ -1213,6 +1214,12 @@ static func _is_snapped_to_pixel() -> bool:
 	if ProjectSettings.has_setting(SETTING_NAME_SNAP_TO_PIXEL):
 		return ProjectSettings.get_setting(SETTING_NAME_SNAP_TO_PIXEL)
 	return false
+
+
+static func _get_snap_resolution() -> float:
+	if ProjectSettings.has_setting(SETTING_NAME_SNAP_RESOLUTION):
+		return ProjectSettings.get_setting(SETTING_NAME_SNAP_RESOLUTION)
+	return 1.0
 
 
 func _exit_tree():
