@@ -360,6 +360,8 @@ func _draw_rect_control_point_handle(viewport_control : Control, svs : ScalableV
 
 
 func _draw_hint(viewport_control : Control, txt : String, force_draw := false) -> void:
+	if set_global_position_popup_panel.visible:
+		return
 	if not _get_select_mode_button().button_pressed:
 		return
 	if not _are_hints_enabled() and not force_draw:
@@ -1094,7 +1096,6 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			and event.keycode == KEY_SHIFT and
 			not Input.is_key_pressed(KEY_SHIFT)):
 		_commit_undo_redo_transaction()
-
 	if not _is_editing_enabled():
 		return false
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:

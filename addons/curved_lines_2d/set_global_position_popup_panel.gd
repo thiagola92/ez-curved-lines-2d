@@ -7,6 +7,8 @@ var x_pos_input : EditorSpinSlider
 var y_pos_input : EditorSpinSlider
 var meta_name := CurvedLines2D.META_NAME_HOVER_POINT_IDX
 var point_idx : int = 0
+var _dragging := false
+var _drag_start := Vector2.ZERO
 
 func _enter_tree() -> void:
 	x_pos_input = _mk_input()
@@ -52,3 +54,16 @@ func _mk_input() -> EditorSpinSlider:
 	num_input.allow_greater = true
 	num_input.step = 0.001
 	return num_input
+
+
+func _on_label_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			if not _dragging:
+				_dragging = true
+				_drag_start = EditorInterface.get_base_control().get_local_mouse_position()
+		else:
+			_dragging = false
+	if event is InputEventMouseMotion and _dragging:
+		position += Vector2i(EditorInterface.get_base_control().get_local_mouse_position() - _drag_start)
+		_drag_start = EditorInterface.get_base_control().get_local_mouse_position()
