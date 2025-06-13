@@ -16,6 +16,8 @@ const SETTING_NAME_PAINT_ORDER := "addons/curved_lines_2d/paint_order"
 const SETTING_NAME_DEFAULT_LINE_BEGIN_CAP := "addons/curved_lines_2d/line_begin_cap"
 const SETTING_NAME_DEFAULT_LINE_END_CAP := "addons/curved_lines_2d/line_end_cap"
 const SETTING_NAME_DEFAULT_LINE_JOINT_MODE := "addons/curved_lines_2d/line_joint_mode"
+const SETTING_NAME_SNAP_TO_PIXEL := "addons/curved_lines_2d/snap_to_pixel"
+const SETTING_NAME_SNAP_RESOLUTION := "addons/curved_lines_2d/snap_resolution"
 
 const META_NAME_HOVER_POINT_IDX := "_hover_point_idx_"
 const META_NAME_HOVER_CP_IN_IDX := "_hover_cp_in_idx_"
@@ -353,10 +355,10 @@ func _draw_rect_control_point_handle(viewport_control : Control, svs : ScalableV
 	return ""
 
 
-func _draw_hint(viewport_control : Control, txt : String) -> void:
+func _draw_hint(viewport_control : Control, txt : String, force_draw := false) -> void:
 	if not _get_select_mode_button().button_pressed:
 		return
-	if not _are_hints_enabled():
+	if not _are_hints_enabled() and not force_draw:
 		return
 
 	var txt_pos := (_vp_transform(EditorInterface.get_editor_viewport_2d().get_mouse_position())
@@ -387,6 +389,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 		return
 	var hint_txt := ""
 	var point_txt := ""
+	var point_pos_txt := ""
 	var point_hint_pos := Vector2.ZERO
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
@@ -396,6 +399,13 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 		var cp_out_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_OUT_IDX, -1) == i
 		var color := VIEWPORT_ORANGE if is_hovered else Color.WHITE
 		var width := 2 if is_hovered else 1
+		if is_hovered:
+			point_pos_txt = "Global point position: (%.3f, %.3f)" % [handle["point_position"].x, handle["point_position"].y]
+		elif cp_in_is_hovered:
+			point_pos_txt = "Global curve handle position: (%.3f, %.3f)" % [handle["in_position"].x,handle["in_position"].y]
+		elif cp_out_is_hovered:
+			point_pos_txt = "Global curve handle position: (%.3f, %.3f)" % [handle["out_position"].x, handle["out_position"].y]
+
 		if svs.shape_type == ScalableVectorShape2D.ShapeType.RECT:
 			hint_txt += _draw_rect_control_point_handle(viewport_control, svs, handle, 'in',
 					cp_in_is_hovered)
@@ -490,8 +500,15 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 			hint_txt = "- Double click to add color stop here"
 	if not point_txt.is_empty():
 		_draw_point_number(viewport_control, point_hint_pos, point_txt)
+
+	if not _are_hints_enabled() and _am_showing_point_numbers():
+		_draw_hint(viewport_control, point_pos_txt, true)
+	elif _are_hints_enabled() and _am_showing_point_numbers() and point_pos_txt.length():
+		hint_txt += "\n\n - " + point_pos_txt
+
 	if not hint_txt.is_empty():
 		_draw_hint(viewport_control, hint_txt)
+
 
 
 func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> void:
@@ -711,10 +728,18 @@ func _update_curve_point_position(current_selection : ScalableVectorShape2D, mou
 	undo_redo_transaction[UndoRedoEntry.DOS] = []
 	if idx == 0 and current_selection.is_curve_closed():
 		var idx_1 = current_selection.curve.point_count - 1
-		undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection, 'set_global_curve_point_position', mouse_pos, idx_1])
-		current_selection.set_global_curve_point_position(mouse_pos, idx_1)
-	undo_redo_transaction[UndoRedoEntry.DOS].append([current_selection, 'set_global_curve_point_position', mouse_pos, idx])
-	current_selection.set_global_curve_point_position(mouse_pos, idx)
+		undo_redo_transaction[UndoRedoEntry.DOS].append([
+				current_selection, 'set_global_curve_point_position', mouse_pos, idx_1,
+				_is_snapped_to_pixel(), _get_snap_resolution()
+		])
+		current_selection.set_global_curve_point_position(mouse_pos, idx_1,
+				_is_snapped_to_pixel(), _get_snap_resolution())
+	undo_redo_transaction[UndoRedoEntry.DOS].append([
+			current_selection, 'set_global_curve_point_position', mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution()
+	])
+	current_selection.set_global_curve_point_position(mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution())
 
 
 func _update_rect_dimensions(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
@@ -761,8 +786,12 @@ func _update_curve_cp_in_position(current_selection : ScalableVectorShape2D, mou
 			var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
 			undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_out', idx_1, current_selection.curve.get_point_out(idx_1)])
 
-	current_selection.set_global_curve_cp_in_position(mouse_pos, idx)
-	undo_redo_transaction[UndoRedoEntry.DOS] = [[current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx]]
+	current_selection.set_global_curve_cp_in_position(mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution())
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[
+			current_selection, 'set_global_curve_cp_in_position', mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution()
+	]]
 	if cp_in_is_cp_out_of_loop_start:
 		var idx_1 = 0 if idx == current_selection.curve.point_count - 1 else idx
 		current_selection.curve.set_point_out(idx_1, -current_selection.curve.get_point_in(idx))
@@ -876,8 +905,12 @@ func _update_curve_cp_out_position(current_selection : ScalableVectorShape2D, mo
 			var idx_1 = current_selection.curve.point_count - 1 if idx == 0 else idx
 			undo_redo_transaction[UndoRedoEntry.UNDOS].append([current_selection.curve, 'set_point_in', idx_1, current_selection.curve.get_point_in(idx_1)])
 
-	current_selection.set_global_curve_cp_out_position(mouse_pos, idx)
-	undo_redo_transaction[UndoRedoEntry.DOS] = [[current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx]]
+	current_selection.set_global_curve_cp_out_position(mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution())
+	undo_redo_transaction[UndoRedoEntry.DOS] = [[
+			current_selection, 'set_global_curve_cp_out_position', mouse_pos, idx,
+			_is_snapped_to_pixel(), _get_snap_resolution()
+	]]
 	if cp_out_is_cp_in_of_loop_end:
 		var idx_1 = current_selection.curve.point_count - 1 if idx == 0 else idx
 		current_selection.curve.set_point_in(idx_1, -current_selection.curve.get_point_out(idx))
@@ -1258,6 +1291,18 @@ static func _get_default_paint_order() -> PaintOrder:
 	if ProjectSettings.has_setting(SETTING_NAME_PAINT_ORDER):
 		return ProjectSettings.get_setting(SETTING_NAME_PAINT_ORDER)
 	return PaintOrder.FILL_STROKE_MARKERS
+
+
+static func _is_snapped_to_pixel() -> bool:
+	if ProjectSettings.has_setting(SETTING_NAME_SNAP_TO_PIXEL):
+		return ProjectSettings.get_setting(SETTING_NAME_SNAP_TO_PIXEL)
+	return false
+
+
+static func _get_snap_resolution() -> float:
+	if ProjectSettings.has_setting(SETTING_NAME_SNAP_RESOLUTION):
+		return ProjectSettings.get_setting(SETTING_NAME_SNAP_RESOLUTION)
+	return 1.0
 
 
 func _exit_tree():
