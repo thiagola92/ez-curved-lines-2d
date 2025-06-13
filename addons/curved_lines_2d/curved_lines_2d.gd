@@ -1113,6 +1113,7 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 				if event.double_click and current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
 					_toggle_loop_if_applies(current_selection, current_selection.get_meta(META_NAME_HOVER_POINT_IDX))
 				elif (_is_svs_valid(current_selection) and Input.is_key_pressed(KEY_ALT)
+						and current_selection.shape_type == ScalableVectorShape2D.ShapeType.PATH
 						and _curve_control_has_hover(current_selection)):
 					set_global_position_popup_panel.popup_with_value(
 							_get_hovered_handle_metadata(current_selection),
