@@ -1107,6 +1107,8 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 						and _curve_control_has_hover(current_selection)):
 					set_global_position_popup_panel.popup_with_value(
 							_get_hovered_handle_metadata(current_selection),
+							_is_snapped_to_pixel(),
+							_get_snap_resolution()
 					)
 				return true
 			elif _is_svs_valid(current_selection) and Input.is_key_pressed(KEY_CTRL):

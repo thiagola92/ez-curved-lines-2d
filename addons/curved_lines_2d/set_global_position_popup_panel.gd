@@ -23,15 +23,22 @@ func _on_button_pressed() -> void:
 	hide()
 
 
-func _on_value_changed(_v : Variant):
+func _on_value_changed(_v : Variant = null):
 	value_changed.emit(Vector2(x_pos_input.value, y_pos_input.value), meta_name, point_idx)
 
 
-func popup_with_value(metadata : Dictionary):
-	x_pos_input.set_value_no_signal(metadata['global_pos'].x)
-	y_pos_input.set_value_no_signal(metadata['global_pos'].y)
+func popup_with_value(metadata : Dictionary, snapped : bool, snap_step : float):
 	point_idx = metadata['point_idx']
 	meta_name = metadata['meta_name']
+	x_pos_input.set_value_no_signal(metadata['global_pos'].x)
+	y_pos_input.set_value_no_signal(metadata['global_pos'].y)
+	if snapped:
+		x_pos_input.step = snap_step
+		y_pos_input.step = snap_step
+	else:
+		x_pos_input.step = 0.001
+		y_pos_input.step = 0.001
+	_on_value_changed()
 	popup_centered()
 
 
