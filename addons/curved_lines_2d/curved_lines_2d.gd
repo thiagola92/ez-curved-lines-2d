@@ -332,6 +332,10 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				hint_txt += "\n - Drag to move\n - Right click to delete"
 				hint_txt += "\n - Hold Shift + Drag to move mirrored"
+			if Input.is_key_pressed(KEY_ALT):
+				hint_txt += "\n - Click to set exact global position (Alt held)"
+			else:
+				hint_txt += "\n - Alt + Click to set exact global position"
 			return hint_txt
 	return ""
 
@@ -458,6 +462,11 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 						hint_txt += "\n - Double click to close loop"
 				if svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 					hint_txt += "\n - Hold Shift + Drag to create curve handles"
+					if Input.is_key_pressed(KEY_ALT):
+						hint_txt += "\n - Click to set exact global position (Alt held)"
+					else:
+						hint_txt += "\n - Alt + Click to set exact global position"
+
 
 	var gradient_handles := svs.get_gradient_handles()
 	if not gradient_handles.is_empty():
