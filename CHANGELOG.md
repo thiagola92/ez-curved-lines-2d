@@ -1,12 +1,17 @@
 # Changelog
 
-## 2.6.0
+## 2.6.1
 
 ## Added
 - Change line-capping of strokes via inspector
 - Change line-joining of strokes via inspector
 - Pick default line-cap and line-join modes for creating new strokes
 - Maps line-join modes and line-cap modes from SVG to Godot using the importer
+- Pixel snap mode checkbox, disabled by default
+- Show point positions under editor hints
+
+## Changed
+- "Show point numbers" renamed to "Show point details", also toggles position info on/off
 
 ## 2.5.2 - 2025-06-08
 
@@ -27,6 +32,7 @@
 
 ### Removed
 - Custom collapse / expand titles from inspector plugin forms in favour of `@export_group` annotations on `ScalableVectorShape2D`
+
 ## 2.4.3 - 2025-06-07
 
 ### Changed

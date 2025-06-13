@@ -418,18 +418,27 @@ func get_gradient_handles() -> Dictionary:
 	return result
 
 
-func set_global_curve_point_position(global_pos : Vector2, point_idx : int) -> void:
+func set_global_curve_point_position(global_pos : Vector2, point_idx : int, snapped : bool,
+			snap : float) -> void:
 	if curve.point_count > point_idx:
+		if snapped:
+			global_pos = snapped(global_pos, Vector2.ONE * snap)
 		curve.set_point_position(point_idx, to_local(global_pos))
 
 
-func set_global_curve_cp_in_position(global_pos : Vector2, point_idx : int) -> void:
+func set_global_curve_cp_in_position(global_pos : Vector2, point_idx : int, snapped : bool,
+			snap : float) -> void:
 	if curve.point_count > point_idx:
+		if snapped:
+			global_pos = snapped(global_pos, Vector2.ONE * snap)
 		curve.set_point_in(point_idx, to_local(global_pos) - curve.get_point_position(point_idx))
 
 
-func set_global_curve_cp_out_position(global_pos : Vector2, point_idx : int) -> void:
+func set_global_curve_cp_out_position(global_pos : Vector2, point_idx : int, snapped : bool,
+			snap : float) -> void:
 	if curve.point_count > point_idx:
+		if snapped:
+			global_pos = snapped(global_pos, Vector2.ONE * snap)
 		curve.set_point_out(point_idx, to_local(global_pos) - curve.get_point_position(point_idx))
 
 
