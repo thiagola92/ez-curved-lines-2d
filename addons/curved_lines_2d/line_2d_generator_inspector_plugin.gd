@@ -25,6 +25,17 @@ func _parse_begin(object: Object) -> void:
 		button.tooltip_text = "Pressing this button will change the way it is edited to Path mode."
 		add_custom_control(button)
 		button.pressed.connect(func(): _on_convert_to_path_button_pressed(object, button))
+	if object is ScalableVectorShape2D:
+		var input := TextEdit.new()
+		input.text = "export.png"
+		input.custom_minimum_size = Vector2(0, 36)
+		var button : Button = Button.new()
+		button.text = "Export as PNG*"
+		button.tooltip_text = "The export will only contain this node and its children,
+				assigned nodes outside this subtree will not be drawn."
+		add_custom_control(input)
+		add_custom_control(button)
+		button.pressed.connect(func(): _on_export_png_button_pressed(object, input.text))
 
 
 func _parse_group(object: Object, group: String) -> void:
@@ -81,3 +92,31 @@ func _on_convert_to_path_button_pressed(svs : ScalableVectorShape2D, button : Bu
 	undo_redo.add_undo_property(svs, 'offset', svs.offset)
 	undo_redo.commit_action()
 	button.hide()
+
+
+func _on_export_png_button_pressed(svs : ScalableVectorShape2D, filename : String) -> void:
+	var sub_viewport := SubViewport.new()
+	EditorInterface.get_base_control().add_child(sub_viewport)
+	sub_viewport.transparent_bg = true
+	sub_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	var copied : ScalableVectorShape2D = svs.duplicate()
+	sub_viewport.add_child(copied)
+	var box = copied.get_bounding_box()
+	var child_list := copied.get_children()
+	while child_list.size() > 0:
+		var child : Node = child_list.pop_back()
+		child_list.append_array(child.get_children())
+		if child is ScalableVectorShape2D:
+			var box1 = child.get_bounding_box()
+			box[0].x = box[0].x if box1[0].x > box[0].x else box1[0].x
+			box[0].y = box[0].y if box1[0].y > box[0].y else box1[0].y
+			box[2].x = box[2].x if box1[2].x < box[2].x else box1[2].x
+			box[2].y = box[2].y if box1[2].y < box[2].y else box1[2].y
+	sub_viewport.canvas_transform.origin = -box[0]
+	sub_viewport.size = Vector2(box[2] - box[0])
+	await RenderingServer.frame_post_draw
+	var img = sub_viewport.get_texture().get_image()
+	var filename1 = "export.png" if filename.is_empty() else filename
+	img.save_png("res://%s" % filename1)
+	EditorInterface.get_resource_filesystem().scan()
+	sub_viewport.queue_free()
