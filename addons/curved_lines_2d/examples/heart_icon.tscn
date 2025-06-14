@@ -652,7 +652,7 @@ width = 4.0
 default_color = Color(0.129412, 0.145098, 0.196078, 1)
 
 [node name="Heart" type="Node2D" parent="Rectangle" node_paths=PackedStringArray("polygon", "line")]
-position = Vector2(118.5, 111.5)
+position = Vector2(63.5, 65)
 script = ExtResource("1_0qe1d")
 polygon = NodePath("Fill")
 line = NodePath("Stroke")
