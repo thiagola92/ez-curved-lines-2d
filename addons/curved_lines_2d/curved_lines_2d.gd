@@ -65,6 +65,8 @@ var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.UNDO_PROPS: []
 }
 
+var set_global_position_popup_panel : PopupPanel
+
 func _enter_tree():
 	scalable_vector_shapes_2d_dock = preload("res://addons/curved_lines_2d/scalable_vector_shapes_2d_dock.tscn").instantiate()
 	plugin = preload("res://addons/curved_lines_2d/line_2d_generator_inspector_plugin.gd").new()
@@ -86,6 +88,13 @@ func _enter_tree():
 	EditorInterface.get_selection().selection_changed.connect(_on_selection_changed)
 	undo_redo.version_changed.connect(update_overlays)
 	make_bottom_panel_item_visible(scalable_vector_shapes_2d_dock)
+
+	set_global_position_popup_panel = preload("res://addons/curved_lines_2d/set_global_position_popup_panel.tscn").instantiate()
+	EditorInterface.get_base_control().add_child(set_global_position_popup_panel)
+	if not set_global_position_popup_panel.value_changed.is_connected(_on_global_position_for_handle_changed):
+		set_global_position_popup_panel.value_changed.connect(_on_global_position_for_handle_changed)
+	if not set_global_position_popup_panel.visibility_changed.is_connected(_commit_undo_redo_transaction):
+		set_global_position_popup_panel.visibility_changed.connect(_commit_undo_redo_transaction)
 
 	if not scalable_vector_shapes_2d_dock.shape_created.is_connected(_on_shape_created):
 		scalable_vector_shapes_2d_dock.shape_created.connect(_on_shape_created)
@@ -257,6 +266,47 @@ func _is_svs_valid(svs : Object) -> bool:
 	return is_instance_valid(svs) and svs is ScalableVectorShape2D and svs.curve
 
 
+func _get_hovered_handle_metadata(svs : ScalableVectorShape2D) -> Dictionary:
+
+	if svs.has_meta(META_NAME_HOVER_POINT_IDX):
+		return {
+			'global_pos': svs.to_global(svs.curve.get_point_position(
+				svs.get_meta(META_NAME_HOVER_POINT_IDX)
+			)),
+			'meta_name': META_NAME_HOVER_POINT_IDX,
+			'point_idx': svs.get_meta(META_NAME_HOVER_POINT_IDX)
+		}
+	elif svs.has_meta(META_NAME_HOVER_CP_IN_IDX):
+		return {
+			'global_pos': svs.to_global(svs.curve.get_point_position(
+				svs.get_meta(META_NAME_HOVER_CP_IN_IDX)
+			) + svs.curve.get_point_in(
+				svs.get_meta(META_NAME_HOVER_CP_IN_IDX)
+			)),
+			'meta_name': META_NAME_HOVER_CP_IN_IDX,
+			'point_idx': svs.get_meta(META_NAME_HOVER_CP_IN_IDX)
+		}
+	elif svs.has_meta(META_NAME_HOVER_CP_OUT_IDX):
+		return {
+			'global_pos': svs.to_global(svs.curve.get_point_position(
+				svs.get_meta(META_NAME_HOVER_CP_OUT_IDX)
+			) + svs.curve.get_point_out(
+				svs.get_meta(META_NAME_HOVER_CP_OUT_IDX)
+			)),
+			'meta_name': META_NAME_HOVER_CP_OUT_IDX,
+			'point_idx': svs.get_meta(META_NAME_HOVER_CP_OUT_IDX)
+		}
+	return {}
+
+
+func _curve_control_has_hover(svs : ScalableVectorShape2D) -> bool:
+	return (
+		svs.has_meta(META_NAME_HOVER_POINT_IDX) or
+		svs.has_meta(META_NAME_HOVER_CP_IN_IDX) or
+		svs.has_meta(META_NAME_HOVER_CP_OUT_IDX)
+	)
+
+
 func _handle_has_hover(svs : ScalableVectorShape2D) -> bool:
 	return (
 		svs.has_meta(META_NAME_HOVER_POINT_IDX) or
@@ -282,6 +332,10 @@ func _draw_control_point_handle(viewport_control : Control, svs : ScalableVector
 			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				hint_txt += "\n - Drag to move\n - Right click to delete"
 				hint_txt += "\n - Hold Shift + Drag to move mirrored"
+			if Input.is_key_pressed(KEY_ALT):
+				hint_txt += "\n - Click to set exact global position (Alt held)"
+			else:
+				hint_txt += "\n - Alt + Click to set exact global position"
 			return hint_txt
 	return ""
 
@@ -306,6 +360,8 @@ func _draw_rect_control_point_handle(viewport_control : Control, svs : ScalableV
 
 
 func _draw_hint(viewport_control : Control, txt : String, force_draw := false) -> void:
+	if set_global_position_popup_panel.visible:
+		return
 	if not _get_select_mode_button().button_pressed:
 		return
 	if not _are_hints_enabled() and not force_draw:
@@ -408,6 +464,11 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 						hint_txt += "\n - Double click to close loop"
 				if svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
 					hint_txt += "\n - Hold Shift + Drag to create curve handles"
+					if Input.is_key_pressed(KEY_ALT):
+						hint_txt += "\n - Click to set exact global position (Alt held)"
+					else:
+						hint_txt += "\n - Alt + Click to set exact global position"
+
 
 	var gradient_handles := svs.get_gradient_handles()
 	if not gradient_handles.is_empty():
@@ -629,6 +690,8 @@ func _start_undo_redo_transaction(name := "") -> void:
 	}
 
 func _commit_undo_redo_transaction() -> void:
+	if not in_undo_redo_transaction:
+		return
 	in_undo_redo_transaction = false
 	undo_redo.create_action(undo_redo_transaction[UndoRedoEntry.NAME])
 	for undo_method in undo_redo_transaction[UndoRedoEntry.UNDOS]:
@@ -648,6 +711,18 @@ func _commit_undo_redo_transaction() -> void:
 		UndoRedoEntry.DO_PROPS: []
 	}
 
+
+func _on_global_position_for_handle_changed(global_pos : Vector2, meta_name: String, idx : int) -> void:
+	var cur := EditorInterface.get_selection().get_selected_nodes().pop_back()
+	if _is_svs_valid(cur):
+		match(meta_name):
+			META_NAME_HOVER_CP_IN_IDX:
+				_update_curve_cp_in_position(cur, global_pos, idx)
+			META_NAME_HOVER_CP_OUT_IDX:
+				_update_curve_cp_out_position(cur, global_pos, idx)
+			META_NAME_HOVER_POINT_IDX:
+				_update_curve_point_position(cur, global_pos, idx)
+		update_overlays()
 
 func _update_curve_point_position(current_selection : ScalableVectorShape2D, mouse_pos : Vector2, idx : int) -> void:
 	if not in_undo_redo_transaction:
@@ -1021,7 +1096,6 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			and event.keycode == KEY_SHIFT and
 			not Input.is_key_pressed(KEY_SHIFT)):
 		_commit_undo_redo_transaction()
-
 	if not _is_editing_enabled():
 		return false
 	if not _is_change_pivot_button_active() and not _get_select_mode_button().button_pressed:
@@ -1039,6 +1113,14 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 			if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
 				if event.double_click and current_selection.has_meta(META_NAME_HOVER_POINT_IDX):
 					_toggle_loop_if_applies(current_selection, current_selection.get_meta(META_NAME_HOVER_POINT_IDX))
+				elif (_is_svs_valid(current_selection) and Input.is_key_pressed(KEY_ALT)
+						and current_selection.shape_type == ScalableVectorShape2D.ShapeType.PATH
+						and _curve_control_has_hover(current_selection)):
+					set_global_position_popup_panel.popup_with_value(
+							_get_hovered_handle_metadata(current_selection),
+							_is_snapped_to_pixel(),
+							_get_snap_resolution()
+					)
 				return true
 			elif _is_svs_valid(current_selection) and Input.is_key_pressed(KEY_CTRL):
 				if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -1242,3 +1324,4 @@ func _exit_tree():
 	remove_custom_type("ScalableVectorShape2D")
 	remove_control_from_bottom_panel(scalable_vector_shapes_2d_dock)
 	scalable_vector_shapes_2d_dock.free()
+	set_global_position_popup_panel.free()

@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.6.1
+## 2.6.2
 
 ## Added
 - Change line-capping of strokes via inspector
@@ -9,6 +9,7 @@
 - Maps line-join modes and line-cap modes from SVG to Godot using the importer
 - Pixel snap mode checkbox, disabled by default
 - Show point positions under editor hints
+- Form to set exact global position for curve point and handles (in path modeß)
 
 ## Changed
 - "Show point numbers" renamed to "Show point details", also toggles position info on/off
