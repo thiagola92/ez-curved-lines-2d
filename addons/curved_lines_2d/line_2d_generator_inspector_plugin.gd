@@ -26,16 +26,13 @@ func _parse_begin(object: Object) -> void:
 		add_custom_control(button)
 		button.pressed.connect(func(): _on_convert_to_path_button_pressed(object, button))
 	if object is ScalableVectorShape2D:
-		var input := TextEdit.new()
-		input.text = "export.png"
-		input.custom_minimum_size = Vector2(0, 36)
 		var button : Button = Button.new()
 		button.text = "Export as PNG*"
 		button.tooltip_text = "The export will only contain this node and its children,
 				assigned nodes outside this subtree will not be drawn."
-		add_custom_control(input)
 		add_custom_control(button)
-		button.pressed.connect(func(): _on_export_png_button_pressed(object, input.text))
+
+		button.pressed.connect(func(): _on_export_png_button_pressed(object))
 
 
 func _parse_group(object: Object, group: String) -> void:
@@ -94,7 +91,17 @@ func _on_convert_to_path_button_pressed(svs : ScalableVectorShape2D, button : Bu
 	button.hide()
 
 
-func _on_export_png_button_pressed(svs : ScalableVectorShape2D, filename : String) -> void:
+func _on_export_png_button_pressed(svs : ScalableVectorShape2D) -> void:
+	var dialog := EditorFileDialog.new()
+	dialog.add_filter("*.png", "PNG image")
+	dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
+	dialog.file_selected.connect(func(path): _export_png(svs, path, dialog))
+	EditorInterface.get_base_control().add_child(dialog)
+	dialog.popup_centered(Vector2i(800, 400))
+
+
+func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) -> void:
+	dialog.queue_free()
 	var sub_viewport := SubViewport.new()
 	EditorInterface.get_base_control().add_child(sub_viewport)
 	sub_viewport.transparent_bg = true
@@ -116,7 +123,6 @@ func _on_export_png_button_pressed(svs : ScalableVectorShape2D, filename : Strin
 	sub_viewport.size = Vector2(box[2] - box[0])
 	await RenderingServer.frame_post_draw
 	var img = sub_viewport.get_texture().get_image()
-	var filename1 = "export.png" if filename.is_empty() else filename
-	img.save_png("res://%s" % filename1)
+	img.save_png(filename)
 	EditorInterface.get_resource_filesystem().scan()
 	sub_viewport.queue_free()
