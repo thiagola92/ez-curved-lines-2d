@@ -34,6 +34,7 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [Creating, mirroring and dragging control point handles](#creating-mirroring-and-dragging-control-point-handles)
 	- [Closing the loop and breaking the loop](#closing-the-loop-and-breaking-the-loop)
 	- [Deleting points and control points](#deleting-points-and-control-points)
+	- [Setting the global position of a point / curve handle manually](#setting-the-global-position-of-a-point--curve-handle-manually)
 	- [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
 - [Manipulating gradients](#manipulating-gradients)
 	- [Changing the start- and endpoint of the gradient](#changing-the-start--and-endpoint-of-the-gradient)
@@ -41,6 +42,9 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [Add new color stops](#add-new-color-stops)
 - [The Project Settings in the Scalable Vector Shapes panel](#the-project-settings-in-the-scalable-vector-shapes-panel)
 - [Using the Inspector Form for `ScalableVectorShape2D`](#using-the-inspector-form-for-scalablevectorshape2d)
+	- [Inspector Buttons](#inspector-buttons)
+		- [Convert to Path button](#convert-to-path-button)
+		- [Export as PNG button](#export-as-png-button)
 	- [The Fill inspector form](#the-fill-inspector-form)
 	- [The Stroke inspector form](#the-stroke-inspector-form)
 	- [The Collision Polygon inspector form](#the-collision-polygon-inspector-form)
@@ -170,6 +174,11 @@ You can recognise the start-/endpoint(s) by the infinity symbol: ∞
 
 You can delete points and control points by using right click.
 
+## Setting the global position of a point / curve handle manually
+
+Using `Alt+Click` you can now open a form to set the global position of a point manually:
+
+![global position popup dialog](./addons/curved_lines_2d/screenshots/global_position_popup.png)
 
 ## Setting the pivot of your shape
 
@@ -214,7 +223,9 @@ A couple of settings in the bottom panel are stored across sessions to represent
 - Editor settings (how the 2D Viewport should behave):
   - Enable/Disable ScalableVectorShape2D Editing (when checked off, you can edit nodes the normal, built-in, godot-way. You _are_ going to need this)
   - Show/Hide Edit hints
-  - Show Point Numbers (which are the exact _indices_ of each point on the `Curve2D` of this shape)
+  - Show Point Details (which are the exact _indices_ of each point on the `Curve2D` of this shape, what is it's global position)
+  - Snap to Pixel (snaps points and curve handles to whole pixels on the global transform, only when  `shape_type == ShapeType.Path`)
+  - Snap distance (the snap step / resolution)
 - Draw Settings:
   - Stroke Width
   - Enable/Disable Fill (when creating new shapes via the bottom panel)
@@ -229,6 +240,8 @@ A couple of settings in the bottom panel are stored across sessions to represent
 
 The following custom forms were added, with extensive tooltips to help explain the actual functions they provide:
 
+- [Convert to Path button](#convert-to-path-button)
+- [Export as PNG button](#export-as-png-button)
 - [Fill](#the-fill-inspector-form) (actually the assigned `Polygon2D`)
 - [Stroke](#the-stroke-inspector-form) (actually the assigned `Line2D`)
 - [Collision Polygon](#the-collision-polygon-inspector-form) (just a button to generate a new `CollisionPolygon2D`)
@@ -236,9 +249,21 @@ The following custom forms were added, with extensive tooltips to help explain t
 - [Shape Type Settings](#the-shape-type-inspector-form)
 - [Editor Settings](#the-editor-settings-inspector-form)
 
-When a primitive shape (basic rectangle or ellipse) is selected, a `Convert to Path` button is also provided up top.
+![screenshot of the inspector](./addons/curved_lines_2d/screenshots/inspector-in-2.6.png)
 
-![screenshot of the inspector](./addons/curved_lines_2d/screenshots/inspector-in-2.5.png)
+
+## Inspector Buttons
+
+### Convert to Path button
+
+When a primitive shape (basic rectangle or ellipse) is selected, a `Convert to Path`-button is available at the top of the inspector.
+
+### Export as PNG button
+
+With the `Export as PNG`-button you can save any `ScalableVectorShape2D` and its children as a new `.png`-file. Note that nodes which are assigned as Fill or Stroke that are higher up in the hierarchy will be excluded from the exported file.
+
+You _can_ however change the type of any `Node2D` to `ScalableVectorShape2D` temporarily in order to export group of shapes as a PNG file.
+
 
 ## The Fill inspector form
 

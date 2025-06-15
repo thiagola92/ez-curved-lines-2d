@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.6.2
+## 2.6.3
 
 ## Added
 - Change line-capping of strokes via inspector
@@ -10,6 +10,7 @@
 - Pixel snap mode checkbox, disabled by default
 - Show point positions under editor hints
 - Form to set exact global position for curve point and handles (in path mode)
+- Export as PNG button in inspector form of ScalableVectorShape2D
 
 ## Changed
 - "Show point numbers" renamed to "Show point details", also toggles position info on/off
