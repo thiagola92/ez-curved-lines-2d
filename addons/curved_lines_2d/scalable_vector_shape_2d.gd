@@ -529,8 +529,8 @@ static func set_rect_points(curve : Curve2D, width : float, height : float, rx :
 ## signal is emitted.
 static func set_ellipse_points(curve : Curve2D, size: Vector2, offset := Vector2.ZERO):
 	curve.clear_points()
-	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2.ZERO, Vector2(0, size.y * 0.5 * SvgImporterDock.R_TO_CP))
-	curve.add_point(offset + Vector2(0, size.y * 0.5), Vector2(size.x * 0.5 * SvgImporterDock.R_TO_CP, 0), Vector2(-size.x * 0.5 * SvgImporterDock.R_TO_CP, 0))
-	curve.add_point(offset + Vector2(-size.x * 0.5, 0), Vector2(0, size.y * 0.5 * SvgImporterDock.R_TO_CP), Vector2(0, -size.y * 0.5 * SvgImporterDock.R_TO_CP))
-	curve.add_point(offset + Vector2(0, -size.y * 0.5), Vector2(-size.x * 0.5 * SvgImporterDock.R_TO_CP, 0), Vector2(size.x * 0.5 * SvgImporterDock.R_TO_CP, 0))
-	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2(0, -size.y * 0.5 * SvgImporterDock.R_TO_CP))
+	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2.ZERO, Vector2(0, size.y * 0.5 * R_TO_CP))
+	curve.add_point(offset + Vector2(0, size.y * 0.5), Vector2(size.x * 0.5 * R_TO_CP, 0), Vector2(-size.x * 0.5 * R_TO_CP, 0))
+	curve.add_point(offset + Vector2(-size.x * 0.5, 0), Vector2(0, size.y * 0.5 * R_TO_CP), Vector2(0, -size.y * 0.5 * R_TO_CP))
+	curve.add_point(offset + Vector2(0, -size.y * 0.5), Vector2(-size.x * 0.5 * R_TO_CP, 0), Vector2(size.x * 0.5 * R_TO_CP, 0))
+	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2(0, -size.y * 0.5 * R_TO_CP))
