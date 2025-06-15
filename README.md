@@ -41,6 +41,9 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [Add new color stops](#add-new-color-stops)
 - [The Project Settings in the Scalable Vector Shapes panel](#the-project-settings-in-the-scalable-vector-shapes-panel)
 - [Using the Inspector Form for `ScalableVectorShape2D`](#using-the-inspector-form-for-scalablevectorshape2d)
+	- [Inspector Buttons](#inspector-buttons)
+		- [Convert to Path button](#convert-to-path-button)
+		- [Export as PNG button](#export-as-png-button)
 	- [The Fill inspector form](#the-fill-inspector-form)
 	- [The Stroke inspector form](#the-stroke-inspector-form)
 	- [The Collision Polygon inspector form](#the-collision-polygon-inspector-form)
@@ -229,6 +232,8 @@ A couple of settings in the bottom panel are stored across sessions to represent
 
 The following custom forms were added, with extensive tooltips to help explain the actual functions they provide:
 
+- [Convert to Path button](#convert-to-path-button)
+- [Export as PNG button](#export-as-png-button)
 - [Fill](#the-fill-inspector-form) (actually the assigned `Polygon2D`)
 - [Stroke](#the-stroke-inspector-form) (actually the assigned `Line2D`)
 - [Collision Polygon](#the-collision-polygon-inspector-form) (just a button to generate a new `CollisionPolygon2D`)
@@ -236,9 +241,21 @@ The following custom forms were added, with extensive tooltips to help explain t
 - [Shape Type Settings](#the-shape-type-inspector-form)
 - [Editor Settings](#the-editor-settings-inspector-form)
 
-When a primitive shape (basic rectangle or ellipse) is selected, a `Convert to Path` button is also provided up top.
+![screenshot of the inspector](./addons/curved_lines_2d/screenshots/inspector-in-2.6.png)
 
-![screenshot of the inspector](./addons/curved_lines_2d/screenshots/inspector-in-2.5.png)
+
+## Inspector Buttons
+
+### Convert to Path button
+
+When a primitive shape (basic rectangle or ellipse) is selected, a `Convert to Path`-button is available at the top of the inspector.
+
+### Export as PNG button
+
+With the `Export as PNG`-button you can save any `ScalableVectorShape2D` and its children as a new `.png`-file. Note that nodes which are assigned as Fill or Stroke that are higher up in the hierarchy will be excluded from the exported file.
+
+You _can_ however change the type of any `Node2D` to `ScalableVectorShape2D` temporarily in order to export group of shapes as a PNG file.
+
 
 ## The Fill inspector form
 
