@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.6.3
+## 2.6.3 - 2025-06-15
 
 ## Added
 - Change line-capping of strokes via inspector
