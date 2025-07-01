@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.6.4 - 2025-01-07
+
+## Changed
+- ScalableVectorShape2D nodes can only be selected when mousedown and mouseup event registered on the same node ('click'-event)
+- ScalableVectorShape2D nodes can now only be selected when they are visible
+- ScalableVectorShape2D nodes can not be selected anymore when they are locked using the lock-icon
+- ScalableVectorShape2D nodes can not be selected anymore when they are part of a different scene
+
 ## 2.6.3 - 2025-06-15
 
 ## Added
