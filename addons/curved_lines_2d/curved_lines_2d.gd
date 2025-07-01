@@ -56,6 +56,7 @@ var select_mode_button : Button
 var undo_redo : EditorUndoRedoManager
 var in_undo_redo_transaction := false
 var shape_preview : Curve2D = null
+var selection_candidate : Node = null
 
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
@@ -1138,12 +1139,22 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 				var results := _find_scalable_vector_shape_2d_nodes_at(mouse_pos)
 				var refined_result := results.rfind_custom(func(x): return x.has_fine_point(mouse_pos))
 				if refined_result > -1 and results[refined_result]:
-					EditorInterface.edit_node(results[refined_result])
-					return true
+					if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+						selection_candidate = results[refined_result]
+						return true
+					else:
+						if selection_candidate == results[refined_result]:
+							EditorInterface.edit_node(results[refined_result])
+							return true
 				var result = results.pop_back()
 				if is_instance_valid(result):
-					EditorInterface.edit_node(result)
-					return true
+					if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+						selection_candidate = result
+						return true
+					else:
+						if selection_candidate == result:
+							EditorInterface.edit_node(result)
+							return true
 		return false
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
