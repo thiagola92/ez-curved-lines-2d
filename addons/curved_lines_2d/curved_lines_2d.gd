@@ -225,7 +225,11 @@ func _find_scalable_vector_shape_2d_nodes() -> Array[Node]:
 func _find_scalable_vector_shape_2d_nodes_at(pos : Vector2) -> Array[Node]:
 	if is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return (_find_scalable_vector_shape_2d_nodes()
-					.filter(func(x : ScalableVectorShape2D): return x.has_point(pos)))
+					.filter(func(x : ScalableVectorShape2D): return not x.has_meta("_edit_lock_"))
+					.filter(func(x : ScalableVectorShape2D): return x.is_visible_in_tree())
+					.filter(func(x : ScalableVectorShape2D): return x.owner == EditorInterface.get_edited_scene_root())
+					.filter(func(x : ScalableVectorShape2D): return x.has_point(pos))
+		)
 	return []
 
 
