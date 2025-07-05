@@ -449,6 +449,12 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
 						cursor += Vector2(float(string_array[i+6]), float(string_array[i+7]))
+						var arc_radius = Vector2(float(string_array[i+1]), float(string_array[i+2]))
+						var arc_rotation_deg = float(string_array[i+3])
+						var is_large_arc = int(string_array[i+4]) == 1
+						var is_clockwise_arc = int(string_array[i+5]) == 1
+						print("arc_radius=", arc_radius, " arc_rotation_deg=", arc_rotation_deg)
+						print("is_large_arc=", is_large_arc, " is_clockwise_arc=", is_clockwise_arc)
 						curve.add_point(cursor)
 						i += 7
 				"A":
