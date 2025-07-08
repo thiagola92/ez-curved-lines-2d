@@ -447,22 +447,34 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 				"a":
 					log_message("WARNING: the 'a' (relative arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
+
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
+						var c = draw_arc_to(curve, cursor,
+								Vector2(float(string_array[i+1]), float(string_array[i+2])),
+								float(string_array[i+3]),
+								int(string_array[i+4]) == 1, int(string_array[i+5]) == 1,
+								cursor + Vector2(float(string_array[i+6]), float(string_array[i+7]))
+						)
+						print(c)
+						create_path_from_ellipse(element, "virt_c", 4, 4, c, current_node, scene_root, gradients)
+
 						cursor += Vector2(float(string_array[i+6]), float(string_array[i+7]))
-						var arc_radius = Vector2(float(string_array[i+1]), float(string_array[i+2]))
-						var arc_rotation_deg = float(string_array[i+3])
-						var is_large_arc = int(string_array[i+4]) == 1
-						var is_clockwise_arc = int(string_array[i+5]) == 1
-						print("arc_radius=", arc_radius, " arc_rotation_deg=", arc_rotation_deg)
-						print("is_large_arc=", is_large_arc, " is_clockwise_arc=", is_clockwise_arc)
-						curve.add_point(cursor)
+						#curve.add_point(cursor)
 						i += 7
 				"A":
 					log_message("WARNING: the 'A' (absolute arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
+						var c = draw_arc_to(curve, cursor,
+								Vector2(float(string_array[i+1]), float(string_array[i+2])),
+								float(string_array[i+3]),
+								int(string_array[i+4]) == 1, int(string_array[i+5]) == 1,
+								Vector2(float(string_array[i+6]), float(string_array[i+7]))
+						)
+						print(c)
+						create_path_from_ellipse(element, "virt_c", 4, 4, c, current_node, scene_root, gradients)
 						cursor = Vector2(float(string_array[i+6]), float(string_array[i+7]))
-						curve.add_point(cursor)
+						#curve.add_point(cursor)
 						i += 7
 
 		if curve.get_point_count() > 1:
@@ -470,6 +482,40 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 			create_path2d(id, current_node,  curve,
 						get_svg_transform(element), get_svg_style(element), scene_root, gradients,
 						string_array[string_array.size()-1].to_upper() == "Z")
+
+
+func draw_arc_to(curve : Curve2D, cursor : Vector2, arc_radius : Vector2, arc_rotation_deg : float,
+						is_large_arc : bool, is_clockwise_arc : bool, arc_to_point : Vector2) -> Vector2:
+
+	var arc_center := get_arc_center(cursor, arc_to_point, arc_radius, is_clockwise_arc, is_large_arc)
+	var guard := 0
+	var p_deg := rad_to_deg(cursor.angle_to_point(arc_center))
+	while cursor.distance_to(arc_to_point) > 1.0 and guard < 360:
+		p_deg += 1.0 if is_clockwise_arc else -1.0
+		var p_rad := deg_to_rad(p_deg)
+		cursor = arc_center - Vector2(cos(p_rad) * arc_radius.x, sin(p_rad) * arc_radius.y)
+		curve.add_point(cursor)
+		guard += 1
+	if cursor.distance_to(arc_to_point) > 0.0:
+		curve.add_point(arc_to_point)
+	return arc_center
+
+
+func get_arc_center(p1 : Vector2, p2 : Vector2, r : Vector2, is_clockwise_arc : bool, is_large_arc : bool) -> Vector2:
+	var q := sqrt(absf(pow(p2.x - p1.x, 2.0) + pow(p2.y - p1.y, 2.0)))
+	print("q:  ", q)
+	var p3 := (p1 + p2) * 0.5
+	print("p3: ", p3)
+
+	var base_c = Vector2(
+		sqrt(absf(pow(r.x, 2) - pow(q * 0.5, 2))) * (p1.y - p2.y) / q,
+		sqrt(absf(pow(r.y, 2) - pow(q * 0.5, 2))) * (p2.x - p1.x) / q
+	)
+	print("base_c: ", base_c)
+	if is_clockwise_arc == is_large_arc:
+		return p3 - base_c
+	else:
+		return p3 + base_c
 
 
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: Transform2D,
