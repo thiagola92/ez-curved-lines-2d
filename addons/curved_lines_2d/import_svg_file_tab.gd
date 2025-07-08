@@ -487,7 +487,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 func draw_arc_to(curve : Curve2D, cursor : Vector2, arc_radius : Vector2, arc_rotation_deg : float,
 						is_large_arc : bool, is_clockwise_arc : bool, arc_to_point : Vector2) -> Vector2:
 
-	var arc_center := get_arc_center(cursor, arc_to_point, arc_radius, is_clockwise_arc, is_large_arc)
+	var arc_center := ellipse_center(cursor, arc_to_point, arc_radius, is_large_arc, is_clockwise_arc)
 	var guard := 0
 	var p_deg := rad_to_deg(cursor.angle_to_point(arc_center))
 	while cursor.distance_to(arc_to_point) > 1.0 and guard < 360:
@@ -496,26 +496,31 @@ func draw_arc_to(curve : Curve2D, cursor : Vector2, arc_radius : Vector2, arc_ro
 		cursor = arc_center - Vector2(cos(p_rad) * arc_radius.x, sin(p_rad) * arc_radius.y)
 		curve.add_point(cursor)
 		guard += 1
-	if cursor.distance_to(arc_to_point) > 0.0:
+	if cursor.distance_to(arc_to_point) != 0.0:
 		curve.add_point(arc_to_point)
 	return arc_center
 
 
-func get_arc_center(p1 : Vector2, p2 : Vector2, r : Vector2, is_clockwise_arc : bool, is_large_arc : bool) -> Vector2:
-	var q := sqrt(absf(pow(p2.x - p1.x, 2.0) + pow(p2.y - p1.y, 2.0)))
-	print("q:  ", q)
-	var p3 := (p1 + p2) * 0.5
-	print("p3: ", p3)
+func ellipse_center(p1 : Vector2, p2 : Vector2, r : Vector2, fa : bool, fs : bool) -> Vector2:
 
-	var base_c = Vector2(
-		sqrt(absf(pow(r.x, 2) - pow(q * 0.5, 2))) * (p1.y - p2.y) / q,
-		sqrt(absf(pow(r.y, 2) - pow(q * 0.5, 2))) * (p2.x - p1.x) / q
+	var v := ((p1 - p2) * 0.5)
+	var lambda := pow(v.x, 2) / pow(r.x, 2) + pow(v.y, 2) / pow(r.y, 2)
+	if lambda > 1:
+		r.x = sqrt(absf(lambda) * r.x)
+		r.y = sqrt(absf(lambda) * r.y)
+	var sign = -1.0 if fa == fs else 1.0
+	var div := (
+		(r.x * r.x * r.y * r.y - r.x * r.x * v.y * v.y - r.y * r.y * v.x * v.x) /
+		(r.x * r.x * v.y * v.y + r.y * r.y * v.x * v.x)
 	)
-	print("base_c: ", base_c)
-	if is_clockwise_arc == is_large_arc:
-		return p3 - base_c
-	else:
-		return p3 + base_c
+	var co = sign * sqrt(absf(div))
+
+	var v1 = Vector2(
+		((r.x * v.y) / r.y) * co,
+		((-r.y * v.x) / r.x) * co
+	)
+	v1 += (p1 + p2) * 0.5
+	return v1
 
 
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: Transform2D,
