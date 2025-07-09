@@ -449,14 +449,12 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
-						var c = draw_arc_to(curve, cursor,
+						draw_arc_to(curve, cursor,
 								Vector2(float(string_array[i+1]), float(string_array[i+2])),
 								float(string_array[i+3]),
 								int(string_array[i+4]) == 1, int(string_array[i+5]) == 1,
 								cursor + Vector2(float(string_array[i+6]), float(string_array[i+7]))
 						)
-						print(c)
-						create_path_from_ellipse(element, "virt_c", 4, 4, c, current_node, scene_root, gradients)
 
 						cursor += Vector2(float(string_array[i+6]), float(string_array[i+7]))
 						#curve.add_point(cursor)
@@ -465,14 +463,12 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 					log_message("WARNING: the 'A' (absolute arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
 							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
-						var c = draw_arc_to(curve, cursor,
+						draw_arc_to(curve, cursor,
 								Vector2(float(string_array[i+1]), float(string_array[i+2])),
 								float(string_array[i+3]),
 								int(string_array[i+4]) == 1, int(string_array[i+5]) == 1,
 								Vector2(float(string_array[i+6]), float(string_array[i+7]))
 						)
-						print(c)
-						create_path_from_ellipse(element, "virt_c", 4, 4, c, current_node, scene_root, gradients)
 						cursor = Vector2(float(string_array[i+6]), float(string_array[i+7]))
 						#curve.add_point(cursor)
 						i += 7
@@ -485,21 +481,72 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 
 
 func draw_arc_to(curve : Curve2D, cursor : Vector2, arc_radius : Vector2, arc_rotation_deg : float,
-						is_large_arc : bool, is_clockwise_arc : bool, arc_to_point : Vector2) -> Vector2:
+						large_arc_flag : bool, sweep_flag : bool, arc_to_point : Vector2):
 
-	var arc_center := ellipse_center(cursor, arc_to_point, arc_radius, is_large_arc, is_clockwise_arc)
-	var guard := 0
-	var p_deg := rad_to_deg(cursor.angle_to_point(arc_center))
-	while cursor.distance_to(arc_to_point) > 1.0 and guard < 360:
-		p_deg += 1.0 if is_clockwise_arc else -1.0
-		var p_rad := deg_to_rad(p_deg)
-		cursor = arc_center - Vector2(cos(p_rad) * arc_radius.x, sin(p_rad) * arc_radius.y)
+	#var arc_center := ellipse_center(cursor, arc_to_point, arc_radius, is_large_arc, is_clockwise_arc)
+	#var guard := 0
+	#var p_deg := rad_to_deg(cursor.angle_to_point(arc_center))
+	#while cursor.distance_to(arc_to_point) > 1.0 and guard < 360:
+		#p_deg += 1.0 if is_clockwise_arc else -1.0
+		#var p_rad := deg_to_rad(p_deg)
+		#cursor = arc_center - Vector2(cos(p_rad) * arc_radius.x, sin(p_rad) * arc_radius.y)
+		#curve.add_point(cursor)
+		#guard += 1
+	#if cursor.distance_to(arc_to_point) != 0.0:
+		#curve.add_point(arc_to_point)
+	#return arc_center
+	var start := cursor
+	var end := arc_to_point
+
+	if start == end or arc_radius.x == 0 or arc_radius.y == 0:
+		return
+
+	var r := arc_radius.abs()
+	# Obtain center parametrization.
+	var rot := deg_to_rad(arc_rotation_deg)
+	var cosine := cos(rot)
+	var sine := sin(rot)
+	var half := (start - end) / 2
+	var x1 := half.x * cosine + half.y * sine
+	var y1 := -half.x * sine + half.y * cosine
+	var r2 := Vector2(r.x * r.x, r.y * r.y)
+	var x12 := x1 * x1
+	var y12 := y1 * y1
+	var cr := x12 / r2.x + y12 / r2.y
+	if cr > 1:
+		cr = sqrt(cr)
+		r *= cr
+		r2 = Vector2(r.x * r.x, r.y * r.y)
+
+	var dq := r2.x * y12 + r2.y * x12
+	var pq := (r2.x * r2.y - dq) / dq
+	var sc := sqrt(maxf(0, pq))
+	if large_arc_flag == sweep_flag:
+		sc = -sc
+
+	var ct := Vector2(r.x * sc * y1 / r.y, -r.y * sc * x1 / r.x)
+	var c := Vector2(ct.x * cosine - ct.y * sine,
+			ct.x * sine + ct.y * cosine) + start.lerp(end, 0.5)
+	var tv := Vector2(x1 - ct.x, y1 - ct.y) / r
+	var theta1 := tv.angle()
+	var delta_theta := fposmod(tv.angle_to(
+			Vector2(-x1 - ct.x, -y1 - ct.y) / r), TAU)
+	if not sweep_flag:
+		theta1 += delta_theta
+		delta_theta = TAU - delta_theta
+	theta1 = fposmod(theta1, TAU)
+
+	var deg_start = rad_to_deg(theta1)
+	for deg: int in range(0, 360):
+		var angle := deg_to_rad((deg if sweep_flag else -deg) + deg_start)
+		if (angle < theta1 or angle > theta1 + delta_theta) and (angle + TAU < theta1 or angle + TAU > theta1 + delta_theta):
+			continue
+		cursor = Vector2(
+				c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
+				c.y + r.x * cos(angle) * sine + r.y * sin(angle) * cosine)
+		if cursor.distance_to(arc_to_point) < 2.0:
+			break
 		curve.add_point(cursor)
-		guard += 1
-	if cursor.distance_to(arc_to_point) != 0.0:
-		curve.add_point(arc_to_point)
-	return arc_center
-
 
 func ellipse_center(p1 : Vector2, p2 : Vector2, r : Vector2, fa : bool, fs : bool) -> Vector2:
 
