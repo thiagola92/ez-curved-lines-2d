@@ -416,6 +416,12 @@ Lots of thanks go out to those who helped me out getting started:
 - The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
 - The SVG Importer code was adapted from the script hosted on github in the [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot) repository
 
+And a big thank you goes to to [@MewPurPur](https://github.com/MewPurPur), author of GodSVG for writing a great [SVG Arc command implementation](https://github.com/MewPurPur/GodSVG/blob/v1.0-alpha10/src/data_classes/ElementPath.gd#L117) I could reuse here:
+- Download from the [GodSVG website](https://www.godsvg.com/)
+- Or try out the [web version](https://www.godsvg.com/editor/)
+- Also on [itch.io](https://mewpurpur.itch.io/godsvg)
+
+
 # Reaching out / Contributing
 If you have feedback on this project, feel free to post an [issue](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues) on github, or to:
 - Ask a question on [reddit](https://www.reddit.com/r/ScalableVectorShape2D)

@@ -1,8 +1,13 @@
 # Changelog
 
+## 2.6.5 - 2025-10-07
+
+### Added
+- SVG importer now supports the arc command (fixed at 4 degree angles for now)
+
 ## 2.6.4 - 2025-01-07
 
-## Changed
+### Changed
 - ScalableVectorShape2D nodes can only be selected when mousedown and mouseup event registered on the same node ('click'-event)
 - ScalableVectorShape2D nodes can now only be selected when they are visible
 - ScalableVectorShape2D nodes can not be selected anymore when they are locked using the lock-icon
@@ -10,7 +15,7 @@
 
 ## 2.6.3 - 2025-06-15
 
-## Added
+### Added
 - Change line-capping of strokes via inspector
 - Change line-joining of strokes via inspector
 - Pick default line-cap and line-join modes for creating new strokes
@@ -20,7 +25,7 @@
 - Form to set exact global position for curve point and handles (in path mode)
 - Export as PNG button in inspector form of ScalableVectorShape2D
 
-## Changed
+### Changed
 - "Show point numbers" renamed to "Show point details", also toggles position info on/off
 
 ## 2.5.2 - 2025-06-08

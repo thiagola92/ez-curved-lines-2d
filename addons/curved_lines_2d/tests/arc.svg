@@ -1,113 +1,22 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<?xml version="1.0" standalone="no"?>
+<svg viewBox="0 0 1200 400"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <title>Example arcs01 - arc commands in path data</title>
+  <desc>Picture of a pie chart with two pie wedges and
+        a picture of a line with arc blips</desc>
+  <rect x="1" y="1" width="1198" height="398"
+        fill="none" stroke="blue" stroke-width="1" />
 
-<svg
-   width="928.61804mm"
-   height="329.99927mm"
-   viewBox="0 0 928.61804 329.99926"
-   version="1.1"
-   id="svg1"
-   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
-   sodipodi:docname="arc.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#505050"
-     bordercolor="#ffffff"
-     borderopacity="1"
-     inkscape:showpageshadow="0"
-     inkscape:pageopacity="0"
-     inkscape:pagecheckerboard="1"
-     inkscape:deskcolor="#505050"
-     inkscape:document-units="mm"
-     inkscape:zoom="0.14976543"
-     inkscape:cx="1128.4313"
-     inkscape:cy="30.046987"
-     inkscape:current-layer="svg1" />
-  <defs
-     id="defs1">
-    <rect
-       x="1535.7348"
-       y="176.99101"
-       width="948.1495"
-       height="343.82344"
-       id="rect3" />
-    <rect
-       x="1535.7348"
-       y="176.99101"
-       width="948.1495"
-       height="343.82344"
-       id="rect4" />
-  </defs>
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(-161.05799,-79.178759)" />
-  <path
-     d="m 177.5,177.5 h -150 a 150,150 0 1 0 150,-150 z"
-     fill="#ff0000"
-     stroke="#0000ff"
-     stroke-width="5"
-     id="path3" />
-  <path
-     d="M 152.5,152.5 V 2.5 a 150,150 0 0 0 -150,150 z"
-     fill="#ffff00"
-     stroke="#0000ff"
-     stroke-width="5"
-     id="path4" />
-  <path
-     d="m 477.50001,327.5 50,-25 A 27.95085,27.95085 0 0 1 577.5,277.5 l 50,-25 a 55.826394,27.913197 60 0 1 50,-25 l 50,-25 a 83.718657,27.906219 60 0 1 50,-25 l 50,-25 a 111.6151,27.903776 60 0 1 50,-25 l 50.00001,-25"
-     fill="none"
-     stroke="#ff0000"
-     stroke-width="5"
-     id="path5" />
-  <text
-     xml:space="preserve"
-     style="font-size:3.70417px;font-family:'DIN Round Pro';-inkscape-font-specification:'DIN Round Pro';opacity:0.99;fill:#fbf7ff;fill-rule:evenodd;stroke-width:0.264583;stroke-miterlimit:80"
-     x="369.23016"
-     y="49.466244"
-     id="text1"><tspan
-       sodipodi:role="line"
-       id="tspan1"
-       style="stroke-width:0.264583"
-       x="369.23016"
-       y="49.466244">T</tspan></text>
-  <text
-     xml:space="preserve"
-     style="font-size:3.70417px;font-family:'DIN Round Pro';-inkscape-font-specification:'DIN Round Pro';opacity:0.99;fill:#fbf7ff;fill-rule:evenodd;stroke-width:0.264583;stroke-miterlimit:80"
-     x="406.32983"
-     y="46.828873"
-     id="text2"><tspan
-       sodipodi:role="line"
-       id="tspan2"
-       style="stroke-width:0.264583"
-       x="406.32983"
-       y="46.828873">T</tspan></text>
-  <text
-     xml:space="preserve"
-     transform="matrix(0.26458333,0,0,0.26458333,-42.399637,-53.810495)"
-     id="text3"
-     style="font-size:140px;font-family:'DIN Round Pro';-inkscape-font-specification:'DIN Round Pro';white-space:pre;shape-inside:url(#rect3);display:inline;opacity:0.99;fill:#fbf7ff;fill-rule:evenodd;stroke-miterlimit:80"><tspan
-       x="1535.7344"
-       y="301.45023"
-       id="tspan5">Text is not </tspan><tspan
-       x="1535.7344"
-       y="476.45023"
-       id="tspan6">supported</tspan></text>
-  <text
-     xml:space="preserve"
-     transform="matrix(0.26458333,0,0,0.26458333,325.52281,195.37795)"
-     id="text4"
-     style="font-size:140px;font-family:'DIN Round Pro';-inkscape-font-specification:'DIN Round Pro';white-space:pre;shape-inside:url(#rect4);display:inline;opacity:0.99;fill:#fbf7ff;fill-rule:evenodd;stroke-miterlimit:80"><tspan
-       x="1535.7344"
-       y="301.45023"
-       id="tspan7">Arcs are not
-</tspan><tspan
-       x="1535.7344"
-       y="476.45023"
-       id="tspan8">supported</tspan></text>
+        <!--                rx,ry  x-axis-rotation  large-arc-flag,sweep-flag   x,y-->
+  <path d="M300,200 h-150 a150,150      0                        1,0          150,-150 z"
+        fill="red" stroke="blue" stroke-width="5" id="one"/>
+  <path d="M275,175 v-150 a150,150 0 0,0 -150,150 z"
+        fill="yellow" stroke="blue" stroke-width="5" id="two" />
+
+  <path d="M600,350 l 50,-25
+           a25,25 -30 0,1 50,-25 l 50,-25
+           a25,50 -30 0,1 50,-25 l 50,-25
+           a25,75 -30 0,1 50,-25 l 50,-25
+           a25,100 -30 0,1 50,-25 l 50,-25"
+        fill="none" stroke="red" stroke-width="5" id="three"  />
 </svg>
