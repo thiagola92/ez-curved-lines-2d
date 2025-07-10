@@ -3,7 +3,7 @@
 ## 2.6.5 - 2025-10-07
 
 ### Added
-- SVG importer now supports the arc command (fix at 4 degree angles for now)
+- SVG importer now supports the arc command (fixed at 4 degree angles for now)
 
 ## 2.6.4 - 2025-01-07
 
