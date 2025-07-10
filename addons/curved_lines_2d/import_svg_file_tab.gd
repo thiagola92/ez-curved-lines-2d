@@ -445,9 +445,6 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						curve.add_point(cursor, c_in)
 						i += 2
 				"a":
-					log_message("WARNING: the 'a' (relative arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
-							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
-
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
 						draw_arc_to(curve, cursor,
 								Vector2(float(string_array[i+1]), float(string_array[i+2])),
@@ -455,13 +452,9 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 								int(string_array[i+4]) == 1, int(string_array[i+5]) == 1,
 								cursor + Vector2(float(string_array[i+6]), float(string_array[i+7]))
 						)
-
 						cursor += Vector2(float(string_array[i+6]), float(string_array[i+7]))
-						#curve.add_point(cursor)
 						i += 7
 				"A":
-					log_message("WARNING: the 'A' (absolute arc) operation is not yet supported, shape for <path id=\"%s\"> will be incorrect" %
-							(element.get_named_attribute_value("id") if element.has_attribute("id") else "?"), LogLevel.WARN)
 					while string_array.size() > i + 7 and string_array[i+1].is_valid_float():
 						draw_arc_to(curve, cursor,
 								Vector2(float(string_array[i+1]), float(string_array[i+2])),
@@ -470,7 +463,6 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 								Vector2(float(string_array[i+6]), float(string_array[i+7]))
 						)
 						cursor = Vector2(float(string_array[i+6]), float(string_array[i+7]))
-						#curve.add_point(cursor)
 						i += 7
 
 		if curve.get_point_count() > 1:
@@ -480,23 +472,10 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						string_array[string_array.size()-1].to_upper() == "Z")
 
 
-func draw_arc_to(curve : Curve2D, cursor : Vector2, arc_radius : Vector2, arc_rotation_deg : float,
-						large_arc_flag : bool, sweep_flag : bool, arc_to_point : Vector2):
-
-	#var arc_center := ellipse_center(cursor, arc_to_point, arc_radius, is_large_arc, is_clockwise_arc)
-	#var guard := 0
-	#var p_deg := rad_to_deg(cursor.angle_to_point(arc_center))
-	#while cursor.distance_to(arc_to_point) > 1.0 and guard < 360:
-		#p_deg += 1.0 if is_clockwise_arc else -1.0
-		#var p_rad := deg_to_rad(p_deg)
-		#cursor = arc_center - Vector2(cos(p_rad) * arc_radius.x, sin(p_rad) * arc_radius.y)
-		#curve.add_point(cursor)
-		#guard += 1
-	#if cursor.distance_to(arc_to_point) != 0.0:
-		#curve.add_point(arc_to_point)
-	#return arc_center
-	var start := cursor
-	var end := arc_to_point
+# Adapted from the GodSVG repository to draw arc in stead of determine bounding box.
+# https://github.com/MewPurPur/GodSVG/blob/53168a8cf74739fe828f488901eada02d5d97b69/src/data_classes/ElementPath.gd#L118
+func draw_arc_to(curve : Curve2D, start : Vector2, arc_radius : Vector2, arc_rotation_deg : float,
+						large_arc_flag : bool, sweep_flag : bool, end : Vector2):
 
 	if start == end or arc_radius.x == 0 or arc_radius.y == 0:
 		return
@@ -536,38 +515,20 @@ func draw_arc_to(curve : Curve2D, cursor : Vector2, arc_radius : Vector2, arc_ro
 		delta_theta = TAU - delta_theta
 	theta1 = fposmod(theta1, TAU)
 
-	var deg_start = rad_to_deg(theta1)
-	for deg: int in range(0, 360):
-		var angle := deg_to_rad((deg if sweep_flag else -deg) + deg_start)
-		if (angle < theta1 or angle > theta1 + delta_theta) and (angle + TAU < theta1 or angle + TAU > theta1 + delta_theta):
-			continue
-		cursor = Vector2(
-				c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
+	var step := deg_to_rad(4.0)
+	var angle := theta1 if sweep_flag else theta1 + delta_theta
+	var init_pnt := Vector2(c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
 				c.y + r.x * cos(angle) * sine + r.y * sin(angle) * cosine)
-		if cursor.distance_to(arc_to_point) < 2.0:
-			break
-		curve.add_point(cursor)
-
-func ellipse_center(p1 : Vector2, p2 : Vector2, r : Vector2, fa : bool, fs : bool) -> Vector2:
-
-	var v := ((p1 - p2) * 0.5)
-	var lambda := pow(v.x, 2) / pow(r.x, 2) + pow(v.y, 2) / pow(r.y, 2)
-	if lambda > 1:
-		r.x = sqrt(absf(lambda) * r.x)
-		r.y = sqrt(absf(lambda) * r.y)
-	var sign = -1.0 if fa == fs else 1.0
-	var div := (
-		(r.x * r.x * r.y * r.y - r.x * r.x * v.y * v.y - r.y * r.y * v.x * v.x) /
-		(r.x * r.x * v.y * v.y + r.y * r.y * v.x * v.x)
-	)
-	var co = sign * sqrt(absf(div))
-
-	var v1 = Vector2(
-		((r.x * v.y) / r.y) * co,
-		((-r.y * v.x) / r.x) * co
-	)
-	v1 += (p1 + p2) * 0.5
-	return v1
+	while (sweep_flag and angle < theta1 + delta_theta) or (not sweep_flag and angle > theta1):
+		var pnt := Vector2(c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
+				c.y + r.x * cos(angle) * sine + r.y * sin(angle) * cosine)
+		if pnt.distance_to(end) > 0.01 and pnt.distance_to(start) > 0.01:
+			curve.add_point(pnt)
+		if sweep_flag:
+			angle += step
+		else:
+			angle -= step
+	curve.add_point(end)
 
 
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, transform: Transform2D,
@@ -683,8 +644,8 @@ func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene
 				add_gradient_to_fill(new_path, svg_gradient, polygon, scene_root, gradients, gradient_point_parent)
 		else:
 			polygon.color = Color(style["fill"])
-		if style.has("fill-opacity"):
-			polygon.self_modulate.a = float(style["fill-opacity"])
+			if style.has("fill-opacity"):
+				polygon.color.a = float(style["fill-opacity"])
 
 
 func add_collision_to_path(new_path : ScalableVectorShape2D, style : Dictionary, scene_root : Node2D,
