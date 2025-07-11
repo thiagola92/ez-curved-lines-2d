@@ -99,6 +99,7 @@ enum ShapeType {
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
+@export var arc_list : Array[ScalableArc] = []
 
 @export_group("Shape Type Settings")
 ## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
@@ -176,6 +177,9 @@ func _enter_tree():
 	# ensure forward compatibility by assigning the default ShapeType
 	if shape_type == null:
 		shape_type = ShapeType.PATH
+	# ensure forward compatibility by assigning the default arc_list
+	if arc_list == null:
+		arc_list = []
 	if Engine.is_editor_hint():
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
@@ -368,6 +372,11 @@ func get_curve_handles() -> Array:
 	var is_closed := is_curve_closed()
 	var result := []
 	for i in range(n):
+		var part_of_arc : ScalableArc = null
+		for arc_def : ScalableArc in arc_list:
+			if i in range(arc_def.start_point, arc_def.end_point):
+				part_of_arc = arc_def
+
 		var p = curve.get_point_position(i)
 		var c_i = curve.get_point_in(i)
 		var c_o = curve.get_point_out(i)
@@ -377,6 +386,7 @@ func get_curve_handles() -> Array:
 			continue
 		result.append({
 			'point_position': to_global(p),
+			'part_of_arc': part_of_arc,
 			'in': c_i,
 			'out': c_o,
 			'mirrored': c_i.length() and c_i.distance_to(-c_o) < 0.01,
