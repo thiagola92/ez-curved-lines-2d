@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.6 - 2025-11-07
+
+## Changed
+- Bugfix: SVG importer can now handle negative numbers without leading whitespace
+- Bugfix: SVG importer now handles multiple shapes in one svg path element
+
 ## 2.6.5 - 2025-10-07
 
 ### Added
