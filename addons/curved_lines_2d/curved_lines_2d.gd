@@ -405,8 +405,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
 		var handle = handles[i]
-		if handle['part_of_arc']:
-			continue
+
 		var is_hovered : bool = svs.get_meta(META_NAME_HOVER_POINT_IDX, -1) == i
 		var cp_in_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_IN_IDX, -1) == i
 		var cp_out_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_OUT_IDX, -1) == i

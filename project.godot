@@ -29,7 +29,7 @@ curved_lines_2d/fill_color=Color(0.435294, 0.431373, 0.431373, 0.52549)
 [application]
 
 config/name="EZ Curved Lines 2D"
-run/main_scene="uid://dkmjip07vkb37"
+run/main_scene="uid://c6dfjd23olqhh"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="uid://b5yxa1e62b0hb"
 
@@ -39,5 +39,6 @@ enabled=PackedStringArray("res://addons/curved_lines_2d/plugin.cfg", "res://addo
 
 [rendering]
 
-anti_aliasing/quality/msaa_2d=3
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.211765, 0.239216, 0.290196, 1)

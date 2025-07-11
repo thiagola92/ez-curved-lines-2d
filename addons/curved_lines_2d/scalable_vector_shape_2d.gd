@@ -99,7 +99,11 @@ enum ShapeType {
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
-@export var arc_list : Array[ScalableArc] = []
+@export var arc_list : Array[ScalableArc] = []:
+	set(_arc_list):
+		arc_list = _arc_list
+		assigned_node_changed.emit()
+
 
 @export_group("Shape Type Settings")
 ## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
@@ -236,15 +240,33 @@ func notify_assigned_node_change():
 	assigned_node_changed.emit()
 
 
-## Redraw the line based on the new curve, using its tesselate method
+func tessellate() -> PackedVector2Array:
+	if arc_list.is_empty():
+		return curve.tessellate(max_stages, tolerance_degrees)
+	var poly_points = []
+	var arc_starts := (arc_list
+		.filter(func(a): return a != null)
+		.map(func(a : ScalableArc): return a.start_point)
+	)
+	for p_idx in (curve.point_count if is_curve_closed() else curve.point_count - 1):
+		if p_idx in arc_starts:
+			var seg := _get_curve_segment(p_idx)
+			poly_points.append(seg.get_point_position(0))
+			poly_points.append(seg.get_point_position(1))
+		else:
+			poly_points.append_array(_get_curve_segment(p_idx).tessellate(max_stages, tolerance_degrees))
+	return poly_points
+
+
+## Redraw the line based on the new curve, using its tessellate method
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
 			and not is_instance_valid(collision_polygon)
 			and not path_changed.has_connections()):
-		# guard against needlessly invoking expensive tesselate operation
+		# guard against needlessly invoking expensive tessellate operation
 		return
 
-	var new_points := curve.tessellate(max_stages, tolerance_degrees)
+	var new_points := self.tessellate()
 	# Fixes cases start- and end-node are so close to each other that
 	# polygons won't fill and closed lines won't cap nicely
 	if new_points.size() > 0 and new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
@@ -268,7 +290,7 @@ func curve_changed():
 func get_bounding_rect() -> Rect2:
 	if not curve:
 		return Rect2(Vector2.ZERO, Vector2.ZERO)
-	var points := curve.tessellate(max_stages, tolerance_degrees)
+	var points := self.tessellate()
 	if points.size() < 1:
 		# Cannot calculate a center for 0 points
 		return Rect2(Vector2.ZERO, Vector2.ZERO)
@@ -292,7 +314,7 @@ func has_point(global_pos : Vector2) -> bool:
 
 func has_fine_point(global_pos : Vector2) -> bool:
 	if is_instance_valid(polygon) or is_instance_valid(collision_polygon):
-		var poly_points := curve.tessellate(max_stages, tolerance_degrees)
+		var poly_points := self.tessellate()
 		return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
 	return false
 
@@ -335,12 +357,12 @@ func get_bounding_box() -> Array[Vector2]:
 
 
 func get_poly_points() -> Array:
-	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)
+	return Array(self.tessellate()).map(to_global)
 
 
 func get_farthest_point(from_local_pos := Vector2.ZERO) -> Vector2:
 	var farthest_point = from_local_pos
-	for p in curve.tessellate(max_stages, tolerance_degrees):
+	for p in self.tessellate():
 		if p.distance_to(from_local_pos) > farthest_point.distance_to(from_local_pos):
 			farthest_point = p
 	return farthest_point
@@ -372,11 +394,6 @@ func get_curve_handles() -> Array:
 	var is_closed := is_curve_closed()
 	var result := []
 	for i in range(n):
-		var part_of_arc : ScalableArc = null
-		for arc_def : ScalableArc in arc_list:
-			if i in range(arc_def.start_point, arc_def.end_point):
-				part_of_arc = arc_def
-
 		var p = curve.get_point_position(i)
 		var c_i = curve.get_point_in(i)
 		var c_o = curve.get_point_out(i)
@@ -386,7 +403,6 @@ func get_curve_handles() -> Array:
 			continue
 		result.append({
 			'point_position': to_global(p),
-			'part_of_arc': part_of_arc,
 			'in': c_i,
 			'out': c_o,
 			'mirrored': c_i.length() and c_i.distance_to(-c_o) < 0.01,
@@ -459,7 +475,7 @@ func replace_curve_points(curve_in : Curve2D) -> void:
 				curve_in.get_point_in(i), curve_in.get_point_out(i))
 
 
-func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> Vector2:
+func _get_curve_segment(segment_p1_idx : int) -> Curve2D:
 	var curve_segment := Curve2D.new()
 	curve_segment.add_point(
 		curve.get_point_position(segment_p1_idx),
@@ -472,7 +488,11 @@ func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> V
 		curve.get_point_position(segment_p2_idx),
 		curve.get_point_in(segment_p2_idx)
 	)
-	var poly_points := curve_segment.tessellate(max_stages, tolerance_degrees)
+	return curve_segment
+
+
+func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> Vector2:
+	var poly_points := _get_curve_segment(segment_p1_idx).tessellate(max_stages, tolerance_degrees)
 	var closest_result := Vector2.INF
 	for i in range(1, poly_points.size()):
 		var p_a := poly_points[i - 1]
