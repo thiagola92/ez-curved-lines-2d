@@ -305,14 +305,14 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 
 	for symbol in ["m", "M", "v", "V", "h", "H", "l", "L", "c", "C", "s", "S", "a", "A", "q", "Q", "t", "T", "z", "Z"]:
 		str_path = str_path.replace(symbol, " " + symbol + " ")
-
+	str_path = str_path.replace("-", " -")
 	var str_path_array = str_path.split(" ", false)
 	var string_arrays = []
 	var string_array_top : PackedStringArray
 	for a in str_path_array:
 		if a == "m" or a == "M":
 			if string_array_top.size() > 0:
-				string_arrays.append(string_array_top)
+				string_arrays.append(string_array_top.duplicate())
 				string_array_top.resize(0)
 		string_array_top.append(a)
 	string_arrays.append(string_array_top)
@@ -320,23 +320,26 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 	var string_array_count = -1
 	if string_arrays.size() > 1:
 		log_message("WARNING: jumps in a path using the 'M' or 'm' operation - i.e. clipping - is not supported", LogLevel.WARN)
+
+	var cursor = Vector2.ZERO
 	for string_array in string_arrays:
-		var cursor = Vector2.ZERO
 		var curve = Curve2D.new()
 		string_array_count += 1
-
-		for i in string_array.size()-1:
+		var cursor_start := Vector2.ZERO
+		for i in string_array.size():
 			match string_array[i]:
 				"m":
 					while string_array.size() > i + 2 and string_array[i+1].is_valid_float():
 						cursor += Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor)
 						i += 2
+						cursor_start = cursor
 				"M":
 					while string_array.size() > i + 2 and string_array[i+1].is_valid_float():
 						cursor = Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor)
 						i += 2
+						cursor_start = cursor
 				"v":
 					while string_array[i+1].is_valid_float():
 						cursor.y += float(string_array[i+1])
@@ -464,6 +467,9 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						)
 						cursor = Vector2(float(string_array[i+6]), float(string_array[i+7]))
 						i += 7
+				"z", "Z":
+					cursor = cursor_start
+
 
 		if curve.get_point_count() > 1:
 			var id = element.get_named_attribute_value("id") if element.has_attribute("id") else "Path"
