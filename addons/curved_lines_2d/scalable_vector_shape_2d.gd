@@ -262,10 +262,25 @@ func tessellate() -> PackedVector2Array:
 	for p_idx in (curve.point_count if is_curve_closed() else curve.point_count - 1):
 		if p_idx in arc_starts:
 			var seg := _get_curve_segment(p_idx)
-			poly_points.append(seg.get_point_position(0))
-			poly_points.append(seg.get_point_position(1))
+			var arc = arc_list.get_arc_for_point(p_idx)
+			if arc:
+				var seg_points := tessellate_arc_segment(seg.get_point_position(0), arc.radius,
+						arc.rotation_deg, arc.large_arc_flag, arc.sweep_flag, seg.get_point_position(1))
+				for i in seg_points.size():
+					if i == 0 and not poly_points.is_empty():
+						continue
+					poly_points.append(seg_points[i])
+			else:
+				printerr("Illegal state: there should be an arc int arc_list with start_point=%d - (%s)" % [p_idx, name])
+				if poly_points.is_empty():
+					poly_points.append(seg.get_point_position(0))
+				poly_points.append(seg.get_point_position(1))
 		else:
-			poly_points.append_array(_get_curve_segment(p_idx).tessellate(max_stages, tolerance_degrees))
+			var seg_points := _get_curve_segment(p_idx).tessellate(max_stages, tolerance_degrees)
+			for i in seg_points.size():
+				if i == 0 and not poly_points.is_empty():
+					continue
+				poly_points.append(seg_points[i])
 	return poly_points
 
 
@@ -536,6 +551,67 @@ func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
 		"point_position": to_global(closest_result),
 		"before_segment": before_segment
 	}
+
+# Adapted from the GodSVG repository to draw arc in stead of determine bounding box.
+# https://github.com/MewPurPur/GodSVG/blob/53168a8cf74739fe828f488901eada02d5d97b69/src/data_classes/ElementPath.gd#L118
+func tessellate_arc_segment(start : Vector2, arc_radius : Vector2, arc_rotation_deg : float,
+						large_arc_flag : bool, sweep_flag : bool, end : Vector2) -> PackedVector2Array:
+
+	if start == end or arc_radius.x == 0 or arc_radius.y == 0:
+		return [start, end]
+
+	var r := arc_radius.abs()
+	# Obtain center parametrization.
+	var rot := deg_to_rad(arc_rotation_deg)
+	var cosine := cos(rot)
+	var sine := sin(rot)
+	var half := (start - end) / 2
+	var x1 := half.x * cosine + half.y * sine
+	var y1 := -half.x * sine + half.y * cosine
+	var r2 := Vector2(r.x * r.x, r.y * r.y)
+	var x12 := x1 * x1
+	var y12 := y1 * y1
+	var cr := x12 / r2.x + y12 / r2.y
+	if cr > 1:
+		cr = sqrt(cr)
+		r *= cr
+		r2 = Vector2(r.x * r.x, r.y * r.y)
+
+	var dq := r2.x * y12 + r2.y * x12
+	var pq := (r2.x * r2.y - dq) / dq
+	var sc := sqrt(maxf(0, pq))
+	if large_arc_flag == sweep_flag:
+		sc = -sc
+
+	var ct := Vector2(r.x * sc * y1 / r.y, -r.y * sc * x1 / r.x)
+	var c := Vector2(ct.x * cosine - ct.y * sine,
+			ct.x * sine + ct.y * cosine) + start.lerp(end, 0.5)
+	var tv := Vector2(x1 - ct.x, y1 - ct.y) / r
+	var theta1 := tv.angle()
+	var delta_theta := fposmod(tv.angle_to(
+			Vector2(-x1 - ct.x, -y1 - ct.y) / r), TAU)
+	if not sweep_flag:
+		theta1 += delta_theta
+		delta_theta = TAU - delta_theta
+	theta1 = fposmod(theta1, TAU)
+
+	var step := deg_to_rad(tolerance_degrees)
+	var angle := theta1 if sweep_flag else theta1 + delta_theta
+	var init_pnt := Vector2(c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
+				c.y + r.x * cos(angle) * sine + r.y * sin(angle) * cosine)
+	var points : PackedVector2Array = []
+	while (sweep_flag and angle < theta1 + delta_theta) or (not sweep_flag and angle > theta1):
+		var pnt := Vector2(c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
+				c.y + r.x * cos(angle) * sine + r.y * sin(angle) * cosine)
+		points.append(pnt)
+		if sweep_flag:
+			angle += step
+		else:
+			angle -= step
+	if points[points.size() - 1] != end:
+		points.append(end)
+	return points
+
 
 ## Convert an existing [Curve2D] instance to a (rounded) rectangle.
 ## [param curve] is passed by reference so the curve's [signal Resource.changed]

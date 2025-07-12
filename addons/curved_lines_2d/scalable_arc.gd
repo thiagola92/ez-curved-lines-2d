@@ -7,7 +7,7 @@ extends Resource
 		emit_changed()
 
 
-@export var radius : Vector2 = Vector2.ONE:
+@export var radius : Vector2 = Vector2.ZERO:
 	set(r):
 		radius = r
 		emit_changed()
@@ -33,7 +33,7 @@ extends Resource
 
 func _init() -> void:
 	start_point = 0
-	radius = Vector2.ONE
+	radius = Vector2.ZERO
 	rotation_deg = 0.0
 	sweep_flag = true
 	large_arc_flag = false
