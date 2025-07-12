@@ -1,0 +1,27 @@
+class_name ScalableArcList
+extends Resource
+
+@export var arcs : Array[ScalableArc] = []:
+	set(_arcs):
+		arcs = _arcs
+		for i in arcs.size():
+			if arcs[i] == null:
+				arcs[i] = ScalableArc.new()
+		emit_changed()
+
+
+func _init() -> void:
+	arcs = []
+	if not changed.is_connected(_on_changed):
+		changed.connect(_on_changed)
+	_on_changed()
+
+
+func _on_changed():
+	for a : ScalableArc in arcs:
+		if a and not a.changed.is_connected(_item_changed):
+			a.changed.connect(_item_changed)
+
+
+func _item_changed():
+	emit_changed()

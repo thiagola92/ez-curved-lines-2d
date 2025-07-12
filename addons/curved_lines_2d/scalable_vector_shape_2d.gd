@@ -77,7 +77,7 @@ enum ShapeType {
 ## Changes to this curve will also emit the path_changed signal with the updated points array
 @export var curve: Curve2D = Curve2D.new():
 	set(_curve):
-		curve = _curve
+		curve = _curve if _curve != null else Curve2D.new()
 		assigned_node_changed.emit()
 
 ## Controls whether the path is treated as static (only update in editor) or dynamic (can be updated during runtime)
@@ -99,9 +99,10 @@ enum ShapeType {
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
-@export var arc_list : Array[ScalableArc] = []:
+
+@export var arc_list : ScalableArcList = ScalableArcList.new():
 	set(_arc_list):
-		arc_list = _arc_list
+		arc_list = _arc_list if _arc_list != null else ScalableArcList.new()
 		assigned_node_changed.emit()
 
 
@@ -172,6 +173,8 @@ func _ready():
 	if update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+		if not arc_list.changed.is_connected(curve_changed):
+			arc_list.changed.connect(curve_changed)
 	if not dimensions_changed.is_connected(_on_dimensions_changed):
 		dimensions_changed.connect(_on_dimensions_changed)
 
@@ -183,16 +186,20 @@ func _enter_tree():
 		shape_type = ShapeType.PATH
 	# ensure forward compatibility by assigning the default arc_list
 	if arc_list == null:
-		arc_list = []
+		arc_list = ScalableArcList.new()
 	if Engine.is_editor_hint():
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+		if not arc_list.changed.is_connected(curve_changed):
+			arc_list.changed.connect(curve_changed)
 		if not assigned_node_changed.is_connected(_on_assigned_node_changed):
 			assigned_node_changed.connect(_on_assigned_node_changed)
 	# handles update when reparenting
 	if update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+		if not arc_list.changed.is_connected(curve_changed):
+			arc_list.changed.connect(curve_changed)
 	# updates the curve points when size, offset, rx, or ry prop changes
 	# (used for ShapeType.RECT and ShapeType.ELLIPSE)
 	if not dimensions_changed.is_connected(_on_dimensions_changed):
@@ -203,6 +210,8 @@ func _enter_tree():
 func _exit_tree():
 	if curve.changed.is_connected(curve_changed):
 		curve.changed.disconnect(curve_changed)
+	if arc_list.changed.is_connected(curve_changed):
+		arc_list.changed.disconnect(curve_changed)
 
 
 func _on_dimensions_changed():
@@ -220,6 +229,8 @@ func _on_assigned_node_changed():
 	if Engine.is_editor_hint() or update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+		if not arc_list.changed.is_connected(curve_changed):
+			arc_list.changed.connect(curve_changed)
 
 	if is_instance_valid(line):
 		if lock_assigned_shapes:
@@ -241,10 +252,10 @@ func notify_assigned_node_change():
 
 
 func tessellate() -> PackedVector2Array:
-	if arc_list.is_empty():
+	if not arc_list or arc_list.arcs.is_empty():
 		return curve.tessellate(max_stages, tolerance_degrees)
 	var poly_points = []
-	var arc_starts := (arc_list
+	var arc_starts := (arc_list.arcs
 		.filter(func(a): return a != null)
 		.map(func(a : ScalableArc): return a.start_point)
 	)
