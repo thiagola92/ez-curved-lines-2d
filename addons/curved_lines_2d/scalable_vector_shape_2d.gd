@@ -518,7 +518,14 @@ func _get_curve_segment(segment_p1_idx : int) -> Curve2D:
 
 
 func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> Vector2:
-	var poly_points := _get_curve_segment(segment_p1_idx).tessellate(max_stages, tolerance_degrees)
+	var arc := arc_list.get_arc_for_point(segment_p1_idx)
+	var seg := _get_curve_segment(segment_p1_idx)
+	var poly_points := (
+			tessellate_arc_segment(seg.get_point_position(0), arc.radius, arc.rotation_deg,
+				arc.large_arc_flag, arc.sweep_flag, seg.get_point_position(1))
+		if arc else
+			seg.tessellate(max_stages, tolerance_degrees)
+	)
 	var closest_result := Vector2.INF
 	for i in range(1, poly_points.size()):
 		var p_a := poly_points[i - 1]
@@ -595,7 +602,7 @@ func tessellate_arc_segment(start : Vector2, arc_radius : Vector2, arc_rotation_
 		delta_theta = TAU - delta_theta
 	theta1 = fposmod(theta1, TAU)
 
-	var step := deg_to_rad(tolerance_degrees)
+	var step := deg_to_rad(1.0 if tolerance_degrees < 1.0 else tolerance_degrees)
 	var angle := theta1 if sweep_flag else theta1 + delta_theta
 	var init_pnt := Vector2(c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
 				c.y + r.x * cos(angle) * sine + r.y * sin(angle) * cosine)

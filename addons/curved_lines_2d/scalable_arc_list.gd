@@ -10,8 +10,8 @@ extends Resource
 		emit_changed()
 
 
-func _init() -> void:
-	arcs = []
+func _init(a : Array[ScalableArc] = []) -> void:
+	arcs = a
 	if not changed.is_connected(_on_changed):
 		changed.connect(_on_changed)
 	_on_changed()

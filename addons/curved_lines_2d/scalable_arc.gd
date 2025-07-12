@@ -31,9 +31,9 @@ extends Resource
 		emit_changed()
 
 
-func _init() -> void:
-	start_point = 0
-	radius = Vector2.ZERO
-	rotation_deg = 0.0
-	sweep_flag = true
-	large_arc_flag = false
+func _init(sp : int = 0, r := Vector2.ZERO, rd := 0.0, lf := true, sf := false) -> void:
+	start_point = sp
+	radius = r
+	rotation_deg = rd
+	large_arc_flag = lf
+	sweep_flag = sf
