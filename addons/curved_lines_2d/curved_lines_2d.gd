@@ -425,10 +425,13 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 				hint_txt += _draw_rect_control_point_handle(viewport_control, svs, handle, 'out',
 						cp_out_is_hovered)
 		elif svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
-			hint_txt += _draw_control_point_handle(viewport_control, svs, handle, 'in',
-					is_hovered or cp_in_is_hovered, cp_in_is_hovered)
-			hint_txt +=_draw_control_point_handle(viewport_control, svs, handle, 'out',
-					is_hovered or cp_out_is_hovered, cp_out_is_hovered)
+			if not svs.is_arc_start(i - 1):
+				hint_txt += _draw_control_point_handle(viewport_control, svs, handle, 'in',
+						is_hovered or cp_in_is_hovered, cp_in_is_hovered)
+			if not svs.is_arc_start(i):
+				hint_txt +=_draw_control_point_handle(viewport_control, svs, handle, 'out',
+						is_hovered or cp_out_is_hovered, cp_out_is_hovered)
+
 		if handle['mirrored']:
 			# mirrored handles
 			var rect := Rect2(_vp_transform(handle['point_position']) - Vector2(5, 5), Vector2(10, 10))
@@ -617,20 +620,26 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_SHIFT):
 		_draw_add_point_hint(viewport_control, svs)
 		return
+
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		var md_p := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
-		var p = _vp_transform(md_p["point_position"])
-		_draw_crosshair(viewport_control, _vp_transform(md_p["point_position"]))
-		var hint := ""
-		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			if svs.curve.point_count > 1:
-				hint += "- Double click to add point on the line"
-				if md_p["before_segment"] < svs.curve.point_count:
-					hint += "\n- Drag to change curve"
-			else:
-				_draw_add_point_hint(viewport_control, svs)
-		if not hint.is_empty():
-			_draw_hint(viewport_control, hint)
+
+		if svs.is_arc_start(md_p["before_segment"] - 1):
+			print("TODO: handle arc segment hover")
+		else:
+			var p = _vp_transform(md_p["point_position"])
+			_draw_crosshair(viewport_control, _vp_transform(md_p["point_position"]))
+			var hint := ""
+			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				if svs.curve.point_count > 1:
+					hint += "- Double click to add point on the line"
+					if md_p["before_segment"] < svs.curve.point_count:
+						hint += "\n- Drag to change curve"
+				else:
+					_draw_add_point_hint(viewport_control, svs)
+
+			if not hint.is_empty():
+				_draw_hint(viewport_control, hint)
 
 
 func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:

@@ -517,6 +517,10 @@ func _get_curve_segment(segment_p1_idx : int) -> Curve2D:
 	return curve_segment
 
 
+func is_arc_start(p_idx) -> bool:
+	return  arc_list.get_arc_for_point(p_idx) != null
+
+
 func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> Vector2:
 	var arc := arc_list.get_arc_for_point(segment_p1_idx)
 	var seg := _get_curve_segment(segment_p1_idx)
