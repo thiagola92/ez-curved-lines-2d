@@ -17,6 +17,28 @@ func _init(a : Array[ScalableArc] = []) -> void:
 	_on_changed()
 
 
+func _get(property: StringName) -> Variant:
+	var components := property.split("/", true, 2)
+	if components.size() >= 2:
+		var arc_idx := components[0].trim_prefix("arc_").to_int()
+		var arc := arcs[arc_idx]
+		if components[1] in arc:
+			return arc[components[1]]
+		return null
+	return null
+
+
+func _set(property: StringName, value: Variant) -> bool:
+	var components := property.split("/", true, 2)
+	if components.size() >= 2:
+		var arc_idx := components[0].trim_prefix("arc_").to_int()
+		var arc := arcs[arc_idx]
+		if components[1] in arc:
+			arc[components[1]] = value
+			return true
+	return false
+
+
 func _on_changed():
 	for a : ScalableArc in arcs:
 		if a and not a.changed.is_connected(_item_changed):

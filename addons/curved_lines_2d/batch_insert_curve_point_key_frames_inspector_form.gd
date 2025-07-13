@@ -37,4 +37,14 @@ func _on_batch_insert_button_pressed() -> void:
 		if p_idx < scalable_vector_shape_2d.curve.point_count - 1:
 			_add_key_frame(undo_redo, animation, NodePath("%s:curve:point_%d/out" % [path_to_node, p_idx]),
 					track_position, scalable_vector_shape_2d.curve.get_point_out(p_idx))
+	for a_idx in scalable_vector_shape_2d.arc_list.arcs.size():
+		_add_key_frame(undo_redo, animation, NodePath("%s:arc_list:arc_%d/radius" % [path_to_node, a_idx]),
+					track_position, scalable_vector_shape_2d.arc_list.arcs[a_idx].radius)
+		_add_key_frame(undo_redo, animation, NodePath("%s:arc_list:arc_%d/rotation_deg" % [path_to_node, a_idx]),
+					track_position, scalable_vector_shape_2d.arc_list.arcs[a_idx].rotation_deg)
+		_add_key_frame(undo_redo, animation, NodePath("%s:arc_list:arc_%d/large_arc_flag" % [path_to_node, a_idx]),
+					track_position, scalable_vector_shape_2d.arc_list.arcs[a_idx].large_arc_flag)
+		_add_key_frame(undo_redo, animation, NodePath("%s:arc_list:arc_%d/sweep_flag" % [path_to_node, a_idx]),
+					track_position, scalable_vector_shape_2d.arc_list.arcs[a_idx].sweep_flag)
+
 	undo_redo.commit_action()
