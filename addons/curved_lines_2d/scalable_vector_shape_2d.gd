@@ -540,14 +540,10 @@ func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> V
 	return closest_result
 
 
-func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
+func get_closest_point_on_curve(global_pos : Vector2) -> ClosestPointOnCurveMeta:
 	var p := to_local(global_pos)
 	if curve.point_count < 2:
-		return {
-			"local_point_position": p,
-			"point_position": global_pos,
-			"before_segment": 1
-		}
+		return ClosestPointOnCurveMeta.new(1, global_pos, p)
 
 	var closest_result := Vector2.INF
 	var before_segment := 1
@@ -556,12 +552,8 @@ func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
 		if p.distance_to(c_p) < p.distance_to(closest_result):
 			closest_result = c_p
 			before_segment = i + 1
+	return ClosestPointOnCurveMeta.new(before_segment, to_global(closest_result), closest_result)
 
-	return {
-		"local_point_position": closest_result,
-		"point_position": to_global(closest_result),
-		"before_segment": before_segment
-	}
 
 # Adapted from the GodSVG repository to draw arc in stead of determine bounding box.
 # https://github.com/MewPurPur/GodSVG/blob/53168a8cf74739fe828f488901eada02d5d97b69/src/data_classes/ElementPath.gd#L118
@@ -662,3 +654,14 @@ static func set_ellipse_points(curve : Curve2D, size: Vector2, offset := Vector2
 	curve.add_point(offset + Vector2(-size.x * 0.5, 0), Vector2(0, size.y * 0.5 * R_TO_CP), Vector2(0, -size.y * 0.5 * R_TO_CP))
 	curve.add_point(offset + Vector2(0, -size.y * 0.5), Vector2(-size.x * 0.5 * R_TO_CP, 0), Vector2(size.x * 0.5 * R_TO_CP, 0))
 	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2(0, -size.y * 0.5 * R_TO_CP))
+
+
+class ClosestPointOnCurveMeta:
+	var before_segment : int
+	var point_position : Vector2
+	var local_point_position : Vector2
+
+	func _init(bs : int, pp : Vector2, lpp : Vector2):
+		before_segment = bs
+		point_position = pp
+		local_point_position = lpp

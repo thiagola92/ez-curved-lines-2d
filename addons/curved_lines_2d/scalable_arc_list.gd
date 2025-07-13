@@ -33,3 +33,15 @@ func get_arc_for_point(p_idx : int) -> ScalableArc:
 		return arcs[idx]
 	else:
 		return null
+
+
+func handle_point_added_at_index(new_idx) -> void:
+	for a : ScalableArc in arcs:
+		if a.start_point >= new_idx:
+			a.start_point += 1
+
+
+func handle_point_removed_at_index(removed_idx) -> void:
+	for a : ScalableArc in arcs:
+		if a.start_point >= removed_idx:
+			a.start_point -= 1

@@ -568,9 +568,7 @@ func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> vo
 
 	var closest_point_on_curve := svs.get_closest_point_on_curve(g_mouse_pos)
 
-	if ("point_position" in closest_point_on_curve and
-			mouse_pos.distance_to(_vp_transform(closest_point_on_curve["point_position"])) < 15
-	):
+	if mouse_pos.distance_to(_vp_transform(closest_point_on_curve.point_position)) < 15:
 		svs.set_meta(META_NAME_HOVER_CLOSEST_POINT, closest_point_on_curve)
 
 
@@ -622,18 +620,18 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 		return
 
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
-		var md_p := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+		var md_p : ScalableVectorShape2D.ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 
-		if svs.is_arc_start(md_p["before_segment"] - 1):
+		if svs.is_arc_start(md_p.before_segment - 1):
 			print("TODO: handle arc segment hover")
 		else:
-			var p = _vp_transform(md_p["point_position"])
-			_draw_crosshair(viewport_control, _vp_transform(md_p["point_position"]))
+			var p = _vp_transform(md_p.point_position)
+			_draw_crosshair(viewport_control, _vp_transform(md_p.point_position))
 			var hint := ""
 			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 				if svs.curve.point_count > 1:
 					hint += "- Double click to add point on the line"
-					if md_p["before_segment"] < svs.curve.point_count:
+					if md_p.before_segment < svs.curve.point_count:
 						hint += "\n- Drag to change curve"
 				else:
 					_draw_add_point_hint(viewport_control, svs)
@@ -995,7 +993,9 @@ func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : i
 	if orig_n > 2:
 		undo_redo.add_do_method(current_selection.curve, 'set_point_out', orig_n - 2, Vector2.ZERO)
 	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
+	undo_redo.add_do_method(current_selection.arc_list, 'handle_point_removed_at_index', idx)
 	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
+	undo_redo.add_undo_method(current_selection.arc_list, 'handle_point_added_at_index', idx)
 	undo_redo.commit_action()
 
 
@@ -1030,10 +1030,13 @@ func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
 		cp_in := Vector2.ZERO, cp_out := Vector2.ZERO, idx := -1) -> void:
 	undo_redo.create_action("Add point at %s to %s " % [str(local_pos), str(svs)])
 	undo_redo.add_do_method(svs.curve, 'add_point', local_pos, cp_in, cp_out, idx)
+	undo_redo.add_do_method(svs.arc_list, 'handle_point_added_at_index', idx)
 	if idx < 0:
 		undo_redo.add_undo_method(svs.curve, 'remove_point', svs.curve.point_count)
+		undo_redo.add_undo_method(svs.arc_list, 'handle_point_removed_at_index', svs.curve.point_count)
 	else:
 		undo_redo.add_undo_method(svs.curve, 'remove_point', idx)
+		undo_redo.add_undo_method(svs.arc_list, 'handle_point_removed_at_index', idx)
 	undo_redo.commit_action()
 
 
@@ -1048,13 +1051,12 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 		return
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
-	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
-	if "before_segment" in md_closest_point and "local_point_position" in md_closest_point:
-		if md_closest_point["before_segment"] >= svs.curve.point_count:
-			_add_point_to_curve(svs, md_closest_point["local_point_position"])
-		else:
-			_add_point_to_curve(svs, md_closest_point["local_point_position"],
-					Vector2.ZERO, Vector2.ZERO, md_closest_point["before_segment"])
+	var md_closest_point : ScalableVectorShape2D.ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+	if md_closest_point.before_segment >= svs.curve.point_count:
+		_add_point_to_curve(svs, md_closest_point.local_point_position)
+	else:
+		_add_point_to_curve(svs, md_closest_point.local_point_position,
+				Vector2.ZERO, Vector2.ZERO, md_closest_point.before_segment)
 
 
 func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
@@ -1063,11 +1065,11 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
 	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
-	if md_closest_point["before_segment"] >= svs.curve.point_count or md_closest_point["before_segment"] < 1:
+	if md_closest_point.before_segment >= svs.curve.point_count or md_closest_point.before_segment < 1:
 		return
 	# Compute control points based on mouse position to align middle of segment curve to it
 	# using the quadratic Bézier control point
-	var idx : int = md_closest_point["before_segment"]
+	var idx : int = md_closest_point.before_segment
 	var segment_start_point := svs.curve.get_point_position(idx - 1)
 	var segment_end_point := svs.curve.get_point_position(idx)
 	var halfway_point := (segment_start_point + segment_end_point) / 2
