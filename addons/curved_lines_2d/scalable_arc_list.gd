@@ -27,6 +27,17 @@ func _item_changed():
 	emit_changed()
 
 
+func remove_arc_for_point(p_idx : int) -> void:
+	arcs = arcs.filter(func(a): return a.start_point != p_idx)
+	emit_changed()
+
+
+func add_arc(arc : ScalableArc) -> void:
+	arcs.append(arc)
+	_on_changed()
+	emit_changed()
+
+
 func get_arc_for_point(p_idx : int) -> ScalableArc:
 	var idx = arcs.find_custom(func(a : ScalableArc): return a.start_point == p_idx)
 	if idx > -1:
