@@ -21,6 +21,8 @@ func _get(property: StringName) -> Variant:
 	var components := property.split("/", true, 2)
 	if components.size() >= 2:
 		var arc_idx := components[0].trim_prefix("arc_").to_int()
+		if arc_idx >= arcs.size():
+			return null
 		var arc := arcs[arc_idx]
 		if components[1] in arc:
 			return arc[components[1]]
@@ -32,6 +34,8 @@ func _set(property: StringName, value: Variant) -> bool:
 	var components := property.split("/", true, 2)
 	if components.size() >= 2:
 		var arc_idx := components[0].trim_prefix("arc_").to_int()
+		if arc_idx >= arcs.size():
+			return false
 		var arc := arcs[arc_idx]
 		if components[1] in arc:
 			arc[components[1]] = value
