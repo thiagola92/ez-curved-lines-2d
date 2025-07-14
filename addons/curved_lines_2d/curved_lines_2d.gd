@@ -621,7 +621,7 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		var hint := ""
-		var md_p : ScalableVectorShape2D.ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+		var md_p : ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 		if svs.is_arc_start(md_p.before_segment - 1):
 			var arc_start_idx := md_p.before_segment - 1
 			var arc := svs.arc_list.get_arc_for_point(arc_start_idx)
@@ -1068,7 +1068,7 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 		return
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
-	var md_closest_point : ScalableVectorShape2D.ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+	var md_closest_point : ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 	if md_closest_point.before_segment >= svs.curve.point_count:
 		_add_point_to_curve(svs, md_closest_point.local_point_position)
 	else:
@@ -1081,7 +1081,7 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 		return
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
-	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+	var md_closest_point : ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 	if svs.is_arc_start(md_closest_point.before_segment - 1) or md_closest_point.before_segment >= svs.curve.point_count or md_closest_point.before_segment < 1:
 		return
 

@@ -655,13 +655,3 @@ static func set_ellipse_points(curve : Curve2D, size: Vector2, offset := Vector2
 	curve.add_point(offset + Vector2(0, -size.y * 0.5), Vector2(-size.x * 0.5 * R_TO_CP, 0), Vector2(size.x * 0.5 * R_TO_CP, 0))
 	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2(0, -size.y * 0.5 * R_TO_CP))
 
-
-class ClosestPointOnCurveMeta:
-	var before_segment : int
-	var point_position : Vector2
-	var local_point_position : Vector2
-
-	func _init(bs : int, pp : Vector2, lpp : Vector2):
-		before_segment = bs
-		point_position = pp
-		local_point_position = lpp

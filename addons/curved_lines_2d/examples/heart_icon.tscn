@@ -1,9 +1,7 @@
-[gd_scene load_steps=17 format=3 uid="uid://c6dfjd23olqhh"]
+[gd_scene load_steps=12 format=3 uid="uid://c6dfjd23olqhh"]
 
 [ext_resource type="Script" uid="uid://de3jpss66xjfh" path="res://addons/curved_lines_2d/scalable_vector_shape_2d.gd" id="1_0qe1d"]
 [ext_resource type="Script" uid="uid://bq71tj10w4224" path="res://addons/curved_lines_2d/examples/heart_icon.gd" id="1_7bfrm"]
-[ext_resource type="Script" uid="uid://dlbv4pit17dnu" path="res://addons/curved_lines_2d/scalable_arc.gd" id="3_0mo18"]
-[ext_resource type="Script" uid="uid://dl1t88tthmwts" path="res://addons/curved_lines_2d/scalable_arc_list.gd" id="4_2kl3k"]
 
 [sub_resource type="Curve2D" id="Curve2D_jr52a"]
 _data = {
@@ -11,19 +9,11 @@ _data = {
 }
 point_count = 9
 
-[sub_resource type="Resource" id="Resource_0f505"]
-script = ExtResource("4_2kl3k")
-arcs = Array[ExtResource("3_0mo18")]([])
-
 [sub_resource type="Curve2D" id="Curve2D_2027v"]
 _data = {
 "points": PackedVector2Array(0, 0, 29.2, -50, 0.973248, -28.9963, 94.8, -57.4, -88.8, -44.5, 0.617999, 42.92, -42.8, -54.2, 0, 0, 0.973248, -28.9963)
 }
 point_count = 3
-
-[sub_resource type="Resource" id="Resource_tok2d"]
-script = ExtResource("4_2kl3k")
-arcs = Array[ExtResource("3_0mo18")]([])
 
 [sub_resource type="Gradient" id="Gradient_ygkck"]
 colors = PackedColorArray(0.60933, 0.60933, 0.60933, 1, 1, 1, 1, 1)
@@ -38,10 +28,6 @@ _data = {
 "points": PackedVector2Array(0, 0, 21.7271, 20.9769, 13.3388, -11.7091, 14.937, 28.6102, -14.937, -28.6102, -14.6612, 16.2909, -10.3688, -18.3229, 0, 0, 13.3388, -11.7091)
 }
 point_count = 3
-
-[sub_resource type="Resource" id="Resource_35n4y"]
-script = ExtResource("4_2kl3k")
-arcs = Array[ExtResource("3_0mo18")]([])
 
 [sub_resource type="Gradient" id="Gradient_42wa7"]
 offsets = PackedFloat32Array(0, 0.529197)
@@ -652,7 +638,6 @@ polygon = NodePath("Fill")
 line = NodePath("Stroke")
 curve = SubResource("Curve2D_jr52a")
 update_curve_at_runtime = true
-arc_list = SubResource("Resource_0f505")
 
 [node name="Fill" type="Polygon2D" parent="Rectangle"]
 show_behind_parent = true
@@ -673,7 +658,6 @@ polygon = NodePath("Fill")
 line = NodePath("Stroke")
 curve = SubResource("Curve2D_2027v")
 update_curve_at_runtime = true
-arc_list = SubResource("Resource_tok2d")
 
 [node name="Fill" type="Polygon2D" parent="Rectangle/Heart"]
 show_behind_parent = true
@@ -703,7 +687,6 @@ script = ExtResource("1_0qe1d")
 polygon = NodePath("Polygon2D")
 curve = SubResource("Curve2D_bi08n")
 update_curve_at_runtime = true
-arc_list = SubResource("Resource_35n4y")
 shape_hint_color = Color(0.196078, 0.803922, 0.196078, 0.27451)
 metadata/_custom_type_script = "uid://de3jpss66xjfh"
 
