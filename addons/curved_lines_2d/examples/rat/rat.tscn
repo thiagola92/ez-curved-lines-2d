@@ -1,6 +1,8 @@
-[gd_scene load_steps=24 format=3 uid="uid://kbkwi2nx8ith"]
+[gd_scene load_steps=28 format=3 uid="uid://kbkwi2nx8ith"]
 
 [ext_resource type="Script" uid="uid://xhridu7hgcrc" path="res://addons/curved_lines_2d/examples/rat/rat.gd" id="1_7hgga"]
+[ext_resource type="Script" uid="uid://dlbv4pit17dnu" path="res://addons/curved_lines_2d/scalable_arc.gd" id="3_4sn87"]
+[ext_resource type="Script" uid="uid://dl1t88tthmwts" path="res://addons/curved_lines_2d/scalable_arc_list.gd" id="4_jqihn"]
 [ext_resource type="Script" uid="uid://de3jpss66xjfh" path="res://addons/curved_lines_2d/scalable_vector_shape_2d.gd" id="18_xsi10"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_12up7"]
@@ -67,6 +69,14 @@ _data = {
 "points": PackedVector2Array(8.87613, 7.12121, -7.20475, -5.93393, -1.28417, -2.88979, -4.59851, 12.7017, 4.59851, -12.7017, -6.45195, -35.544, -14.8595, -1.9786, 14.8595, 1.9786, 30.5377, -58.2104, -16.317, -6.66003, 10.8842, 8.67538, 67.2043, -42.6683)
 }
 point_count = 4
+
+[sub_resource type="Resource" id="Resource_syjnd"]
+script = ExtResource("4_jqihn")
+arcs = Array[ExtResource("3_4sn87")]([])
+
+[sub_resource type="Resource" id="Resource_6gv5h"]
+script = ExtResource("4_jqihn")
+arcs = Array[ExtResource("3_4sn87")]([])
 
 [sub_resource type="Gradient" id="Gradient_7pevi"]
 colors = PackedColorArray(0.345098, 0.345098, 0.290196, 1, 0.462745, 0.462745, 0.384314, 1)
@@ -1729,6 +1739,7 @@ script = ExtResource("18_xsi10")
 line = NodePath("../Line2D")
 curve = SubResource("Curve2D_d4tj5")
 update_curve_at_runtime = true
+arc_list = SubResource("Resource_syjnd")
 
 [node name="Tail2" type="Node2D" parent="Pivot/Body_fill" node_paths=PackedStringArray("line")]
 position = Vector2(-37.6309, 5.64914)
@@ -1736,6 +1747,7 @@ script = ExtResource("18_xsi10")
 line = NodePath("../Line2D2")
 curve = SubResource("Curve2D_d4tj5")
 update_curve_at_runtime = true
+arc_list = SubResource("Resource_6gv5h")
 
 [node name="Leg_front_near_stroke" type="Node2D" parent="Pivot/Body_fill"]
 show_behind_parent = true

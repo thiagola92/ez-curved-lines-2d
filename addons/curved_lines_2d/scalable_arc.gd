@@ -32,7 +32,7 @@ extends Resource
 		emit_changed()
 
 
-func _init(sp : int = 0, r := Vector2.ZERO, rd := 0.0, lf := true, sf := false) -> void:
+func _init(sp : int = 0, r := Vector2.ZERO, rd := 0.0, lf := false, sf := true) -> void:
 	start_point = sp
 	radius = r
 	rotation_deg = rd

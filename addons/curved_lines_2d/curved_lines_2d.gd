@@ -640,6 +640,7 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 					hint = "- Double click to add point on the line"
 					if md_p.before_segment < svs.curve.point_count:
 						hint += "\n- Drag to change curve"
+						hint += "\n- Right click to convert line segment to arc"
 				else:
 					_draw_add_point_hint(viewport_control, svs)
 		if not hint.is_empty():
@@ -1046,6 +1047,13 @@ func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
 	undo_redo.commit_action()
 
 
+func _create_arc(svs :  ScalableVectorShape2D, start_point_idx : int) -> void:
+	undo_redo.create_action("Remove arc for segment %d on %s " % [start_point_idx, str(svs)])
+	undo_redo.add_do_method(svs, 'add_arc', start_point_idx)
+	undo_redo.add_undo_method(svs.arc_list, 'remove_arc_for_point', start_point_idx)
+	undo_redo.commit_action()
+
+
 func _remove_arc(svs : ScalableVectorShape2D, start_point_idx : int) -> void:
 	var redo_arc := svs.arc_list.get_arc_for_point(start_point_idx)
 	if redo_arc == null:
@@ -1214,6 +1222,8 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 				var cp_md = current_selection.get_meta(META_NAME_HOVER_CLOSEST_POINT)
 				if current_selection.is_arc_start(cp_md.before_segment - 1):
 					_remove_arc(current_selection, cp_md.before_segment - 1)
+				else:
+					_create_arc(current_selection, cp_md.before_segment - 1)
 
 			return true
 

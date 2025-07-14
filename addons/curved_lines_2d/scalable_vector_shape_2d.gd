@@ -501,6 +501,12 @@ func replace_curve_points(curve_in : Curve2D) -> void:
 				curve_in.get_point_in(i), curve_in.get_point_out(i))
 
 
+func add_arc(segment_p1_idx : int) -> void:
+	var seg := _get_curve_segment(segment_p1_idx)
+	var r := seg.get_point_position(0).distance_to(seg.get_point_position(1)) * 0.5
+	arc_list.add_arc(ScalableArc.new(segment_p1_idx, Vector2.ONE * r, 0.0))
+
+
 func _get_curve_segment(segment_p1_idx : int) -> Curve2D:
 	var curve_segment := Curve2D.new()
 	curve_segment.add_point(
