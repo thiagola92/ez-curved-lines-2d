@@ -1,4 +1,3 @@
-class_name Rat
 extends CharacterBody2D
 
 
