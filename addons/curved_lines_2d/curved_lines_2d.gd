@@ -67,6 +67,7 @@ var undo_redo_transaction : Dictionary = {
 }
 
 var set_global_position_popup_panel : PopupPanel
+var arc_settings_popup_panel : PopupPanel
 
 func _enter_tree():
 	scalable_vector_shapes_2d_dock = preload("res://addons/curved_lines_2d/scalable_vector_shapes_2d_dock.tscn").instantiate()
@@ -91,7 +92,9 @@ func _enter_tree():
 	make_bottom_panel_item_visible(scalable_vector_shapes_2d_dock)
 
 	set_global_position_popup_panel = preload("res://addons/curved_lines_2d/set_global_position_popup_panel.tscn").instantiate()
+	arc_settings_popup_panel = preload("res://addons/curved_lines_2d/arc_settings_popup_panel.tscn").instantiate()
 	EditorInterface.get_base_control().add_child(set_global_position_popup_panel)
+	EditorInterface.get_base_control().add_child(arc_settings_popup_panel)
 	if not set_global_position_popup_panel.value_changed.is_connected(_on_global_position_for_handle_changed):
 		set_global_position_popup_panel.value_changed.connect(_on_global_position_for_handle_changed)
 	if not set_global_position_popup_panel.visibility_changed.is_connected(_commit_undo_redo_transaction):
@@ -631,7 +634,8 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 				svs.curve.get_point_position(arc_start_idx + 1),
 			)).map(func(p): return _vp_transform(svs.to_global(p)))
 			viewport_control.draw_polyline(arc_points, Color.RED, 3.0, true)
-			hint = "- Right click to remove arc (straighten this line segment)"
+			hint = "- Left click to open arc settings"
+			hint += "\n- Right click to remove arc (straighten this line segment)"
 		else:
 			var p = _vp_transform(md_p.point_position)
 			_draw_crosshair(viewport_control, _vp_transform(md_p.point_position))
@@ -1077,6 +1081,8 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
 	var md_closest_point : ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+	if svs.is_arc_start(md_closest_point.before_segment - 1):
+		return
 	if md_closest_point.before_segment >= svs.curve.point_count:
 		_add_point_to_curve(svs, md_closest_point.local_point_position)
 	else:
@@ -1170,7 +1176,10 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					_add_point_on_position(current_selection, mouse_pos)
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
-				if event.double_click:
+				var cp_md : ClosestPointOnCurveMeta = current_selection.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+				if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and current_selection.is_arc_start(cp_md.before_segment - 1):
+					arc_settings_popup_panel.popup_with_value(current_selection.arc_list.get_arc_for_point(cp_md.before_segment - 1))
+				elif event.double_click:
 					_add_point_on_curve_segment(current_selection)
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE):
