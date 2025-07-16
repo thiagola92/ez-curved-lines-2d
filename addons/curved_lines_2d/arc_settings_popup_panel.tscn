@@ -176,6 +176,6 @@ layout_mode = 2
 text = "Ok"
 
 [connection signal="gui_input" from="VBoxContainer/Label" to="." method="_on_label_gui_input"]
-[connection signal="toggled" from="VBoxContainer/HBoxContainer3/Container/LargeArcCheckBox" to="." method="_on_value_changed"]
-[connection signal="toggled" from="VBoxContainer/HBoxContainer4/Container/SweepCheckBox" to="." method="_on_value_changed"]
+[connection signal="toggled" from="VBoxContainer/HBoxContainer3/Container/LargeArcCheckBox" to="." method="_on_large_arc_check_box_toggled"]
+[connection signal="toggled" from="VBoxContainer/HBoxContainer4/Container/SweepCheckBox" to="." method="_on_sweep_check_box_toggled"]
 [connection signal="pressed" from="VBoxContainer/Button" to="." method="_on_button_pressed"]

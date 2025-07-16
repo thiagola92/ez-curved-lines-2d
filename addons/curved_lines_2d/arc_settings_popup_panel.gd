@@ -20,24 +20,47 @@ func _enter_tree() -> void:
 	find_child("RxInputContainer").add_child(rx_input)
 	find_child("RyInputContainer").add_child(ry_input)
 	find_child("RotationInputContainer").add_child(rotation_input)
-	if not rx_input.value_changed.is_connected(_on_value_changed):
-		rx_input.value_changed.connect(_on_value_changed)
-	if not ry_input.value_changed.is_connected(_on_value_changed):
-		ry_input.value_changed.connect(_on_value_changed)
-	if not rotation_input.value_changed.is_connected(_on_value_changed):
-		rotation_input.value_changed.connect(_on_value_changed)
+	if not rx_input.value_changed.is_connected(_on_radius_changed):
+		rx_input.value_changed.connect(_on_radius_changed)
+	if not ry_input.value_changed.is_connected(_on_radius_changed):
+		ry_input.value_changed.connect(_on_radius_changed)
+	if not rotation_input.value_changed.is_connected(_on_rotation_changed):
+		rotation_input.value_changed.connect(_on_rotation_changed)
 
 func _on_button_pressed() -> void:
 	hide()
 
 
-func _on_value_changed(_v : Variant = null):
-	# TODO: split up all changed listeners and use undo_redo
-	print("TODO: split up all changed listeners and use undo_redo")
-	_arc_under_edit.radius = Vector2(rx_input.value, ry_input.value)
-	_arc_under_edit.rotation_deg = rotation_input.value
-	_arc_under_edit.large_arc_flag = large_arc_checkbox.button_pressed
-	_arc_under_edit.sweep_flag = sweep_checkbox.button_pressed
+func _on_rotation_changed(new_rot : float) -> void:
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Update arc rotation")
+	undo_redo.add_do_property(_arc_under_edit, 'rotation_deg', new_rot)
+	undo_redo.add_undo_property(_arc_under_edit, 'rotation_deg', _arc_under_edit.rotation_deg)
+	undo_redo.commit_action()
+
+
+func _on_radius_changed(_v : float) -> void:
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Update arc radius")
+	undo_redo.add_do_property(_arc_under_edit, 'radius', Vector2(rx_input.value, ry_input.value))
+	undo_redo.add_undo_property(_arc_under_edit, 'radius', _arc_under_edit.radius)
+	undo_redo.commit_action()
+
+
+func _on_sweep_check_box_toggled(toggled_on: bool) -> void:
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Update arc sweep flag")
+	undo_redo.add_do_property(_arc_under_edit, 'sweep_flag', toggled_on)
+	undo_redo.add_undo_property(_arc_under_edit, 'sweep_flag', _arc_under_edit.sweep_flag)
+	undo_redo.commit_action()
+
+
+func _on_large_arc_check_box_toggled(toggled_on: bool) -> void:
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Update arc large arc flag")
+	undo_redo.add_do_property(_arc_under_edit, 'large_arc_flag', toggled_on)
+	undo_redo.add_undo_property(_arc_under_edit, 'large_arc_flag', _arc_under_edit.large_arc_flag)
+	undo_redo.commit_action()
 
 
 func popup_with_value(arc : ScalableArc):
@@ -47,7 +70,6 @@ func popup_with_value(arc : ScalableArc):
 	rotation_input.set_value_no_signal(arc.rotation_deg)
 	large_arc_checkbox.set_pressed_no_signal(arc.large_arc_flag)
 	sweep_checkbox.set_pressed_no_signal(arc.sweep_flag)
-	_on_value_changed()
 	popup_centered()
 
 
