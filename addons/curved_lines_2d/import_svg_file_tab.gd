@@ -697,7 +697,10 @@ func process_svg_transform(svg_transform : String) -> Transform2D:
 	elif svg_transform.begins_with("scale"):
 		svg_transform = svg_transform.replace("scale", "").replacen("(", "").replacen(")", "")
 		var transform_split = svg_transform.split_floats(",")
-		transform = transform.scaled(Vector2(transform_split[0], transform_split[1]))
+		if transform_split.size() >= 2:
+			transform = transform.scaled(Vector2(transform_split[0], transform_split[1]))
+		else:
+			transform = transform.scaled(Vector2(transform_split[0], transform_split[0]))
 	elif svg_transform.begins_with("rotate"):
 		svg_transform = svg_transform.replace("rotate", "").replacen("(", "").replacen(")", "")
 		var transform_split = svg_transform.split_floats(",")
