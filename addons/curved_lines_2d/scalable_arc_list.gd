@@ -81,5 +81,7 @@ func handle_point_added_at_index(new_idx) -> void:
 
 func handle_point_removed_at_index(removed_idx) -> void:
 	for a : ScalableArc in arcs:
-		if a.start_point >= removed_idx:
+		if a.start_point == removed_idx or a.start_point + 1 == removed_idx:
+			remove_arc_for_point(a.start_point)
+		elif a.start_point >= removed_idx:
 			a.start_point -= 1

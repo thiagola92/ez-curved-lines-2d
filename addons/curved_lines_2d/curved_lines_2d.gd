@@ -1040,12 +1040,12 @@ func _remove_rounded_corners_from_rect(svs : ScalableVectorShape2D):
 func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
 		cp_in := Vector2.ZERO, cp_out := Vector2.ZERO, idx := -1) -> void:
 	undo_redo.create_action("Add point at %s to %s " % [str(local_pos), str(svs)])
+
 	undo_redo.add_do_method(svs.curve, 'add_point', local_pos, cp_in, cp_out, idx)
-	undo_redo.add_do_method(svs.arc_list, 'handle_point_added_at_index', idx)
 	if idx < 0:
 		undo_redo.add_undo_method(svs.curve, 'remove_point', svs.curve.point_count)
-		undo_redo.add_undo_method(svs.arc_list, 'handle_point_removed_at_index', svs.curve.point_count)
 	else:
+		undo_redo.add_do_method(svs.arc_list, 'handle_point_added_at_index', idx)
 		undo_redo.add_undo_method(svs.curve, 'remove_point', idx)
 		undo_redo.add_undo_method(svs.arc_list, 'handle_point_removed_at_index', idx)
 	undo_redo.commit_action()

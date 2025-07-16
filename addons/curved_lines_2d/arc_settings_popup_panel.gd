@@ -1,15 +1,13 @@
 @tool
 extends PopupPanel
 
-signal value_changed(data : ScalableArc)
-
 var rx_input : EditorSpinSlider
 var ry_input : EditorSpinSlider
 var rotation_input : EditorSpinSlider
 var large_arc_checkbox : CheckBox
 var sweep_checkbox : CheckBox
+var _arc_under_edit : ScalableArc
 
-var start_point_idx : int = 0
 var _dragging := false
 var _drag_start := Vector2.ZERO
 
@@ -34,15 +32,21 @@ func _on_button_pressed() -> void:
 
 
 func _on_value_changed(_v : Variant = null):
-	value_changed.emit(ScalableArc.new(start_point_idx, Vector2(rx_input.value, ry_input.value),
-			rotation_input.value, large_arc_checkbox.button_pressed, sweep_checkbox.button_pressed))
+	# TODO: split up all changed listeners and use undo_redo
+	print("TODO: split up all changed listeners and use undo_redo")
+	_arc_under_edit.radius = Vector2(rx_input.value, ry_input.value)
+	_arc_under_edit.rotation_deg = rotation_input.value
+	_arc_under_edit.large_arc_flag = large_arc_checkbox.button_pressed
+	_arc_under_edit.sweep_flag = sweep_checkbox.button_pressed
 
 
 func popup_with_value(arc : ScalableArc):
-	start_point_idx = arc.start_point
+	_arc_under_edit = arc
 	rx_input.set_value_no_signal(arc.radius.x)
 	ry_input.set_value_no_signal(arc.radius.y)
 	rotation_input.set_value_no_signal(arc.rotation_deg)
+	large_arc_checkbox.set_pressed_no_signal(arc.large_arc_flag)
+	sweep_checkbox.set_pressed_no_signal(arc.sweep_flag)
 	_on_value_changed()
 	popup_centered()
 
