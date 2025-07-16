@@ -618,7 +618,10 @@ func tessellate_arc_segment(start : Vector2, arc_radius : Vector2, arc_rotation_
 		else:
 			angle -= step
 	if points[points.size() - 1] != end:
-		points.append(end)
+		if points[points.size() - 1].distance_to(end) < 0.01:
+			points[points.size() - 1] = end
+		else:
+			points.append(end)
 	return points
 
 
