@@ -1003,10 +1003,21 @@ func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : i
 	undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
 	if orig_n > 2:
 		undo_redo.add_do_method(current_selection.curve, 'set_point_out', orig_n - 2, Vector2.ZERO)
+
+	var redo_arcs : Array[ScalableArc] = []
+	for a : ScalableArc in current_selection.arc_list.arcs:
+		if a.start_point == idx or a.start_point == idx - 1:
+			undo_redo.add_do_method(current_selection.arc_list, 'remove_arc_for_point', a.start_point)
+			redo_arcs.append(a)
+
 	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
 	undo_redo.add_do_method(current_selection.arc_list, 'handle_point_removed_at_index', idx)
 	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
 	undo_redo.add_undo_method(current_selection.arc_list, 'handle_point_added_at_index', idx)
+	for a in redo_arcs:
+		undo_redo.add_undo_reference(a)
+		undo_redo.add_undo_method(current_selection.arc_list, 'add_arc', a)
+
 	undo_redo.commit_action()
 
 
