@@ -259,7 +259,7 @@ func tessellate() -> PackedVector2Array:
 		.filter(func(a): return a != null)
 		.map(func(a : ScalableArc): return a.start_point)
 	)
-	for p_idx in (curve.point_count if is_curve_closed() else curve.point_count - 1):
+	for p_idx in curve.point_count - 1:
 		if p_idx in arc_starts:
 			var seg := _get_curve_segment(p_idx)
 			var arc = arc_list.get_arc_for_point(p_idx)
