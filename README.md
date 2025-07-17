@@ -35,6 +35,8 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [Closing the loop and breaking the loop](#closing-the-loop-and-breaking-the-loop)
 	- [Deleting points and control points](#deleting-points-and-control-points)
 	- [Setting the global position of a point / curve handle manually](#setting-the-global-position-of-a-point--curve-handle-manually)
+	- [Converting a line segment into an arc-segment](#converting-a-line-segment-into-an-arc-segment)
+	- [Editing arc properties](#editing-arc-properties)
 	- [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
 - [Manipulating gradients](#manipulating-gradients)
 	- [Changing the start- and endpoint of the gradient](#changing-the-start--and-endpoint-of-the-gradient)
@@ -180,6 +182,29 @@ Using `Alt+Click` you can now open a form to set the global position of a point 
 
 ![global position popup dialog](./addons/curved_lines_2d/screenshots/global_position_popup.png)
 
+## Converting a line segment into an arc-segment
+
+Use `Right click` on a line segment to convert it into an arc[^3] (a an ellipse-shaped bend with an x- and y-radius).
+
+![add an arc](./addons/curved_lines_2d/screenshots/add-arc.png)
+
+Use `Right click` on an arc again to convert it back into a normal line segment.
+
+![remove an arc](./addons/curved_lines_2d/screenshots/remove-arc.png)
+
+## Editing arc properties
+
+Using `Left click` on an arc segment opens a popup form to edit the properties of the arc:
+- radius (`rx` / `ry`)
+- rotation (rotates the arc around its elliptical center; is only noticable when radius is non-uniform)
+- large arc (when the arc's radius is greater than distance between its start- and endpoint it can be drawn the short and the long way 'round)
+- sweep (determines the direction the arc points are drawn: clockwise / counter-clockwise; this effectively flips the arc)
+
+![open arc settings](./addons/curved_lines_2d/screenshots/arc-settings.png)
+
+
+[^3]: Arcs are implemented the same way as specified by the [w3c for scalable vecor graphics](https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands).
+
 ## Setting the pivot of your shape
 
 You can use the `Change pivot` mode to change the origin of your shape, just like you would a `Sprite2D`. In this case, the 'pivot' will actually be the `position` property of you `ScalableVectorShape2D` node.
@@ -303,6 +328,7 @@ The curve settings inspector form provides the following options
 - The `update_curve_at_runtime` checkbox, which enables animating the entire shape
 - The `max_stages` property which influences smoothness (and performance!) of curve drawing; a higher value means smoother lines
 - The `tolerance_degrees` property, which also influences smoothness (and performance) of curve drawing: a lower value adds a smoother curve, especially for very subtle bends
+- The `arc_list`: a container for the metadata-objects describing elliptical arc segments of the curve (implemented via `ScalableArc2D` and `ScalableArcList` resource-classes).
 
 ## The Shape type inspector form
 
@@ -372,11 +398,16 @@ You can use the `Update Curve at Runtime` checkbox in the inspector to enable dy
 
 ## Add keyframes in an animation player
 
-You can then add an `AnimationPlayer` node to your scene, create a new animation and (batch) insert key frames for the following this:
+You can then add an `AnimationPlayer` node to your scene, create a new animation and (batch) insert key frames for the following:
+
 - The entire shape of your `ScalableVectorShape2D`, which are:
   - `curve:point_*/position`
   - `curve:point_*/in`
   - `curve:point_*/out`
+  - `arc_list:arc_*/radius`
+  - `arc_list:arc_*/rotation_deg`
+  - `arc_list:arc_*/large_arc_flag`
+  - `arc_list:arc_*/sweep_flag`
 - All the gradient properties of your fill (`Polygon2D` assigned to `ScalableVectorShape2D`), which are:
   - `texture:gradient:colors` (the entire `PackedColorArray`)
   - `texture:gradient:offsets` (the entire `PackedFloat32Array`)

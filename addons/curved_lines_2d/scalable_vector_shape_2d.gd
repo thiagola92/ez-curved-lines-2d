@@ -77,7 +77,7 @@ enum ShapeType {
 ## Changes to this curve will also emit the path_changed signal with the updated points array
 @export var curve: Curve2D = Curve2D.new():
 	set(_curve):
-		curve = _curve
+		curve = _curve if _curve != null else Curve2D.new()
 		assigned_node_changed.emit()
 
 ## Controls whether the path is treated as static (only update in editor) or dynamic (can be updated during runtime)
@@ -97,6 +97,12 @@ enum ShapeType {
 @export_range(0.0, 180.0) var tolerance_degrees := 4.0:
 	set(_tolerance_degrees):
 		tolerance_degrees = _tolerance_degrees
+		assigned_node_changed.emit()
+
+
+@export var arc_list : ScalableArcList = ScalableArcList.new():
+	set(_arc_list):
+		arc_list = _arc_list if _arc_list != null else ScalableArcList.new()
 		assigned_node_changed.emit()
 
 
@@ -167,6 +173,8 @@ func _ready():
 	if update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+		if not arc_list.changed.is_connected(curve_changed):
+			arc_list.changed.connect(curve_changed)
 	if not dimensions_changed.is_connected(_on_dimensions_changed):
 		dimensions_changed.connect(_on_dimensions_changed)
 
@@ -176,15 +184,22 @@ func _enter_tree():
 	# ensure forward compatibility by assigning the default ShapeType
 	if shape_type == null:
 		shape_type = ShapeType.PATH
+	# ensure forward compatibility by assigning the default arc_list
+	if arc_list == null:
+		arc_list = ScalableArcList.new()
 	if Engine.is_editor_hint():
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+		if not arc_list.changed.is_connected(curve_changed):
+			arc_list.changed.connect(curve_changed)
 		if not assigned_node_changed.is_connected(_on_assigned_node_changed):
 			assigned_node_changed.connect(_on_assigned_node_changed)
 	# handles update when reparenting
 	if update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+		if not arc_list.changed.is_connected(curve_changed):
+			arc_list.changed.connect(curve_changed)
 	# updates the curve points when size, offset, rx, or ry prop changes
 	# (used for ShapeType.RECT and ShapeType.ELLIPSE)
 	if not dimensions_changed.is_connected(_on_dimensions_changed):
@@ -195,6 +210,8 @@ func _enter_tree():
 func _exit_tree():
 	if curve.changed.is_connected(curve_changed):
 		curve.changed.disconnect(curve_changed)
+	if arc_list.changed.is_connected(curve_changed):
+		arc_list.changed.disconnect(curve_changed)
 
 
 func _on_dimensions_changed():
@@ -212,6 +229,8 @@ func _on_assigned_node_changed():
 	if Engine.is_editor_hint() or update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
+		if not arc_list.changed.is_connected(curve_changed):
+			arc_list.changed.connect(curve_changed)
 
 	if is_instance_valid(line):
 		if lock_assigned_shapes:
@@ -232,15 +251,48 @@ func notify_assigned_node_change():
 	assigned_node_changed.emit()
 
 
-## Redraw the line based on the new curve, using its tesselate method
+func tessellate() -> PackedVector2Array:
+	if not arc_list or arc_list.arcs.is_empty():
+		return curve.tessellate(max_stages, tolerance_degrees)
+	var poly_points = []
+	var arc_starts := (arc_list.arcs
+		.filter(func(a): return a != null)
+		.map(func(a : ScalableArc): return a.start_point)
+	)
+	for p_idx in curve.point_count - 1:
+		if p_idx in arc_starts:
+			var seg := _get_curve_segment(p_idx)
+			var arc = arc_list.get_arc_for_point(p_idx)
+			if arc:
+				var seg_points := tessellate_arc_segment(seg.get_point_position(0), arc.radius,
+						arc.rotation_deg, arc.large_arc_flag, arc.sweep_flag, seg.get_point_position(1))
+				for i in seg_points.size():
+					if i == 0 and not poly_points.is_empty():
+						continue
+					poly_points.append(seg_points[i])
+			else:
+				printerr("Illegal state: there should be an arc int arc_list with start_point=%d - (%s)" % [p_idx, name])
+				if poly_points.is_empty():
+					poly_points.append(seg.get_point_position(0))
+				poly_points.append(seg.get_point_position(1))
+		else:
+			var seg_points := _get_curve_segment(p_idx).tessellate(max_stages, tolerance_degrees)
+			for i in seg_points.size():
+				if i == 0 and not poly_points.is_empty():
+					continue
+				poly_points.append(seg_points[i])
+	return poly_points
+
+
+## Redraw the line based on the new curve, using its tessellate method
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
 			and not is_instance_valid(collision_polygon)
 			and not path_changed.has_connections()):
-		# guard against needlessly invoking expensive tesselate operation
+		# guard against needlessly invoking expensive tessellate operation
 		return
 
-	var new_points := curve.tessellate(max_stages, tolerance_degrees)
+	var new_points := self.tessellate()
 	# Fixes cases start- and end-node are so close to each other that
 	# polygons won't fill and closed lines won't cap nicely
 	if new_points.size() > 0 and new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
@@ -264,7 +316,7 @@ func curve_changed():
 func get_bounding_rect() -> Rect2:
 	if not curve:
 		return Rect2(Vector2.ZERO, Vector2.ZERO)
-	var points := curve.tessellate(max_stages, tolerance_degrees)
+	var points := self.tessellate()
 	if points.size() < 1:
 		# Cannot calculate a center for 0 points
 		return Rect2(Vector2.ZERO, Vector2.ZERO)
@@ -288,7 +340,7 @@ func has_point(global_pos : Vector2) -> bool:
 
 func has_fine_point(global_pos : Vector2) -> bool:
 	if is_instance_valid(polygon) or is_instance_valid(collision_polygon):
-		var poly_points := curve.tessellate(max_stages, tolerance_degrees)
+		var poly_points := self.tessellate()
 		return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
 	return false
 
@@ -331,12 +383,12 @@ func get_bounding_box() -> Array[Vector2]:
 
 
 func get_poly_points() -> Array:
-	return Array(curve.tessellate(max_stages, tolerance_degrees)).map(to_global)
+	return Array(self.tessellate()).map(to_global)
 
 
 func get_farthest_point(from_local_pos := Vector2.ZERO) -> Vector2:
 	var farthest_point = from_local_pos
-	for p in curve.tessellate(max_stages, tolerance_degrees):
+	for p in self.tessellate():
 		if p.distance_to(from_local_pos) > farthest_point.distance_to(from_local_pos):
 			farthest_point = p
 	return farthest_point
@@ -449,7 +501,13 @@ func replace_curve_points(curve_in : Curve2D) -> void:
 				curve_in.get_point_in(i), curve_in.get_point_out(i))
 
 
-func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> Vector2:
+func add_arc(segment_p1_idx : int) -> void:
+	var seg := _get_curve_segment(segment_p1_idx)
+	var r := seg.get_point_position(0).distance_to(seg.get_point_position(1)) * 0.5
+	arc_list.add_arc(ScalableArc.new(segment_p1_idx, Vector2.ONE * r, 0.0))
+
+
+func _get_curve_segment(segment_p1_idx : int) -> Curve2D:
 	var curve_segment := Curve2D.new()
 	curve_segment.add_point(
 		curve.get_point_position(segment_p1_idx),
@@ -462,7 +520,22 @@ func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> V
 		curve.get_point_position(segment_p2_idx),
 		curve.get_point_in(segment_p2_idx)
 	)
-	var poly_points := curve_segment.tessellate(max_stages, tolerance_degrees)
+	return curve_segment
+
+
+func is_arc_start(p_idx) -> bool:
+	return  arc_list.get_arc_for_point(p_idx) != null
+
+
+func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> Vector2:
+	var arc := arc_list.get_arc_for_point(segment_p1_idx)
+	var seg := _get_curve_segment(segment_p1_idx)
+	var poly_points := (
+			tessellate_arc_segment(seg.get_point_position(0), arc.radius, arc.rotation_deg,
+				arc.large_arc_flag, arc.sweep_flag, seg.get_point_position(1))
+		if arc else
+			seg.tessellate(max_stages, tolerance_degrees)
+	)
 	var closest_result := Vector2.INF
 	for i in range(1, poly_points.size()):
 		var p_a := poly_points[i - 1]
@@ -473,14 +546,10 @@ func _get_closest_point_on_curve_segment(p : Vector2, segment_p1_idx : int) -> V
 	return closest_result
 
 
-func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
+func get_closest_point_on_curve(global_pos : Vector2) -> ClosestPointOnCurveMeta:
 	var p := to_local(global_pos)
 	if curve.point_count < 2:
-		return {
-			"local_point_position": p,
-			"point_position": global_pos,
-			"before_segment": 1
-		}
+		return ClosestPointOnCurveMeta.new(1, global_pos, p)
 
 	var closest_result := Vector2.INF
 	var before_segment := 1
@@ -489,12 +558,72 @@ func get_closest_point_on_curve(global_pos : Vector2) -> Dictionary:
 		if p.distance_to(c_p) < p.distance_to(closest_result):
 			closest_result = c_p
 			before_segment = i + 1
+	return ClosestPointOnCurveMeta.new(before_segment, to_global(closest_result), closest_result)
 
-	return {
-		"local_point_position": closest_result,
-		"point_position": to_global(closest_result),
-		"before_segment": before_segment
-	}
+
+# Adapted from the GodSVG repository to draw arc in stead of determine bounding box.
+# https://github.com/MewPurPur/GodSVG/blob/53168a8cf74739fe828f488901eada02d5d97b69/src/data_classes/ElementPath.gd#L118
+func tessellate_arc_segment(start : Vector2, arc_radius : Vector2, arc_rotation_deg : float,
+						large_arc_flag : bool, sweep_flag : bool, end : Vector2) -> PackedVector2Array:
+
+	if start == end or arc_radius.x == 0 or arc_radius.y == 0:
+		return [start, end]
+
+	var r := arc_radius.abs()
+	# Obtain center parametrization.
+	var rot := deg_to_rad(arc_rotation_deg)
+	var cosine := cos(rot)
+	var sine := sin(rot)
+	var half := (start - end) / 2
+	var x1 := half.x * cosine + half.y * sine
+	var y1 := -half.x * sine + half.y * cosine
+	var r2 := Vector2(r.x * r.x, r.y * r.y)
+	var x12 := x1 * x1
+	var y12 := y1 * y1
+	var cr := x12 / r2.x + y12 / r2.y
+	if cr > 1:
+		cr = sqrt(cr)
+		r *= cr
+		r2 = Vector2(r.x * r.x, r.y * r.y)
+
+	var dq := r2.x * y12 + r2.y * x12
+	var pq := (r2.x * r2.y - dq) / dq
+	var sc := sqrt(maxf(0, pq))
+	if large_arc_flag == sweep_flag:
+		sc = -sc
+
+	var ct := Vector2(r.x * sc * y1 / r.y, -r.y * sc * x1 / r.x)
+	var c := Vector2(ct.x * cosine - ct.y * sine,
+			ct.x * sine + ct.y * cosine) + start.lerp(end, 0.5)
+	var tv := Vector2(x1 - ct.x, y1 - ct.y) / r
+	var theta1 := tv.angle()
+	var delta_theta := fposmod(tv.angle_to(
+			Vector2(-x1 - ct.x, -y1 - ct.y) / r), TAU)
+	if not sweep_flag:
+		theta1 += delta_theta
+		delta_theta = TAU - delta_theta
+	theta1 = fposmod(theta1, TAU)
+
+	var step := deg_to_rad(1.0 if tolerance_degrees < 1.0 else tolerance_degrees)
+	var angle := theta1 if sweep_flag else theta1 + delta_theta
+	var init_pnt := Vector2(c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
+				c.y + r.x * cos(angle) * sine + r.y * sin(angle) * cosine)
+	var points : PackedVector2Array = []
+	while (sweep_flag and angle < theta1 + delta_theta) or (not sweep_flag and angle > theta1):
+		var pnt := Vector2(c.x + r.x * cos(angle) * cosine - r.y * sin(angle) * sine,
+				c.y + r.x * cos(angle) * sine + r.y * sin(angle) * cosine)
+		points.append(pnt)
+		if sweep_flag:
+			angle += step
+		else:
+			angle -= step
+	if points[points.size() - 1] != end:
+		if points[points.size() - 1].distance_to(end) < 0.01:
+			points[points.size() - 1] = end
+		else:
+			points.append(end)
+	return points
+
 
 ## Convert an existing [Curve2D] instance to a (rounded) rectangle.
 ## [param curve] is passed by reference so the curve's [signal Resource.changed]
@@ -534,3 +663,4 @@ static func set_ellipse_points(curve : Curve2D, size: Vector2, offset := Vector2
 	curve.add_point(offset + Vector2(-size.x * 0.5, 0), Vector2(0, size.y * 0.5 * R_TO_CP), Vector2(0, -size.y * 0.5 * R_TO_CP))
 	curve.add_point(offset + Vector2(0, -size.y * 0.5), Vector2(-size.x * 0.5 * R_TO_CP, 0), Vector2(size.x * 0.5 * R_TO_CP, 0))
 	curve.add_point(offset + Vector2(size.x * 0.5, 0), Vector2(0, -size.y * 0.5 * R_TO_CP))
+

@@ -1,8 +1,19 @@
 # Changelog
 
+## 2.7.0 - 2025-16-07
+
+### Added
+- Add direct arc support for ScalableVectorShape2D: moving arcs around is now much easier by replacing many points by just the 2 (start and end)
+- The arcs can be dynamically manipulated via metadata fields (radius, rotation, large arc, sweep -> see: [svg specification](https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands))
+- The arcs can also be animated using the `Curve Settings > Batch insert` button for key frames
+
+
+### Changed
+- Bugfix: fixed index out of bounds for scale-transform in svg importer.
+
 ## 2.6.6 - 2025-11-07
 
-## Changed
+### Changed
 - Bugfix: SVG importer can now handle negative numbers without leading whitespace
 - Bugfix: SVG importer now handles multiple shapes in one svg path element
 

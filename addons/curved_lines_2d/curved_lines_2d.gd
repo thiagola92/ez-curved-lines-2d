@@ -67,6 +67,7 @@ var undo_redo_transaction : Dictionary = {
 }
 
 var set_global_position_popup_panel : PopupPanel
+var arc_settings_popup_panel : PopupPanel
 
 func _enter_tree():
 	scalable_vector_shapes_2d_dock = preload("res://addons/curved_lines_2d/scalable_vector_shapes_2d_dock.tscn").instantiate()
@@ -91,7 +92,9 @@ func _enter_tree():
 	make_bottom_panel_item_visible(scalable_vector_shapes_2d_dock)
 
 	set_global_position_popup_panel = preload("res://addons/curved_lines_2d/set_global_position_popup_panel.tscn").instantiate()
+	arc_settings_popup_panel = preload("res://addons/curved_lines_2d/arc_settings_popup_panel.tscn").instantiate()
 	EditorInterface.get_base_control().add_child(set_global_position_popup_panel)
+	EditorInterface.get_base_control().add_child(arc_settings_popup_panel)
 	if not set_global_position_popup_panel.value_changed.is_connected(_on_global_position_for_handle_changed):
 		set_global_position_popup_panel.value_changed.connect(_on_global_position_for_handle_changed)
 	if not set_global_position_popup_panel.visibility_changed.is_connected(_commit_undo_redo_transaction):
@@ -405,6 +408,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 	var handles = svs.get_curve_handles()
 	for i in range(handles.size()):
 		var handle = handles[i]
+
 		var is_hovered : bool = svs.get_meta(META_NAME_HOVER_POINT_IDX, -1) == i
 		var cp_in_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_IN_IDX, -1) == i
 		var cp_out_is_hovered : bool = svs.get_meta(META_NAME_HOVER_CP_OUT_IDX, -1) == i
@@ -424,10 +428,13 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 				hint_txt += _draw_rect_control_point_handle(viewport_control, svs, handle, 'out',
 						cp_out_is_hovered)
 		elif svs.shape_type == ScalableVectorShape2D.ShapeType.PATH:
-			hint_txt += _draw_control_point_handle(viewport_control, svs, handle, 'in',
-					is_hovered or cp_in_is_hovered, cp_in_is_hovered)
-			hint_txt +=_draw_control_point_handle(viewport_control, svs, handle, 'out',
-					is_hovered or cp_out_is_hovered, cp_out_is_hovered)
+			if not svs.is_arc_start(i - 1):
+				hint_txt += _draw_control_point_handle(viewport_control, svs, handle, 'in',
+						is_hovered or cp_in_is_hovered, cp_in_is_hovered)
+			if not svs.is_arc_start(i):
+				hint_txt +=_draw_control_point_handle(viewport_control, svs, handle, 'out',
+						is_hovered or cp_out_is_hovered, cp_out_is_hovered)
+
 		if handle['mirrored']:
 			# mirrored handles
 			var rect := Rect2(_vp_transform(handle['point_position']) - Vector2(5, 5), Vector2(10, 10))
@@ -564,9 +571,7 @@ func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> vo
 
 	var closest_point_on_curve := svs.get_closest_point_on_curve(g_mouse_pos)
 
-	if ("point_position" in closest_point_on_curve and
-			mouse_pos.distance_to(_vp_transform(closest_point_on_curve["point_position"])) < 15
-	):
+	if mouse_pos.distance_to(_vp_transform(closest_point_on_curve.point_position)) < 15:
 		svs.set_meta(META_NAME_HOVER_CLOSEST_POINT, closest_point_on_curve)
 
 
@@ -616,18 +621,32 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_SHIFT):
 		_draw_add_point_hint(viewport_control, svs)
 		return
+
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
-		var md_p := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
-		var p = _vp_transform(md_p["point_position"])
-		_draw_crosshair(viewport_control, _vp_transform(md_p["point_position"]))
 		var hint := ""
-		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			if svs.curve.point_count > 1:
-				hint += "- Double click to add point on the line"
-				if md_p["before_segment"] < svs.curve.point_count:
-					hint += "\n- Drag to change curve"
-			else:
-				_draw_add_point_hint(viewport_control, svs)
+		var md_p : ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+		if svs.is_arc_start(md_p.before_segment - 1):
+			var arc_start_idx := md_p.before_segment - 1
+			var arc := svs.arc_list.get_arc_for_point(arc_start_idx)
+			var arc_points := Array(svs.tessellate_arc_segment(
+				svs.curve.get_point_position(arc_start_idx),
+				arc.radius, arc.rotation_deg, arc.large_arc_flag, arc.sweep_flag,
+				svs.curve.get_point_position(arc_start_idx + 1),
+			)).map(func(p): return _vp_transform(svs.to_global(p)))
+			viewport_control.draw_polyline(arc_points, Color.RED, 3.0, true)
+			hint = "- Left click to open arc settings"
+			hint += "\n- Right click to remove arc (straighten this line segment)"
+		else:
+			var p = _vp_transform(md_p.point_position)
+			_draw_crosshair(viewport_control, _vp_transform(md_p.point_position))
+			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+				if svs.curve.point_count > 1:
+					hint = "- Double click to add point on the line"
+					if md_p.before_segment < svs.curve.point_count:
+						hint += "\n- Drag to change curve"
+						hint += "\n- Right click to convert line segment to arc"
+				else:
+					_draw_add_point_hint(viewport_control, svs)
 		if not hint.is_empty():
 			_draw_hint(viewport_control, hint)
 
@@ -984,8 +1003,21 @@ func _remove_point_from_curve(current_selection : ScalableVectorShape2D, idx : i
 	undo_redo.add_do_method(current_selection.curve, 'set_point_in', 0, Vector2.ZERO)
 	if orig_n > 2:
 		undo_redo.add_do_method(current_selection.curve, 'set_point_out', orig_n - 2, Vector2.ZERO)
+
+	var redo_arcs : Array[ScalableArc] = []
+	for a : ScalableArc in current_selection.arc_list.arcs:
+		if a.start_point == idx or a.start_point == idx - 1:
+			undo_redo.add_do_method(current_selection.arc_list, 'remove_arc_for_point', a.start_point)
+			redo_arcs.append(a)
+
 	undo_redo.add_do_method(current_selection.curve, 'remove_point', idx)
+	undo_redo.add_do_method(current_selection.arc_list, 'handle_point_removed_at_index', idx)
 	undo_redo.add_undo_method(current_selection, 'replace_curve_points', backup)
+	undo_redo.add_undo_method(current_selection.arc_list, 'handle_point_added_at_index', idx)
+	for a in redo_arcs:
+		undo_redo.add_undo_reference(a)
+		undo_redo.add_undo_method(current_selection.arc_list, 'add_arc', a)
+
 	undo_redo.commit_action()
 
 
@@ -1019,11 +1051,32 @@ func _remove_rounded_corners_from_rect(svs : ScalableVectorShape2D):
 func _add_point_to_curve(svs : ScalableVectorShape2D, local_pos : Vector2,
 		cp_in := Vector2.ZERO, cp_out := Vector2.ZERO, idx := -1) -> void:
 	undo_redo.create_action("Add point at %s to %s " % [str(local_pos), str(svs)])
+
 	undo_redo.add_do_method(svs.curve, 'add_point', local_pos, cp_in, cp_out, idx)
 	if idx < 0:
 		undo_redo.add_undo_method(svs.curve, 'remove_point', svs.curve.point_count)
 	else:
+		undo_redo.add_do_method(svs.arc_list, 'handle_point_added_at_index', idx)
 		undo_redo.add_undo_method(svs.curve, 'remove_point', idx)
+		undo_redo.add_undo_method(svs.arc_list, 'handle_point_removed_at_index', idx)
+	undo_redo.commit_action()
+
+
+func _create_arc(svs :  ScalableVectorShape2D, start_point_idx : int) -> void:
+	undo_redo.create_action("Remove arc for segment %d on %s " % [start_point_idx, str(svs)])
+	undo_redo.add_do_method(svs, 'add_arc', start_point_idx)
+	undo_redo.add_undo_method(svs.arc_list, 'remove_arc_for_point', start_point_idx)
+	undo_redo.commit_action()
+
+
+func _remove_arc(svs : ScalableVectorShape2D, start_point_idx : int) -> void:
+	var redo_arc := svs.arc_list.get_arc_for_point(start_point_idx)
+	if redo_arc == null:
+		return
+	undo_redo.create_action("Remove arc for segment %d on %s " % [start_point_idx, str(svs)])
+	undo_redo.add_do_method(svs.arc_list, 'remove_arc_for_point', start_point_idx)
+	undo_redo.add_undo_method(svs.arc_list, 'add_arc', redo_arc)
+	undo_redo.add_undo_reference(redo_arc)
 	undo_redo.commit_action()
 
 
@@ -1038,13 +1091,14 @@ func _add_point_on_curve_segment(svs : ScalableVectorShape2D) -> void:
 		return
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
-	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
-	if "before_segment" in md_closest_point and "local_point_position" in md_closest_point:
-		if md_closest_point["before_segment"] >= svs.curve.point_count:
-			_add_point_to_curve(svs, md_closest_point["local_point_position"])
-		else:
-			_add_point_to_curve(svs, md_closest_point["local_point_position"],
-					Vector2.ZERO, Vector2.ZERO, md_closest_point["before_segment"])
+	var md_closest_point : ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+	if svs.is_arc_start(md_closest_point.before_segment - 1):
+		return
+	if md_closest_point.before_segment >= svs.curve.point_count:
+		_add_point_to_curve(svs, md_closest_point.local_point_position)
+	else:
+		_add_point_to_curve(svs, md_closest_point.local_point_position,
+				Vector2.ZERO, Vector2.ZERO, md_closest_point.before_segment)
 
 
 func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> void:
@@ -1052,12 +1106,13 @@ func _drag_curve_segment(svs : ScalableVectorShape2D, mouse_pos : Vector2) -> vo
 		return
 	if not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
 		return
-	var md_closest_point := svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
-	if md_closest_point["before_segment"] >= svs.curve.point_count or md_closest_point["before_segment"] < 1:
+	var md_closest_point : ClosestPointOnCurveMeta = svs.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+	if svs.is_arc_start(md_closest_point.before_segment - 1) or md_closest_point.before_segment >= svs.curve.point_count or md_closest_point.before_segment < 1:
 		return
+
 	# Compute control points based on mouse position to align middle of segment curve to it
 	# using the quadratic Bézier control point
-	var idx : int = md_closest_point["before_segment"]
+	var idx : int = md_closest_point.before_segment
 	var segment_start_point := svs.curve.get_point_position(idx - 1)
 	var segment_end_point := svs.curve.get_point_position(idx)
 	var halfway_point := (segment_start_point + segment_end_point) / 2
@@ -1132,7 +1187,10 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					_add_point_on_position(current_selection, mouse_pos)
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT):
-				if event.double_click:
+				var cp_md : ClosestPointOnCurveMeta = current_selection.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+				if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and current_selection.is_arc_start(cp_md.before_segment - 1):
+					arc_settings_popup_panel.popup_with_value(current_selection.arc_list.get_arc_for_point(cp_md.before_segment - 1))
+				elif event.double_click:
 					_add_point_on_curve_segment(current_selection)
 				return true
 			elif _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE):
@@ -1178,6 +1236,15 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 						_remove_cp_out_from_curve(current_selection, current_selection.get_meta(META_NAME_HOVER_CP_OUT_IDX))
 				elif current_selection.has_meta(META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX):
 					_remove_color_stop(current_selection, current_selection.get_meta(META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX))
+			return true
+		if _is_svs_valid(current_selection) and current_selection.has_meta(META_NAME_HOVER_CLOSEST_POINT) and not _handle_has_hover(current_selection):
+			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+				var cp_md = current_selection.get_meta(META_NAME_HOVER_CLOSEST_POINT)
+				if current_selection.is_arc_start(cp_md.before_segment - 1):
+					_remove_arc(current_selection, cp_md.before_segment - 1)
+				else:
+					_create_arc(current_selection, cp_md.before_segment - 1)
+
 			return true
 
 	if (event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT) and
