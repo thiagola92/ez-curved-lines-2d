@@ -66,6 +66,9 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead](#dont-duplicate-scalablevectorshape2d-use-the-path_changed-signal-in-stead)
 	- [Performance impact](#performance-impact)
 - [Attributions](#attributions)
+	- [Lots of thanks go out to those who helped me out getting started:](#lots-of-thanks-go-out-to-those-who-helped-me-out-getting-started)
+	- [And a big thank you goes to to @MewPurPur](#and-a-big-thank-you-goes-to-to-mewpurpur)
+	- [And of course everyone who helped test and review the code thus far](#and-of-course-everyone-who-helped-test-and-review-the-code-thus-far)
 - [Reaching out / Contributing](#reaching-out--contributing)
 
 # Drawing Shapes in the Godot 2D Viewport
@@ -442,15 +445,24 @@ Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance De
 
 # Attributions
 
-Lots of thanks go out to those who helped me out getting started:
+## Lots of thanks go out to those who helped me out getting started:
 - This plugin was first inspired by [Mark Hedberg's blog on rendering curves in Godot](https://www.hedberggames.com/blog/rendering-curves-in-godot).
 - The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
 - The SVG Importer code was adapted from the script hosted on github in the [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot) repository
 
-And a big thank you goes to to [@MewPurPur](https://github.com/MewPurPur), author of GodSVG for writing a great [SVG Arc command implementation](https://github.com/MewPurPur/GodSVG/blob/v1.0-alpha10/src/data_classes/ElementPath.gd#L117) I could reuse here:
+
+## And a big thank you goes to to [@MewPurPur](https://github.com/MewPurPur)
+
+The author of GodSVG for writing a great [SVG Arc command implementation](https://github.com/MewPurPur/GodSVG/blob/v1.0-alpha10/src/data_classes/ElementPath.gd#L117) I could reuse here:
 - Download from the [GodSVG website](https://www.godsvg.com/)
 - Or try out the [web version](https://www.godsvg.com/editor/)
 - Also on [itch.io](https://mewpurpur.itch.io/godsvg)
+
+## And of course everyone who helped test and review the code thus far
+
+- @hedberg-games
+- @thiagola92
+- @HannesParth
 
 
 # Reaching out / Contributing

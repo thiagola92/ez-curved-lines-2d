@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.7.0 - 2025-16-07
+## 2.7.1 - 2025-16-07
 
 ### Added
 - Add direct arc support for ScalableVectorShape2D: moving arcs around is now much easier by replacing many points by just the 2 (start and end)
@@ -10,6 +10,7 @@
 
 ### Changed
 - Bugfix: fixed index out of bounds for scale-transform in svg importer.
+- Removed `Rat` class_name from the rat example to prevent name conflicts.ß
 
 ## 2.6.6 - 2025-11-07
 
