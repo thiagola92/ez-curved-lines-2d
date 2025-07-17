@@ -12,6 +12,7 @@ var _dragging := false
 var _drag_start := Vector2.ZERO
 
 func _enter_tree() -> void:
+	visible = false
 	rx_input = _mk_input()
 	ry_input = _mk_input()
 	rotation_input = _mk_input(1.0)
