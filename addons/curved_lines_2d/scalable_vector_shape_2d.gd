@@ -106,6 +106,12 @@ enum ShapeType {
 		assigned_node_changed.emit()
 
 
+@export var clip_paths : Array[ScalableVectorShape2D] = []:
+	set(_clip_paths):
+		clip_paths = _clip_paths if clip_paths != null else []
+		assigned_node_changed.emit()
+
+
 @export_group("Shape Type Settings")
 ## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
 ## properties [member size], [member offset], [member rx], and [member ry].
@@ -187,6 +193,9 @@ func _enter_tree():
 	# ensure forward compatibility by assigning the default arc_list
 	if arc_list == null:
 		arc_list = ScalableArcList.new()
+	if clip_paths == null:
+		clip_paths = []
+
 	if Engine.is_editor_hint():
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
@@ -297,11 +306,28 @@ func curve_changed():
 	# polygons won't fill and closed lines won't cap nicely
 	if new_points.size() > 0 and new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
 		new_points.remove_at(new_points.size() - 1)
+
+	var polygon_indices = []
+	if clip_paths.size() > 0:
+		var clip_poly = clip_paths[0].tessellate()
+		var result = Geometry2D.exclude_polygons(new_points, clip_poly)
+		print(result.size())
+		new_points.clear()
+		var p_count := 0
+		for poly_points in result:
+			if not Geometry2D.is_polygon_clockwise(poly_points):
+				var p_range := range(p_count, poly_points.size() + p_count)
+				new_points.append_array(poly_points)
+				polygon_indices.append(p_range)
+				p_count += poly_points.size()
+
+
 	if is_instance_valid(line):
 		line.points = new_points
 		line.closed = is_curve_closed()
 	if is_instance_valid(polygon):
 		polygon.polygon = new_points
+		polygon.polygons = polygon_indices
 		if polygon.texture is GradientTexture2D:
 			var box := get_bounding_rect()
 			polygon.texture_offset = -box.position
