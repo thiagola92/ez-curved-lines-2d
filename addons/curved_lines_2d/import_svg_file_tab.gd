@@ -5,6 +5,8 @@ class_name SvgImporterDock
 
 # Fraction of a radius for a bezier control point
 const R_TO_CP = 0.5523
+const PLC_EXP = "__PLC_EXP__"
+
 const SUPPORTED_STYLES : Array[String] = ["opacity", "stroke", "stroke-width", "stroke-opacity",
 		"fill", "fill-opacity", "paint-order", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit"]
 const SVG_ROOT_META_NAME := "svg_root"
@@ -298,14 +300,18 @@ func process_svg_polygon(element:XMLParser, current_node : Node2D, scene_root : 
 
 func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Node2D,
 		gradients : Array[Dictionary]) -> void:
-	# FIXME: better parsing, splits into sub arrays not necessary
 
+	# FIXME: implement better parsing here
 	var str_path = parse_attribute_string(
 				element.get_named_attribute_value("d")).replacen(",", " ")
 
 	for symbol in ["m", "M", "v", "V", "h", "H", "l", "L", "c", "C", "s", "S", "a", "A", "q", "Q", "t", "T", "z", "Z"]:
 		str_path = str_path.replace(symbol, " " + symbol + " ")
+
+	# FIXME: this bit is especially problematic
+	str_path = str_path.replace("e-", PLC_EXP)
 	str_path = str_path.replace("-", " -")
+	str_path = str_path.replace(PLC_EXP, "e-")
 	var str_path_array = str_path.split(" ", false)
 	var string_arrays = []
 	var string_array_top : PackedStringArray
