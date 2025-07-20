@@ -63,12 +63,24 @@ enum ShapeType {
 		line = _line
 		assigned_node_changed.emit()
 
-@export_group("Collision Polygon")
+
+@export_group("Collision")
+## The [CollisionObject2D] containing the [CollisionPolygon2D] node(s) generated
+## by this shape
+@export var collision_object: CollisionObject2D:
+	set(_coll):
+		collision_object = _coll
+		assigned_node_changed.emit()
+
+
 ## The CollisionPolygon2D controlled by this node's curve property
+## @deprecated: Use [member ScalableVectorShape2D.collision_object] instead.
 @export var collision_polygon: CollisionPolygon2D:
 	set(_poly):
 		collision_polygon = _poly
 		assigned_node_changed.emit()
+
+
 
 ## Controls the paramaters used to divide up the line  in segments.
 ## These settings are prefilled with the default values.
@@ -244,6 +256,10 @@ func _on_assigned_node_changed():
 		if lock_assigned_shapes:
 			collision_polygon.set_meta("_edit_lock_", true)
 		curve_changed()
+	if is_instance_valid(collision_object):
+		if lock_assigned_shapes:
+			collision_object.set_meta("_edit_lock_", true)
+		curve_changed()
 
 
 ## Exposes assigned_node_changed signal to outside callers
@@ -288,6 +304,7 @@ func tessellate() -> PackedVector2Array:
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
 			and not is_instance_valid(collision_polygon)
+			and not is_instance_valid(collision_object)
 			and not path_changed.has_connections()):
 		# guard against needlessly invoking expensive tessellate operation
 		return
@@ -309,6 +326,17 @@ func curve_changed():
 			polygon.texture.height = 1 if box.size.y < 1 else box.size.y
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
+	if is_instance_valid(collision_object):
+		var ch = collision_object.find_children("*", "CollisionPolygon2D", false)
+		var c_poly : CollisionPolygon2D = null if ch.is_empty() else ch[0]
+		if not c_poly:
+			c_poly = CollisionPolygon2D.new()
+			collision_object.add_child(c_poly, true)
+			if collision_object.owner:
+				c_poly.set_owner(collision_object.owner)
+			if lock_assigned_shapes:
+				c_poly.set_meta("_edit_lock_", true)
+		c_poly.polygon = new_points
 	path_changed.emit(new_points)
 
 
