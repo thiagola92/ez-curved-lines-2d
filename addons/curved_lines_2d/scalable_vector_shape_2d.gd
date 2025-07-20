@@ -15,6 +15,8 @@ signal assigned_node_changed()
 ## Further reading: [member shape_type]
 signal dimensions_changed()
 
+signal clip_paths_changed()
+
 ## The constant used to convert a radius unit to the equivalent cubic Beziér control point length
 const R_TO_CP = 0.5523
 
@@ -106,6 +108,15 @@ enum ShapeType {
 		assigned_node_changed.emit()
 
 
+@export var clip_paths : Array[ScalableVectorShape2D] = []:
+	set(_clip_paths):
+		clip_paths = _clip_paths if clip_paths != null else []
+		for i in clip_paths.size():
+			if clip_paths[i] == self:
+				clip_paths[i] = null
+		clip_paths_changed.emit()
+
+
 @export_group("Shape Type Settings")
 ## Determines what handles are shown in the editor and how the [member curve] is (re)drawn on changing
 ## properties [member size], [member offset], [member rx], and [member ry].
@@ -175,6 +186,9 @@ func _ready():
 			curve.changed.connect(curve_changed)
 		if not arc_list.changed.is_connected(curve_changed):
 			arc_list.changed.connect(curve_changed)
+		if not clip_paths_changed.is_connected(_on_clip_paths_changed):
+			clip_paths_changed.connect(_on_clip_paths_changed)
+			_on_clip_paths_changed()
 	if not dimensions_changed.is_connected(_on_dimensions_changed):
 		dimensions_changed.connect(_on_dimensions_changed)
 
@@ -187,6 +201,8 @@ func _enter_tree():
 	# ensure forward compatibility by assigning the default arc_list
 	if arc_list == null:
 		arc_list = ScalableArcList.new()
+	if clip_paths == null:
+		clip_paths = []
 	if Engine.is_editor_hint():
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
@@ -194,6 +210,9 @@ func _enter_tree():
 			arc_list.changed.connect(curve_changed)
 		if not assigned_node_changed.is_connected(_on_assigned_node_changed):
 			assigned_node_changed.connect(_on_assigned_node_changed)
+		if not clip_paths_changed.is_connected(_on_clip_paths_changed):
+			clip_paths_changed.connect(_on_clip_paths_changed)
+			_on_clip_paths_changed()
 	# handles update when reparenting
 	if update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
@@ -214,6 +233,20 @@ func _exit_tree():
 		arc_list.changed.disconnect(curve_changed)
 
 
+func _on_clip_paths_changed():
+	for cp in clip_paths:
+		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
+			cp.path_changed.connect(_on_assigned_node_changed)
+			cp.set_notify_transform(true)
+	_on_assigned_node_changed()
+
+
+func _notification(what: int) -> void:
+
+	if what == NOTIFICATION_TRANSFORM_CHANGED:
+		path_changed.emit()
+
+
 func _on_dimensions_changed():
 	if shape_type == ShapeType.RECT:
 		var width = size.x
@@ -225,7 +258,7 @@ func _on_dimensions_changed():
 		set_ellipse_points(curve, size, offset)
 
 
-func _on_assigned_node_changed():
+func _on_assigned_node_changed(_x : Variant = null):
 	if Engine.is_editor_hint() or update_curve_at_runtime:
 		if not curve.changed.is_connected(curve_changed):
 			curve.changed.connect(curve_changed)
@@ -298,25 +331,31 @@ func curve_changed():
 	if new_points.size() > 0 and new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
 		new_points.remove_at(new_points.size() - 1)
 
-	#var polygon_indices = []
-	#if clip_paths.size() > 0:
-		#var clip_poly = clip_paths[0].tessellate()
-		#var result = Geometry2D.exclude_polygons(new_points, clip_poly)
-		#print(result.size())
-		#new_points.clear()
-		#var p_count := 0
-		#for poly_points in result:
-			#if not Geometry2D.is_polygon_clockwise(poly_points):
-				#var p_range := range(p_count, poly_points.size() + p_count)
-				#new_points.append_array(poly_points)
-				#polygon_indices.append(p_range)
-				#p_count += poly_points.size()
+	var polygon_indices = []
+	var polygon_points = []
+	var line_points = []
+	if clip_paths.size() > 0 and is_instance_valid(clip_paths[0]):
+		var clip_poly = Array(clip_paths[0].tessellate()).map(func(p): return (clip_paths[0].to_global(p) - self.global_position).rotated(-self.rotation))
+		var result = Geometry2D.clip_polygons(new_points, clip_poly)
+		var p_count := 0
+		for poly_points in result:
+			if not Geometry2D.is_polygon_clockwise(poly_points):
+				var p_range := range(p_count, poly_points.size() + p_count)
+				polygon_points.append_array(poly_points)
+				polygon_indices.append(p_range)
+				p_count += poly_points.size()
+		var line_result = Geometry2D.clip_polyline_with_polygon(new_points, clip_poly)
+		for lpr in result:
+			if not Geometry2D.is_polygon_clockwise(lpr):
+				line_points.append_array(lpr)
+
 
 	if is_instance_valid(line):
-		line.points = new_points
+		line.points = new_points if line_points.is_empty() else line_points
 		line.closed = is_curve_closed()
 	if is_instance_valid(polygon):
-		polygon.polygon = new_points
+		polygon.polygons = polygon_indices
+		polygon.polygon = new_points if polygon_points.is_empty() else polygon_points
 		if polygon.texture is GradientTexture2D:
 			var box := get_bounding_rect()
 			polygon.texture_offset = -box.position
