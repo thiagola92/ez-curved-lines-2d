@@ -10,7 +10,7 @@
 
 ### Changed
 - Bugfix: fixed index out of bounds for scale-transform in svg importer.
-- Removed `Rat` class_name from the rat example to prevent name conflicts.ß
+- Removed `Rat` class_name from the rat example to prevent name conflicts.
 
 ## 2.6.6 - 2025-11-07
 
