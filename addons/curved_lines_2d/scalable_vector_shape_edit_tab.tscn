@@ -166,7 +166,7 @@ custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
-color = Color(0.435294, 0.431373, 0.431373, 0.52549)
+color = Color(1, 1, 1, 1)
 
 [node name="StrokeCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer"]
 layout_mode = 2
@@ -183,7 +183,7 @@ custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
-color = Color(0.664063, 0.163422, 0.163422, 1)
+color = Color(1, 1, 1, 1)
 
 [node name="CollisionObjectTypeOptionButton" parent="VBoxContainer/DrawSettingsContainer" instance=ExtResource("2_kh00m")]
 layout_mode = 2
