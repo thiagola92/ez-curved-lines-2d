@@ -18,7 +18,6 @@ signal dimensions_changed()
 ## The constant used to convert a radius unit to the equivalent cubic Beziér control point length
 const R_TO_CP = 0.5523
 
-
 enum ShapeType {
 	## Gives every point in the [member curve] a handle, as well as their in- and out- control points.
 	## Ignores the [member size], [member offset], [member rx] and [member ry] properties when
