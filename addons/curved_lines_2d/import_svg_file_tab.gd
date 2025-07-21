@@ -42,7 +42,7 @@ var info_label_settings : LabelSettings = null
 var debug_label_settings : LabelSettings = null
 
 ## Settings
-var import_collision_polygons := false
+var collision_object_type := ScalableVectorShape2D.CollisionObjectType.NONE
 var import_collision_polygons_for_all_shapes := false
 var import_collision_polygons_for_all_shapes_checkbox : Control = null
 var keep_drawable_path_node := true
@@ -608,10 +608,21 @@ func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene
 
 func add_collision_to_path(new_path : ScalableVectorShape2D, style : Dictionary, scene_root : Node2D,
 			_gradients : Array[Dictionary], _gradient_point_parent : Node2D) -> void:
-	if (import_collision_polygons and
+	if (collision_object_type != ScalableVectorShape2D.CollisionObjectType.NONE and
 			("fill" in style or import_collision_polygons_for_all_shapes)):
-		var poly := CollisionPolygon2D.new()
-		_managed_add_child_and_set_owner(new_path, poly, scene_root, 'collision_polygon')
+		match collision_object_type:
+			ScalableVectorShape2D.CollisionObjectType.STATIC_BODY_2D:
+				_managed_add_child_and_set_owner(new_path, StaticBody2D.new(), scene_root, 'collision_object')
+			ScalableVectorShape2D.CollisionObjectType.AREA_2D:
+				_managed_add_child_and_set_owner(new_path, Area2D.new(), scene_root, 'collision_object')
+			ScalableVectorShape2D.CollisionObjectType.ANIMATABLE_BODY_2D:
+				_managed_add_child_and_set_owner(new_path, AnimatableBody2D.new(), scene_root, 'collision_object')
+			ScalableVectorShape2D.CollisionObjectType.RIGID_BODY_2D:
+				_managed_add_child_and_set_owner(new_path, RigidBody2D.new(), scene_root, 'collision_object')
+			ScalableVectorShape2D.CollisionObjectType.CHARACTER_BODY_2D:
+				_managed_add_child_and_set_owner(new_path, CharacterBody2D.new(), scene_root, 'collision_object')
+			ScalableVectorShape2D.CollisionObjectType.PHYSICAL_BONE_2D:
+				_managed_add_child_and_set_owner(new_path, PhysicalBone2D.new(), scene_root, 'collision_object')
 
 
 func add_gradient_to_fill(new_path : ScalableVectorShape2D, svg_gradient: Dictionary, polygon : Polygon2D,
@@ -772,9 +783,9 @@ static func parse_attribute_string(raw_attribute_str : String) -> String:
 	return str_path.strip_edges()
 
 
-func _on_import_collision_polygons_check_box_toggled(toggled_on: bool) -> void:
-	import_collision_polygons = toggled_on
-	import_collision_polygons_for_all_shapes_checkbox.visible = toggled_on
+func _on_collision_object_type_option_button_type_selected(obj_type: ScalableVectorShape2D.CollisionObjectType) -> void:
+	collision_object_type = obj_type
+	import_collision_polygons_for_all_shapes_checkbox.visible = obj_type != ScalableVectorShape2D.CollisionObjectType.NONE
 
 
 func _on_import_collision_polygons_for_all_shapes_check_box_toggled(toggled_on: bool) -> void:
@@ -796,3 +807,5 @@ func _on_antialiased_check_box_toggled(toggled_on: bool) -> void:
 
 func _on_open_file_dialog_button_pressed() -> void:
 	import_file_dialog.popup_file_dialog()
+
+
