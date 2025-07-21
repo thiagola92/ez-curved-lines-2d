@@ -376,10 +376,8 @@ func has_point(global_pos : Vector2) -> bool:
 
 
 func has_fine_point(global_pos : Vector2) -> bool:
-	if is_instance_valid(polygon) or is_instance_valid(collision_polygon):
-		var poly_points := self.tessellate()
-		return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
-	return false
+	var poly_points := self.tessellate()
+	return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
 
 
 func set_position_to_center() -> void:
