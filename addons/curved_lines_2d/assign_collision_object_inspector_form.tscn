@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dar1y7o5qcxic"]
+[gd_scene load_steps=3 format=3 uid="uid://dar1y7o5qcxic"]
 
 [ext_resource type="Script" uid="uid://ci3o0cnwiet6" path="res://addons/curved_lines_2d/assign_collision_object_inspector_form.gd" id="1_csmls"]
+[ext_resource type="PackedScene" uid="uid://cjbkvx1pj7gq2" path="res://addons/curved_lines_2d/collision_object_type_option_button.tscn" id="2_ks3po"]
 
 [node name="AssignCollisionObjectInspectorForm" type="VBoxContainer"]
 anchors_preset = 15
@@ -22,23 +23,14 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="HBoxContainer"]
 layout_mode = 2
+tooltip_text = "Assign a new CollisionObject2D to this shape.
+This will hold any generated CollisionPolygon2D nodes.
+
+Selecting 'none' will unassign any existing node, but will not delete the node."
+mouse_filter = 0
 text = "Collision Object* "
 
-[node name="OptionButton" type="OptionButton" parent="HBoxContainer"]
+[node name="CollisionObjectTypeOptionButton" parent="HBoxContainer" instance=ExtResource("2_ks3po")]
 layout_mode = 2
-selected = 0
-item_count = 7
-popup/item_0/text = "- No Collision -"
-popup/item_0/id = 0
-popup/item_1/text = "StaticBody2D"
-popup/item_1/id = 1
-popup/item_2/text = "Area2D"
-popup/item_2/id = 2
-popup/item_3/text = "AnimatableBody2D"
-popup/item_3/id = 3
-popup/item_4/text = "RigidBody2D"
-popup/item_4/id = 4
-popup/item_5/text = "CharacterBody2D"
-popup/item_5/id = 5
-popup/item_6/text = "PhysicalBone2D"
-popup/item_6/id = 6
+
+[connection signal="type_selected" from="HBoxContainer/CollisionObjectTypeOptionButton" to="." method="_on_collision_object_type_option_button_type_selected"]

@@ -31,7 +31,6 @@ func _parse_begin(object: Object) -> void:
 		button.tooltip_text = "The export will only contain this node and its children,
 				assigned nodes outside this subtree will not be drawn."
 		add_custom_control(button)
-
 		button.pressed.connect(func(): _on_export_png_button_pressed(object))
 
 
@@ -55,6 +54,10 @@ func _parse_property(object: Object, type: Variant.Type, name: String, hint_type
 		if object.collision_polygon == null:
 			return true
 		var assign_collision_inspector_form = load("res://addons/curved_lines_2d/assign_collision_inspector_form.tscn").instantiate()
+		assign_collision_inspector_form.scalable_vector_shape_2d = object
+		add_custom_control(assign_collision_inspector_form)
+	elif name == "collision_object" and (object is ScalableVectorShape2D):
+		var assign_collision_inspector_form = load("res://addons/curved_lines_2d/assign_collision_object_inspector_form.tscn").instantiate()
 		assign_collision_inspector_form.scalable_vector_shape_2d = object
 		add_custom_control(assign_collision_inspector_form)
 	return false

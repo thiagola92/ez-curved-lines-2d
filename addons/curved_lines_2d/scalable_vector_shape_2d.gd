@@ -38,6 +38,18 @@ enum ShapeType {
 	ELLIPSE
 }
 
+
+enum CollisionObjectType {
+	NONE,
+	STATIC_BODY_2D,
+	AREA_2D,
+	ANIMATABLE_BODY_2D,
+	RIGID_BODY_2D,
+	CHARACTER_BODY_2D,
+	PHYSICAL_BONE_2D
+}
+
+
 @export_group("Fill")
 ## The 'Fill' of a [ScalableVectorShape2D] is simply an instance of a [Polygon2D] node
 ## assigned to the `polygon` property.
