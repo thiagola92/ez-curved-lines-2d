@@ -5,6 +5,23 @@ class_name AssignCollisionObjectInspectorForm
 
 var scalable_vector_shape_2d : ScalableVectorShape2D
 
+func _enter_tree() -> void:
+	if not is_instance_valid(scalable_vector_shape_2d):
+		return
+	if 'assigned_node_changed' in scalable_vector_shape_2d:
+		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
+	_on_svs_assignment_changed()
+
+
+func _on_svs_assignment_changed() -> void:
+	if is_instance_valid(scalable_vector_shape_2d.collision_object):
+		find_child("GoToCollisionObjectButton").show()
+		find_child("CollisionObjectTypeOptionButton").hide()
+	else:
+		find_child("GoToCollisionObjectButton").hide()
+		find_child("CollisionObjectTypeOptionButton").show()
+		(find_child("CollisionObjectTypeOptionButton") as OptionButton).select(0)
+
 func _on_collision_object_type_option_button_type_selected(obj_type: ScalableVectorShape2D.CollisionObjectType) -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
@@ -38,4 +55,12 @@ func _assign_collision_object(new_obj : CollisionObject2D) -> void:
 	undo_redo.add_undo_method(scalable_vector_shape_2d, 'remove_child', new_obj)
 	undo_redo.add_undo_property(scalable_vector_shape_2d, 'collision_object', null)
 	undo_redo.commit_action()
+
+
+func _on_go_to_collision_object_button_pressed() -> void:
+	if not is_instance_valid(scalable_vector_shape_2d):
+		return
+	if not is_instance_valid(scalable_vector_shape_2d.collision_object):
+		return
+	EditorInterface.call_deferred('edit_node', scalable_vector_shape_2d.collision_object)
 

@@ -12,17 +12,12 @@ grow_vertical = 2
 theme_override_constants/separation = 4
 script = ExtResource("1_csmls")
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 2
-
-[node name="HSeparator" type="HSeparator" parent="."]
-layout_mode = 2
-
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 tooltip_text = "Assign a new CollisionObject2D to this shape.
 This will hold any generated CollisionPolygon2D nodes.
 
@@ -32,5 +27,13 @@ text = "Collision Object* "
 
 [node name="CollisionObjectTypeOptionButton" parent="HBoxContainer" instance=ExtResource("2_ks3po")]
 layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GoToCollisionObjectButton" type="Button" parent="HBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Go To Node"
 
 [connection signal="type_selected" from="HBoxContainer/CollisionObjectTypeOptionButton" to="." method="_on_collision_object_type_option_button_type_selected"]
+[connection signal="pressed" from="HBoxContainer/GoToCollisionObjectButton" to="." method="_on_go_to_collision_object_button_pressed"]
