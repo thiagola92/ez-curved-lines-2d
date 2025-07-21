@@ -1,7 +1,8 @@
-[gd_scene load_steps=25 format=3 uid="uid://dwns40mbgt82s"]
+[gd_scene load_steps=26 format=3 uid="uid://dwns40mbgt82s"]
 
 [ext_resource type="Script" uid="uid://tl3hcapnk7lb" path="res://addons/curved_lines_2d/scalable_vector_shape_edit_tab.gd" id="1_nt5in"]
 [ext_resource type="StyleBox" uid="uid://v0ueesjbdyrk" path="res://addons/curved_lines_2d/snazzy_toggle_button.stylebox" id="2_3cgh6"]
+[ext_resource type="PackedScene" uid="uid://cjbkvx1pj7gq2" path="res://addons/curved_lines_2d/collision_object_type_option_button.tscn" id="2_kh00m"]
 [ext_resource type="Texture2D" uid="uid://7hhlkt6n4b32" path="res://addons/curved_lines_2d/PaintOrder.svg" id="2_qgati"]
 [ext_resource type="PackedScene" uid="uid://cmoxkoulpd7so" path="res://addons/curved_lines_2d/link_button_with_copy_hint.tscn" id="2_xxhaf"]
 [ext_resource type="Texture2D" uid="uid://cdkf2g8b5e55r" path="res://addons/curved_lines_2d/LineCaps.svg" id="4_xku8w"]
@@ -165,7 +166,7 @@ custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
-color = Color(1, 1, 1, 1)
+color = Color(0.435294, 0.431373, 0.431373, 0.52549)
 
 [node name="StrokeCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer"]
 layout_mode = 2
@@ -173,6 +174,7 @@ size_flags_horizontal = 8
 tooltip_text = "- Toggled On: when creating a new shape via this panel, a Stroke (Line2D) of this color will be automatically added
 - When a new ScalableVectorShape2D is generated via the Scene Tree or the 2D Viewport using add node, a Stroke will _not_ be automatically assigned.
 - When generating a Stroke via the Inspector button for ScalableVectorShape2D, the color configured here will be automatically picked."
+button_pressed = true
 text = "Stroke*"
 alignment = 2
 
@@ -181,14 +183,10 @@ custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
 text = "Fill"
-color = Color(1, 1, 1, 1)
+color = Color(0.664063, 0.163422, 0.163422, 1)
 
-[node name="CollisionCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer"]
+[node name="CollisionObjectTypeOptionButton" parent="VBoxContainer/DrawSettingsContainer" instance=ExtResource("2_kh00m")]
 layout_mode = 2
-size_flags_horizontal = 8
-tooltip_text = "Toggled On: when creating a new shape via this dock CollisionPolygon2D will be automatically added"
-text = "Collsions*"
-alignment = 2
 
 [node name="Label" type="Label" parent="VBoxContainer/DrawSettingsContainer"]
 layout_mode = 2
@@ -634,7 +632,7 @@ uri = "https://youtu.be/_QOnMRrlIMk?t=126&feature=shared"
 [connection signal="color_changed" from="VBoxContainer/DrawSettingsContainer/FillPickerButton" to="." method="_on_fill_picker_button_color_changed"]
 [connection signal="toggled" from="VBoxContainer/DrawSettingsContainer/StrokeCheckButton" to="." method="_on_stroke_check_button_toggled"]
 [connection signal="color_changed" from="VBoxContainer/DrawSettingsContainer/StrokePickerButton" to="." method="_on_stroke_picker_button_color_changed"]
-[connection signal="toggled" from="VBoxContainer/DrawSettingsContainer/CollisionCheckButton" to="." method="_on_collision_check_button_toggled"]
+[connection signal="type_selected" from="VBoxContainer/DrawSettingsContainer/CollisionObjectTypeOptionButton" to="." method="_on_collision_object_type_option_button_type_selected"]
 [connection signal="toggled" from="VBoxContainer/DrawSettingsContainer/PaintOrderButton0" to="." method="_on_paint_order_button_0_toggled"]
 [connection signal="toggled" from="VBoxContainer/DrawSettingsContainer/PaintOrderButton1" to="." method="_on_paint_order_button_1_toggled"]
 [connection signal="toggled" from="VBoxContainer/DrawSettingsContainer/PaintOrderButton2" to="." method="_on_paint_order_button_2_toggled"]
