@@ -65,14 +65,6 @@ enum ShapeType {
 
 
 @export_group("Collision")
-## The [CollisionObject2D] containing the [CollisionPolygon2D] node(s) generated
-## by this shape
-@export var collision_object: CollisionObject2D:
-	set(_coll):
-		collision_object = _coll
-		assigned_node_changed.emit()
-
-
 ## The CollisionPolygon2D controlled by this node's curve property
 ## @deprecated: Use [member ScalableVectorShape2D.collision_object] instead.
 @export var collision_polygon: CollisionPolygon2D:
@@ -80,6 +72,12 @@ enum ShapeType {
 		collision_polygon = _poly
 		assigned_node_changed.emit()
 
+## The [CollisionObject2D] containing the [CollisionPolygon2D] node(s) generated
+## by this shape
+@export var collision_object: CollisionObject2D:
+	set(_coll):
+		collision_object = _coll
+		assigned_node_changed.emit()
 
 
 ## Controls the paramaters used to divide up the line  in segments.

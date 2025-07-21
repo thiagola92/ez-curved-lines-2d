@@ -10,24 +10,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_wi77q")
 
-[node name="ButtonContainer" type="HBoxContainer" parent="."]
-layout_mode = 2
-
-[node name="Label2" type="Label" parent="ButtonContainer"]
-clip_contents = true
-custom_minimum_size = Vector2(80, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-tooltip_text = "This will create a new CollisionPolygon2D node and assign it to the collision_polygon property of this ScalableVectorScape2D."
-mouse_filter = 0
-text = "Add Collision"
-
-[node name="CreateCollisionButton" type="Button" parent="ButtonContainer"]
-layout_mode = 2
-size_flags_horizontal = 2
-tooltip_text = "This will create a new Polygon2D node and assign it to the polygon property of this ScalableVectorScape2D."
-text = "Add Collision"
-
 [node name="HSeparator" type="HSeparator" parent="."]
 layout_mode = 2
 
@@ -39,11 +21,11 @@ clip_contents = true
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "Click on this button to select the CollisionPolygon2D node that is assigned to this shape  in the Scene Tree.
-
-Use this for advanced features which are already built-in into godot."
+tooltip_text = "⚠️ Assigning a CollisionPolygon2D directly is deprecated in favour of assigning a CollisionObject2D. Remove this assignment and add a Collision Object in stead. 
+ 
+Click the  button to select the CollisionPolygon2D node that is assigned to this shape  in the Scene Tree."
 mouse_filter = 0
-text = "Edit CollisionPolygon2D*"
+text = "⚠️ CollisionPolygon2D*"
 
 [node name="GotoCollisionButton" type="Button" parent="ButtonContainer2"]
 layout_mode = 2
@@ -51,7 +33,6 @@ size_flags_horizontal = 2
 tooltip_text = "Click on this button to select the CollisionPolygon2D node that is assigned to this shape  in the Scene Tree.
 
 Use this for advanced features which are already built-in into godot."
-text = "Edit CollisionPolygon2D"
+text = "Go To Node"
 
-[connection signal="pressed" from="ButtonContainer/CreateCollisionButton" to="." method="_on_create_collision_button_pressed"]
 [connection signal="pressed" from="ButtonContainer2/GotoCollisionButton" to="." method="_on_goto_collision_button_pressed"]
