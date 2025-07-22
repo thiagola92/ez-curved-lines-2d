@@ -359,9 +359,14 @@ func curve_changed():
 
 	var polygon_indices = []
 	var polygon_points = []
-	var line_points = []
 	if clip_paths.size() > 0 and is_instance_valid(clip_paths[0]):
-		var clip_poly = Array(clip_paths[0].tessellate()).map(func(p): return (clip_paths[0].to_global(p) - self.global_position).rotated(-self.rotation))
+		var clip_poly = Array(clip_paths[0].tessellate()).map(
+			func(p):
+				return (
+					(clip_paths[0].to_global(p) - self.global_position)
+						.rotated(-self.rotation) / self.global_scale
+				)
+		)
 		var result = Geometry2D.clip_polygons(new_points, clip_poly)
 		var p_count := 0
 		for poly_points in result:
@@ -370,14 +375,10 @@ func curve_changed():
 				polygon_points.append_array(poly_points)
 				polygon_indices.append(p_range)
 				p_count += poly_points.size()
-		var line_result = Geometry2D.clip_polyline_with_polygon(new_points, clip_poly)
-		for lpr in result:
-			if not Geometry2D.is_polygon_clockwise(lpr):
-				line_points.append_array(lpr)
 
 
 	if is_instance_valid(line):
-		line.points = new_points if line_points.is_empty() else line_points
+		line.points = new_points if polygon_points.is_empty() else polygon_points
 		line.closed = is_curve_closed()
 	if is_instance_valid(polygon):
 		polygon.polygons = polygon_indices
