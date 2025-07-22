@@ -23,10 +23,14 @@ bg_color = Color(0.0588235, 0.0588235, 0.0588235, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1vtg0"]
 bg_color = Color(0.0588235, 0.0588235, 0.0588235, 1)
 
-[node name="ArcSettingsPopupPanel" type="PopupPanel"]
+[node name="ArcSettingsPopupPanel" type="PopupPanel" node_paths=PackedStringArray("large_arc_checkbox", "sweep_checkbox", "rx_input_container", "ry_input_container", "rotation_input_container")]
 size = Vector2i(250, 251)
-visible = true
 script = ExtResource("1_3bjn8")
+large_arc_checkbox = NodePath("VBoxContainer/HBoxContainer3/Container/LargeArcCheckBox")
+sweep_checkbox = NodePath("VBoxContainer/HBoxContainer4/Container/SweepCheckBox")
+rx_input_container = NodePath("VBoxContainer/HBoxContainer/VBoxContainer/PanelContainer/HBoxContainer/RxInputContainer")
+ry_input_container = NodePath("VBoxContainer/HBoxContainer/VBoxContainer/PanelContainer2/HBoxContainer/RyInputContainer")
+rotation_input_container = NodePath("VBoxContainer/HBoxContainer2/RotationInputContainer")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchors_preset = 15
@@ -34,8 +38,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 4.0
 offset_top = 4.0
-offset_right = -4.0
-offset_bottom = -4.0
+offset_right = 246.0
+offset_bottom = 247.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 0

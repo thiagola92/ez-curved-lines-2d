@@ -3,6 +3,9 @@ extends Control
 
 class_name AssignCollisionObjectInspectorForm
 
+@export var collision_object_type_option_button: OptionButton
+@export var go_to_collision_object_button: Button
+
 var scalable_vector_shape_2d : ScalableVectorShape2D
 
 func _enter_tree() -> void:
@@ -15,12 +18,12 @@ func _enter_tree() -> void:
 
 func _on_svs_assignment_changed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.collision_object):
-		find_child("GoToCollisionObjectButton").show()
-		find_child("CollisionObjectTypeOptionButton").hide()
+		go_to_collision_object_button.show()
+		collision_object_type_option_button.hide()
 	else:
-		find_child("GoToCollisionObjectButton").hide()
-		find_child("CollisionObjectTypeOptionButton").show()
-		(find_child("CollisionObjectTypeOptionButton") as OptionButton).select(0)
+		go_to_collision_object_button.hide()
+		collision_object_type_option_button.show()
+		collision_object_type_option_button.select(0)
 
 func _on_collision_object_type_option_button_type_selected(obj_type: ScalableVectorShape2D.CollisionObjectType) -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
@@ -63,4 +66,3 @@ func _on_go_to_collision_object_button_pressed() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d.collision_object):
 		return
 	EditorInterface.call_deferred('edit_node', scalable_vector_shape_2d.collision_object)
-

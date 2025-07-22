@@ -1,11 +1,15 @@
 @tool
 extends PopupPanel
 
+@export var large_arc_checkbox : CheckBox
+@export var sweep_checkbox : CheckBox
+@export var rx_input_container: PanelContainer
+@export var ry_input_container: PanelContainer
+@export var rotation_input_container: PanelContainer
+
 var rx_input : EditorSpinSlider
 var ry_input : EditorSpinSlider
 var rotation_input : EditorSpinSlider
-var large_arc_checkbox : CheckBox
-var sweep_checkbox : CheckBox
 var _arc_under_edit : ScalableArc
 
 var _dragging := false
@@ -16,11 +20,9 @@ func _enter_tree() -> void:
 	rx_input = _mk_input()
 	ry_input = _mk_input()
 	rotation_input = _mk_input(1.0)
-	large_arc_checkbox = find_child("LargeArcCheckBox")
-	sweep_checkbox = find_child("SweepCheckBox")
-	find_child("RxInputContainer").add_child(rx_input)
-	find_child("RyInputContainer").add_child(ry_input)
-	find_child("RotationInputContainer").add_child(rotation_input)
+	rx_input_container.add_child(rx_input)
+	ry_input_container.add_child(ry_input)
+	rotation_input_container.add_child(rotation_input)
 	if not rx_input.value_changed.is_connected(_on_radius_changed):
 		rx_input.value_changed.connect(_on_radius_changed)
 	if not ry_input.value_changed.is_connected(_on_radius_changed):

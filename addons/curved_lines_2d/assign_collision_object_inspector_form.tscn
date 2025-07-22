@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ci3o0cnwiet6" path="res://addons/curved_lines_2d/assign_collision_object_inspector_form.gd" id="1_csmls"]
 [ext_resource type="PackedScene" uid="uid://cjbkvx1pj7gq2" path="res://addons/curved_lines_2d/collision_object_type_option_button.tscn" id="2_ks3po"]
 
-[node name="AssignCollisionObjectInspectorForm" type="VBoxContainer"]
+[node name="AssignCollisionObjectInspectorForm" type="VBoxContainer" node_paths=PackedStringArray("collision_object_type_option_button", "go_to_collision_object_button")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -11,6 +11,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 4
 script = ExtResource("1_csmls")
+collision_object_type_option_button = NodePath("HBoxContainer/CollisionObjectTypeOptionButton")
+go_to_collision_object_button = NodePath("HBoxContainer/GoToCollisionObjectButton")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
