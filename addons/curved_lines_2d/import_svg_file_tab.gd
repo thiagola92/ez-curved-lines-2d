@@ -417,7 +417,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						curve.add_point(cursor, c_in - cursor)
 						i += 4
 				"q":
-					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
+					while string_array.size() > i + 4 and string_array[i+1].is_valid_float():
 						var prev_point := curve.get_point_position(curve.get_point_count() - 1)
 						var quadratic_control_point = cursor + Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						var c_out = (quadratic_control_point - prev_point) * (2.0/3.0)
@@ -427,7 +427,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						curve.add_point(cursor, c_in)
 						i += 4
 				"Q":
-					while string_array.size() > i + 4 and string_array[i+4].is_valid_float():
+					while string_array.size() > i + 4 and string_array[i+1].is_valid_float():
 						var prev_point := curve.get_point_position(curve.get_point_count() - 1)
 						var quadratic_control_point := Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						var c_out = (quadratic_control_point - prev_point) * (2.0/3.0)
