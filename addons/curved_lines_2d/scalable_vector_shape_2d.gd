@@ -357,28 +357,36 @@ func curve_changed():
 	if new_points.size() > 0 and new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
 		new_points.remove_at(new_points.size() - 1)
 
+	# used to store result of clipping
 	var polygon_indices = []
 	var polygon_points = []
-	if clip_paths.size() > 0 and is_instance_valid(clip_paths[0]):
-		var clip_poly = Array(clip_paths[0].tessellate()).map(
-			func(p):
-				return (
-					(clip_paths[0].to_global(p) - self.global_position)
-						.rotated(-self.rotation) / self.global_scale
-				)
-		)
-		var result = Geometry2D.clip_polygons(new_points, clip_poly)
-		var p_count := 0
-		for poly_points in result:
-			if not Geometry2D.is_polygon_clockwise(poly_points):
-				var p_range := range(p_count, poly_points.size() + p_count)
-				polygon_points.append_array(poly_points)
-				polygon_indices.append(p_range)
-				p_count += poly_points.size()
-
+	var polyline_points = []
+	if clip_paths.size() > 0:
+		# start out with
+		var current_polygons : Array[PackedVector2Array] = [new_points]
+		for clip_path in clip_paths.filter(func(cp): return is_instance_valid(cp)):
+			var result_polygons : Array[PackedVector2Array] = []
+			var clip_poly = _clip_path_to_local(clip_path)
+			for current_points : PackedVector2Array in current_polygons:
+				var result = Geometry2D.clip_polygons(current_points, clip_poly)
+				for poly_points in result:
+					if Geometry2D.is_polygon_clockwise(poly_points):
+						print("TODO, handle a hole")
+					else:
+						result_polygons.append(poly_points)
+			current_polygons.clear()
+			current_polygons.append_array(result_polygons)
+		var p_count = 0
+		for poly_points in current_polygons:
+			var p_range := range(p_count, poly_points.size() + p_count)
+			polygon_points.append_array(poly_points)
+			if polyline_points.is_empty():
+				polyline_points.append_array(poly_points)
+			polygon_indices.append(p_range)
+			p_count += poly_points.size()
 
 	if is_instance_valid(line):
-		line.points = new_points if polygon_points.is_empty() else polygon_points
+		line.points = new_points if polyline_points.is_empty() else polyline_points
 		line.closed = is_curve_closed()
 	if is_instance_valid(polygon):
 		polygon.polygons = polygon_indices
@@ -402,6 +410,13 @@ func curve_changed():
 				c_poly.set_meta("_edit_lock_", true)
 		c_poly.polygon = new_points
 	path_changed.emit(new_points)
+
+
+func _clip_path_to_local(clip_path : ScalableVectorShape2D):
+	var cpy := PackedVector2Array()
+	for p in clip_path.tessellate():
+		cpy.append((clip_path.to_global(p) - self.global_position).rotated(-self.rotation) / self.global_scale)
+	return cpy
 
 
 ## Calculate and return the bounding rect in local space
