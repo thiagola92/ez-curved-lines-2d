@@ -9,7 +9,7 @@
 
 ### Changed
 - The `collision_polygon` property is now marked as deprecated (but will function the same for backward compatibility)
-- Bugfix: fixed parsing bug for quadratic bézier curvesß
+- Bugfix: fixed parsing bug for quadratic bézier curves
 
 ### Removed
 - Removed the assignment inspector form field for the `collision_polygon` property once it has been unassigned
