@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.8.0 - 2025-21-07
+## 2.8.1 - 2025-21-07
 
 ### Added
 - The `collision_object` property is meant to replace the `collision_polygon` property
