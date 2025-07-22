@@ -57,7 +57,7 @@ func _enter_tree() -> void:
 	fill_color_button.color = CurvedLines2D._get_default_fill_color()
 	find_child("StrokeCheckButton").button_pressed = CurvedLines2D._is_add_stroke_enabled()
 	find_child("FillCheckButton").button_pressed = CurvedLines2D._is_add_fill_enabled()
-	find_child("CollisionCheckButton").button_pressed = CurvedLines2D._is_add_collision_enabled()
+	(find_child("CollisionObjectTypeOptionButton") as OptionButton).select(CurvedLines2D._add_collision_object_type())
 	find_child("SnapResolutionInputContainer").add_child(snap_resolution_input)
 	snap_resolution_input.value = CurvedLines2D._get_snap_resolution()
 	snap_resolution_input.value_changed.connect(_on_snap_resolution_value_changed)
@@ -234,11 +234,6 @@ func _on_fill_check_button_toggled(toggled_on: bool) -> void:
 	ProjectSettings.save()
 
 
-func _on_collision_check_button_toggled(toggled_on: bool) -> void:
-	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_ADD_COLLISION_ENABLED, toggled_on)
-	ProjectSettings.save()
-
-
 func _on_paint_order_button_0_toggled(toggled_on: bool) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_PAINT_ORDER,
 			CurvedLines2D.PaintOrder.FILL_STROKE_MARKERS)
@@ -336,3 +331,7 @@ func _on_snap_to_pixel_check_box_toggled(toggled_on: bool) -> void:
 
 func _on_snap_resolution_value_changed(val : float) -> void:
 	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_SNAP_RESOLUTION, val)
+
+
+func _on_collision_object_type_option_button_type_selected(obj_type: ScalableVectorShape2D.CollisionObjectType) -> void:
+	ProjectSettings.set_setting(CurvedLines2D.SETTING_NAME_ADD_COLLISION_TYPE, obj_type)

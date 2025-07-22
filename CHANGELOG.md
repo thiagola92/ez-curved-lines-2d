@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.8.0 - 2025-21-07
+
+### Added
+- The `collision_object` property is meant to replace the `collision_polygon` property
+- This will hold an assignment to a descendant of `CollisionObject2D` (`Area2D`, `StaticBody2D`, etcetera)
+- This managed `CollisionObject2D` will get directly generated `Polygon2D` children from the plugin
+
+### Changed
+- The `collision_polygon` property is now marked as deprecated (but will function the same for backward compatibility)
+
+### Removed
+- Removed the assignment inspector form field for the `collision_polygon` property once it has been unassigned
+
 ## 2.7.1 - 2025-16-07
 
 ### Added
@@ -10,7 +23,7 @@
 
 ### Changed
 - Bugfix: fixed index out of bounds for scale-transform in svg importer.
-- Removed `Rat` class_name from the rat example to prevent name conflicts.ß
+- Removed `Rat` class_name from the rat example to prevent name conflicts.
 
 ## 2.6.6 - 2025-11-07
 
