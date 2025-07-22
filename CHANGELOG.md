@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.8.1 - 2025-21-07
+## 2.8.2 - 2025-21-07
 
 ### Added
 - The `collision_object` property is meant to replace the `collision_polygon` property
@@ -9,6 +9,7 @@
 
 ### Changed
 - The `collision_polygon` property is now marked as deprecated (but will function the same for backward compatibility)
+- Bugfix: fixed parsing bug for quadratic bézier curvesß
 
 ### Removed
 - Removed the assignment inspector form field for the `collision_polygon` property once it has been unassigned
