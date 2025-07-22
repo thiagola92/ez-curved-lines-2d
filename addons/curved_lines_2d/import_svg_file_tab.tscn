@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://cfeemeccrtef7"]
+[gd_scene load_steps=8 format=3 uid="uid://cfeemeccrtef7"]
 
 [ext_resource type="Script" uid="uid://bp5vvj23w57js" path="res://addons/curved_lines_2d/import_svg_file_tab.gd" id="1_fhkel"]
 [ext_resource type="LabelSettings" uid="uid://bspk1rkq1cmhx" path="res://addons/curved_lines_2d/info_label_settings.tres" id="1_x2xey"]
 [ext_resource type="Texture2D" uid="uid://b8ludy6aqsejg" path="res://addons/curved_lines_2d/LockViewport.svg" id="2_38alv"]
 [ext_resource type="PackedScene" uid="uid://cmoxkoulpd7so" path="res://addons/curved_lines_2d/link_button_with_copy_hint.tscn" id="2_fhkel"]
+[ext_resource type="PackedScene" uid="uid://cjbkvx1pj7gq2" path="res://addons/curved_lines_2d/collision_object_type_option_button.tscn" id="3_kpb1b"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rycm0"]
 content_margin_left = 10.0
@@ -83,11 +84,8 @@ layout_mode = 2
 tooltip_text = "It's probably better to use project settings for this, but checking this on will ensure that the antialised property is checked on for imported Line2D and Polygon2D"
 text = "Flag on antialiased for Polygon2D and Line2D*"
 
-[node name="ImportCollisionPolygonsCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer"]
+[node name="CollisionObjectTypeOptionButton" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer" instance=ExtResource("3_kpb1b")]
 layout_mode = 2
-tooltip_text = "- Checking on this box will ensure that shapes with fills will also generate a CollisionPolygon2D. 
-- This can always be done later via the Inspector of ScalableVectorShape2D"
-text = "Import collision polygons *"
 
 [node name="ImportCollisionPolygonsForAllShapesCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer"]
 visible = false
@@ -139,6 +137,6 @@ uri = "https://youtu.be/3j_OEfU8qbo?feature=shared"
 [connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/KeepDrawablePath2DNodeCheckBox" to="." method="_on_keep_drawable_path_2d_node_check_box_toggled"]
 [connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/LockShapesCheckBox" to="." method="_on_lock_shapes_check_box_toggled"]
 [connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/AntialiasedCheckBox" to="." method="_on_antialiased_check_box_toggled"]
-[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/ImportCollisionPolygonsCheckBox" to="." method="_on_import_collision_polygons_check_box_toggled"]
+[connection signal="type_selected" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/CollisionObjectTypeOptionButton" to="." method="_on_collision_object_type_option_button_type_selected"]
 [connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/ImportCollisionPolygonsForAllShapesCheckBox" to="." method="_on_import_collision_polygons_for_all_shapes_check_box_toggled"]
 [connection signal="pressed" from="VBoxContainer2/PanelContainer/VBoxContainer2/OpenFileDialogButton" to="." method="_on_open_file_dialog_button_pressed"]

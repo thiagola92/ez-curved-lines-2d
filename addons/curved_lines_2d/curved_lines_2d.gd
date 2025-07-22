@@ -11,7 +11,8 @@ const SETTING_NAME_STROKE_COLOR := "addons/curved_lines_2d/stroke_color"
 const SETTING_NAME_FILL_COLOR := "addons/curved_lines_2d/fill_color"
 const SETTING_NAME_ADD_STROKE_ENABLED := "addons/curved_lines_2d/add_stroke_enabled"
 const SETTING_NAME_ADD_FILL_ENABLED := "addons/curved_lines_2d/add_fill_enabled"
-const SETTING_NAME_ADD_COLLISION_ENABLED := "addons/curved_lines_2d/add_collision_enabled"
+const SETTING_NAME_ADD_COLLISION_TYPE = "addons/curved_lines_2d/add_collision_type"
+
 const SETTING_NAME_PAINT_ORDER := "addons/curved_lines_2d/paint_order"
 const SETTING_NAME_DEFAULT_LINE_BEGIN_CAP := "addons/curved_lines_2d/line_begin_cap"
 const SETTING_NAME_DEFAULT_LINE_END_CAP := "addons/curved_lines_2d/line_end_cap"
@@ -189,12 +190,25 @@ func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root 
 
 
 func _add_collision_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
-	if _is_add_collision_enabled():
-		var collision := CollisionPolygon2D.new()
-		undo_redo.add_do_property(new_shape, 'collision_polygon', collision)
+	if _add_collision_object_type() != ScalableVectorShape2D.CollisionObjectType.NONE:
+		var collision : CollisionObject2D = null
+		match  _add_collision_object_type():
+			ScalableVectorShape2D.CollisionObjectType.STATIC_BODY_2D:
+				collision = StaticBody2D.new()
+			ScalableVectorShape2D.CollisionObjectType.AREA_2D:
+				collision = Area2D.new()
+			ScalableVectorShape2D.CollisionObjectType.ANIMATABLE_BODY_2D:
+				collision = AnimatableBody2D.new()
+			ScalableVectorShape2D.CollisionObjectType.RIGID_BODY_2D:
+				collision = RigidBody2D.new()
+			ScalableVectorShape2D.CollisionObjectType.CHARACTER_BODY_2D:
+				collision = CharacterBody2D.new()
+			ScalableVectorShape2D.CollisionObjectType.PHYSICAL_BONE_2D:
+				collision = PhysicalBone2D.new()
 		undo_redo.add_do_method(new_shape, 'add_child', collision, true)
-		undo_redo.add_do_method(collision, 'set_owner', scene_root)
 		undo_redo.add_do_reference(collision)
+		undo_redo.add_do_method(collision, 'set_owner', scene_root)
+		undo_redo.add_do_property(new_shape, 'collision_object', collision)
 		undo_redo.add_undo_method(new_shape, 'remove_child', collision)
 
 
@@ -1376,10 +1390,11 @@ static func _is_add_fill_enabled() -> bool:
 	return true
 
 
-static func _is_add_collision_enabled() -> bool:
-	if ProjectSettings.has_setting(SETTING_NAME_ADD_COLLISION_ENABLED):
-		return ProjectSettings.get_setting(SETTING_NAME_ADD_COLLISION_ENABLED)
-	return false
+static func _add_collision_object_type() -> ScalableVectorShape2D.CollisionObjectType:
+	if ProjectSettings.has_setting(SETTING_NAME_ADD_COLLISION_TYPE):
+		return ProjectSettings.get_setting(SETTING_NAME_ADD_COLLISION_TYPE)
+	return ScalableVectorShape2D.CollisionObjectType.NONE
+
 
 
 static func _get_default_paint_order() -> PaintOrder:

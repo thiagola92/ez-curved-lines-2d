@@ -20,7 +20,6 @@ signal clip_paths_changed()
 ## The constant used to convert a radius unit to the equivalent cubic Beziér control point length
 const R_TO_CP = 0.5523
 
-
 enum ShapeType {
 	## Gives every point in the [member curve] a handle, as well as their in- and out- control points.
 	## Ignores the [member size], [member offset], [member rx] and [member ry] properties when
@@ -40,6 +39,18 @@ enum ShapeType {
 		## The [member offset] can change by using the pivot-tool in the 2D Editor
 	ELLIPSE
 }
+
+
+enum CollisionObjectType {
+	NONE,
+	STATIC_BODY_2D,
+	AREA_2D,
+	ANIMATABLE_BODY_2D,
+	RIGID_BODY_2D,
+	CHARACTER_BODY_2D,
+	PHYSICAL_BONE_2D
+}
+
 
 @export_group("Fill")
 ## The 'Fill' of a [ScalableVectorShape2D] is simply an instance of a [Polygon2D] node
@@ -65,12 +76,22 @@ enum ShapeType {
 		line = _line
 		assigned_node_changed.emit()
 
-@export_group("Collision Polygon")
+
+@export_group("Collision")
 ## The CollisionPolygon2D controlled by this node's curve property
+## @deprecated: Use [member ScalableVectorShape2D.collision_object] instead.
 @export var collision_polygon: CollisionPolygon2D:
 	set(_poly):
 		collision_polygon = _poly
 		assigned_node_changed.emit()
+
+## The [CollisionObject2D] containing the [CollisionPolygon2D] node(s) generated
+## by this shape
+@export var collision_object: CollisionObject2D:
+	set(_coll):
+		collision_object = _coll
+		assigned_node_changed.emit()
+
 
 ## Controls the paramaters used to divide up the line  in segments.
 ## These settings are prefilled with the default values.
@@ -277,6 +298,10 @@ func _on_assigned_node_changed(_x : Variant = null):
 		if lock_assigned_shapes:
 			collision_polygon.set_meta("_edit_lock_", true)
 		curve_changed()
+	if is_instance_valid(collision_object):
+		if lock_assigned_shapes:
+			collision_object.set_meta("_edit_lock_", true)
+		curve_changed()
 
 
 ## Exposes assigned_node_changed signal to outside callers
@@ -321,6 +346,7 @@ func tessellate() -> PackedVector2Array:
 func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
 			and not is_instance_valid(collision_polygon)
+			and not is_instance_valid(collision_object)
 			and not path_changed.has_connections()):
 		# guard against needlessly invoking expensive tessellate operation
 		return
@@ -363,6 +389,17 @@ func curve_changed():
 			polygon.texture.height = 1 if box.size.y < 1 else box.size.y
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
+	if is_instance_valid(collision_object):
+		var ch = collision_object.find_children("*", "CollisionPolygon2D", false)
+		var c_poly : CollisionPolygon2D = null if ch.is_empty() else ch[0]
+		if not c_poly:
+			c_poly = CollisionPolygon2D.new()
+			collision_object.add_child(c_poly, true)
+			if collision_object.owner:
+				c_poly.set_owner(collision_object.owner)
+			if lock_assigned_shapes:
+				c_poly.set_meta("_edit_lock_", true)
+		c_poly.polygon = new_points
 	path_changed.emit(new_points)
 
 
@@ -393,10 +430,8 @@ func has_point(global_pos : Vector2) -> bool:
 
 
 func has_fine_point(global_pos : Vector2) -> bool:
-	if is_instance_valid(polygon) or is_instance_valid(collision_polygon):
-		var poly_points := self.tessellate()
-		return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
-	return false
+	var poly_points := self.tessellate()
+	return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
 
 
 func set_position_to_center() -> void:

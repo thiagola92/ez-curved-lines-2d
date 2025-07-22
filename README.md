@@ -49,14 +49,11 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 		- [Export as PNG button](#export-as-png-button)
 	- [The Fill inspector form](#the-fill-inspector-form)
 	- [The Stroke inspector form](#the-stroke-inspector-form)
-	- [The Collision Polygon inspector form](#the-collision-polygon-inspector-form)
+	- [The Collision inspector form](#the-collision-inspector-form)
 	- [The Curve settings inspector form](#the-curve-settings-inspector-form)
 	- [The Shape type inspector form](#the-shape-type-inspector-form)
 	- [The Editor settings inspector form](#the-editor-settings-inspector-form)
-- [More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`](#more-about-assigned-line2d-polygon2d-and-collisionpolygon2d)
-	- [The assigned shapes are now siblings](#the-assigned-shapes-are-now-siblings)
-	- [Yet they still respond to changes to your `ScalableVectorShape2D`](#yet-they-still-respond-to-changes-to-your-scalablevectorshape2d)
-	- [Because you assigned them to it using the inspector](#because-you-assigned-them-to-it-using-the-inspector)
+- [More about assigned `Line2D`, `Polygon2D` and `CollisionObject2D`](#more-about-assigned-line2d-polygon2d-and-collisionobject2d)
 	- [Watch the chapter about working with collisions, paint order and the node hierarchy on youtube](#watch-the-chapter-about-working-with-collisions-paint-order-and-the-node-hierarchy-on-youtube)
 - [Animating / Changing shapes at runtime](#animating--changing-shapes-at-runtime)
 	- [Youtube explainer on animating](#youtube-explainer-on-animating)
@@ -260,7 +257,7 @@ A couple of settings in the bottom panel are stored across sessions to represent
   - Fill color (when creating new shapes in the bottom panel)
   - Enable/Disable Stroke (when creating new shapes via the bottom panel)
   - Stroke color (when creating new shapes in the bottom panel)
-  - Enable/Disable Collisions (when creating new shapes via the bottom panel)
+  - Choose a `CollisionObject2D` type (when creating new shapes via the bottom panel, default is no collision object assignment)
 - Paint order: a toggle which represent what comes in front of what (when creating new shapes in the bottom panel)
 
 
@@ -272,7 +269,7 @@ The following custom forms were added, with extensive tooltips to help explain t
 - [Export as PNG button](#export-as-png-button)
 - [Fill](#the-fill-inspector-form) (actually the assigned `Polygon2D`)
 - [Stroke](#the-stroke-inspector-form) (actually the assigned `Line2D`)
-- [Collision Polygon](#the-collision-polygon-inspector-form) (just a button to generate a new `CollisionPolygon2D`)
+- [Collision](#the-collision-inspector-form) (manages an assigned `CollisionObject2D`)
 - [Curve Settings](#the-curve-settings-inspector-form)
 - [Shape Type Settings](#the-shape-type-inspector-form)
 - [Editor Settings](#the-editor-settings-inspector-form)
@@ -319,9 +316,23 @@ Once assigned, the following options are available:
 
 Below that, a standard godot `Assign ...`-field is also available to set the `line`-property directly with and to enable unassignment.
 
-## The Collision Polygon inspector form
+## The Collision inspector form
 
-This works the same as the Fill- and Stroke forms, but in this case a `CollisionPolygon2D` is assigned to the `collision_polygon`-property.
+This works the same as the Fill- and Stroke forms, but in this case a descendant of a `CollisionObject2D` is assigned to the `collision_object`-property[^4]:
+
+[^4]: Note that the `collision_polygon` property of `ScalableVectorShape2D` remains supported for backward compatibility, even though the inspector form will now show a deprecation warning and suggest replacing it by assigning a `CollisionObject2D` to the `collision_object` property.
+
+![the collision inspector form](./addons/curved_lines_2d/screenshots/collision-inspector-form.png)
+
+Every time the shape is changed, one or more `Polygon2D` nodes will be added/updated as direct children of this `collision_object`. The descendants of `CollisionObject2D` are:
+
+- `StaticBody2D`
+- `Area2D`
+- `AnimatableBody2D`
+- `RigidBody2D`
+- `CharacterBody2D`
+- `PhysicalBone2D`
+
 
 ## The Curve settings inspector form
 
@@ -354,21 +365,9 @@ This form exposes 2 settings:
 
 
 
-# More about assigned `Line2D`, `Polygon2D` and `CollisionPolygon2D`
+# More about assigned `Line2D`, `Polygon2D` and `CollisionObject2D`
 
-Using the `Add ...` buttons in the inspector simply adds a new node as a child to `ScalableVectorShape2D` but it does __not need to be__ a child. The important bit is that the new node is _assigned_ to it via its properties: `polygon`, `line` and `collision_polygon`:
-
-## The assigned shapes are now siblings
-
-![assigned tree](./addons/curved_lines_2d/screenshots/12a-assigned.png)
-
-## Yet they still respond to changes to your `ScalableVectorShape2D`
-
-![assigned viewport](./addons/curved_lines_2d/screenshots/12b-assigned.png)
-
-## Because you assigned them to it using the inspector
-
-![assigned inspector](./addons/curved_lines_2d/screenshots/12c-assigned.png)
+Using the `Add ...` buttons in the inspector simply adds a new node as a child to `ScalableVectorShape2D` but it does __not need to be__ a child. The important bit is that the new node is _assigned_ to it via its properties: `polygon`, `line` and `collision_object`.
 
 ## Watch the chapter about working with collisions, paint order and the node hierarchy on youtube
 
@@ -389,7 +388,7 @@ Watch this explainer on youtube on animating:
 
 The shapes you create will work fine with basic key-frame operations.
 
-You can even detach the Line2D, Polygon2D and CollisionPolygon2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning, and change the `ScalableVectorShape2D` to a simple `Node2D` if necessary.
+You can even detach the Line2D, Polygon2D and CollisionObject2D from `ScalableVectorShape2D` entirely, once you're done drawing and aligning, and change the `ScalableVectorShape2D` to a simple `Node2D` if necessary.
 
 ## Animating the shape and gradients at Runtime
 
@@ -447,7 +446,7 @@ Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance De
 
 ## Lots of thanks go out to those who helped me out getting started:
 - This plugin was first inspired by [Mark Hedberg's blog on rendering curves in Godot](https://www.hedberggames.com/blog/rendering-curves-in-godot).
-- The suggestion to support both `Polygon2D` and `CollisionPolygon2D` was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
+- The suggestion to support both `Polygon2D` and collisions was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
 - The SVG Importer code was adapted from the script hosted on github in the [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot) repository
 
 
