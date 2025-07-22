@@ -16,11 +16,11 @@ func _enter_tree() -> void:
 	rx_input = _mk_input()
 	ry_input = _mk_input()
 	rotation_input = _mk_input(1.0)
-	large_arc_checkbox = find_child("LargeArcCheckBox")
-	sweep_checkbox = find_child("SweepCheckBox")
-	find_child("RxInputContainer").add_child(rx_input)
-	find_child("RyInputContainer").add_child(ry_input)
-	find_child("RotationInputContainer").add_child(rotation_input)
+	large_arc_checkbox = %LargeArcCheckBox
+	sweep_checkbox = %SweepCheckBox
+	%RxInputContainer.add_child(rx_input)
+	%RyInputContainer.add_child(ry_input)
+	%RotationInputContainer.add_child(rotation_input)
 	if not rx_input.value_changed.is_connected(_on_radius_changed):
 		rx_input.value_changed.connect(_on_radius_changed)
 	if not ry_input.value_changed.is_connected(_on_radius_changed):
