@@ -364,6 +364,7 @@ func curve_changed():
 	if clip_paths.size() > 0:
 		# start out with
 		var current_polygons : Array[PackedVector2Array] = [new_points]
+		var holes : Array[PackedVector2Array] = []
 		for clip_path in clip_paths.filter(func(cp): return is_instance_valid(cp)):
 			var result_polygons : Array[PackedVector2Array] = []
 			var clip_poly = _clip_path_to_local(clip_path)
@@ -371,17 +372,37 @@ func curve_changed():
 				var result = Geometry2D.clip_polygons(current_points, clip_poly)
 				for poly_points in result:
 					if Geometry2D.is_polygon_clockwise(poly_points):
-						print("TODO, handle a hole")
+						holes.append(poly_points)
 					else:
 						result_polygons.append(poly_points)
 			current_polygons.clear()
 			current_polygons.append_array(result_polygons)
+
+		if not current_polygons.is_empty():
+			polyline_points.append_array(current_polygons[0])
+
+		if not holes.is_empty():
+			var sliced_polygons : Array[PackedVector2Array] = []
+			for current_points : PackedVector2Array in current_polygons:
+				for hole in holes:
+					var result_polygons : Array[PackedVector2Array] = []
+					var slices := Geometry2DUtil.slice_polygon_vertical(
+						current_points, Geometry2DUtil.get_polygon_center(hole)
+					)
+					#sliced_polygons.append_array(slices)
+					for slice in slices:
+						var result = Geometry2D.clip_polygons(slice, hole)
+						for poly_points in result:
+							if not Geometry2D.is_polygon_clockwise(poly_points):
+								sliced_polygons.append(poly_points)
+			current_polygons.clear()
+			current_polygons.append_array(sliced_polygons)
+
 		var p_count = 0
 		for poly_points in current_polygons:
 			var p_range := range(p_count, poly_points.size() + p_count)
 			polygon_points.append_array(poly_points)
-			if polyline_points.is_empty():
-				polyline_points.append_array(poly_points)
+
 			polygon_indices.append(p_range)
 			p_count += poly_points.size()
 
@@ -427,16 +448,7 @@ func get_bounding_rect() -> Rect2:
 	if points.size() < 1:
 		# Cannot calculate a center for 0 points
 		return Rect2(Vector2.ZERO, Vector2.ZERO)
-	var minx := INF
-	var miny := INF
-	var maxx := -INF
-	var maxy := -INF
-	for p : Vector2 in points:
-		minx = p.x if p.x < minx else minx
-		miny = p.y if p.y < miny else miny
-		maxx = p.x if p.x > maxx else maxx
-		maxy = p.y if p.y > maxy else maxy
-	return Rect2(minx, miny, maxx - minx, maxy - miny)
+	return Geometry2DUtil.get_polygon_bounding_rect(points)
 
 
 func has_point(global_pos : Vector2) -> bool:
