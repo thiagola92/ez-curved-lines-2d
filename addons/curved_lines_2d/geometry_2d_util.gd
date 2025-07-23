@@ -80,20 +80,19 @@ static func slice_polygon_vertical(polygon : PackedVector2Array, slice_target : 
 		result.push_back(polyslice)
 	return result
 
-class ClipResult:
-	var outline: PackedVector2Array
-	var holes: Array[PackedVector2Array]
-	var result: Array[PackedVector2Array]
 
-	func _init(ol = [], h = [], r = []):
-		outline = ol
-		holes = h
-		result = r
+class ClipResult:
+	var outlines: Array[PackedVector2Array]
+	var polygons: Array[PackedVector2Array]
+	func _init(ol = [], p = []):
+		outlines = ol
+		polygons = p
+
 
 static func apply_clips_to_polygon(polygon : PackedVector2Array, clips) -> ClipResult:
 	var current_polygons : Array[PackedVector2Array] = [polygon]
 	var holes : Array[PackedVector2Array] = []
-	var outline = polygon
+	var outlines : Array[PackedVector2Array] = []
 	for clip_poly in clips:
 		var result_polygons : Array[PackedVector2Array] = []
 		for current_points : PackedVector2Array in current_polygons:
@@ -107,7 +106,7 @@ static func apply_clips_to_polygon(polygon : PackedVector2Array, clips) -> ClipR
 		current_polygons.append_array(result_polygons)
 
 	if not current_polygons.is_empty():
-		outline = current_polygons[0]
+		outlines = current_polygons.duplicate()
 
 	if not holes.is_empty():
 		var result_polygons : Array[PackedVector2Array] = []
@@ -124,5 +123,5 @@ static func apply_clips_to_polygon(polygon : PackedVector2Array, clips) -> ClipR
 			current_polygons.clear()
 			current_polygons.append_array(result_polygons)
 			result_polygons.clear()
-
-	return ClipResult.new(outline, holes, current_polygons)
+	outlines.append_array(holes)
+	return ClipResult.new(outlines, current_polygons)

@@ -358,8 +358,8 @@ func curve_changed():
 
 	# used to store result of clipping
 	var polygon_indices = []
-	var polygon_points = []
-	var polyline_points = []
+	var polygon_points : PackedVector2Array = []
+	var polyline_points : Array[PackedVector2Array] = []
 	if clip_paths.size() > 0:
 		var clip_result := Geometry2DUtil.apply_clips_to_polygon(
 			new_points,
@@ -367,16 +367,28 @@ func curve_changed():
 					.map(_clip_path_to_local)
 		)
 		var p_count = 0
-		polyline_points = clip_result.outline
-		for poly_points in clip_result.result:
+		polyline_points = clip_result.outlines
+		for poly_points in clip_result.polygons:
 			var p_range := range(p_count, poly_points.size() + p_count)
 			polygon_points.append_array(poly_points)
 			polygon_indices.append(p_range)
 			p_count += poly_points.size()
 
 	if is_instance_valid(line):
-		line.points = new_points if polyline_points.is_empty() else polyline_points
-		line.closed = is_curve_closed()
+		if polyline_points.is_empty():
+			line.points = new_points
+			line.closed = is_curve_closed()
+		else:
+			line.points = polyline_points.pop_front()
+			line.closed = true
+			var existing = line.get_children().filter(func(c): return c is Line2D)
+			for idx in existing.size():
+				if idx >= polyline_points.size():
+					existing[idx].queue_free()
+			for polyline_index in polyline_points.size():
+				if polyline_index >= existing.size():
+					existing.append(_make_new_line_2d())
+				existing[polyline_index].points = polyline_points[polyline_index]
 	if is_instance_valid(polygon):
 		polygon.polygons = polygon_indices
 		polygon.polygon = new_points if polygon_points.is_empty() else polygon_points
@@ -415,6 +427,23 @@ func _make_new_collision_polygon_2d() -> CollisionPolygon2D:
 	if lock_assigned_shapes:
 		c_poly.set_meta("_edit_lock_", true)
 	return c_poly
+
+
+func _make_new_line_2d() -> Line2D:
+	var ln := Line2D.new()
+	ln.name = "ExtraStroke"
+	line.add_child(ln, true)
+	ln.width = line.width
+	ln.begin_cap_mode = line.begin_cap_mode
+	ln.end_cap_mode = line.end_cap_mode
+	ln.joint_mode = line.joint_mode
+	ln.default_color = line.default_color
+	ln.closed = true
+	if line.owner:
+		ln.set_owner(line.owner)
+	if lock_assigned_shapes:
+		ln.set_meta("_edit_lock_", true)
+	return ln
 
 
 func _clip_path_to_local(clip_path : ScalableVectorShape2D) -> PackedVector2Array:
