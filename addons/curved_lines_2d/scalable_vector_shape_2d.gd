@@ -257,13 +257,14 @@ func _exit_tree():
 func _on_clip_paths_changed():
 	for cp in clip_paths:
 		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
-			cp.path_changed.connect(_on_assigned_node_changed)
-			cp.set_notify_transform(true)
+			if Engine.is_editor_hint() or cp.update_curve_at_runtime:
+				cp.path_changed.connect(_on_assigned_node_changed)
+			if Engine.is_editor_hint() or update_curve_at_runtime:
+				cp.set_notify_transform(true)
 	_on_assigned_node_changed()
 
 
 func _notification(what: int) -> void:
-
 	if what == NOTIFICATION_TRANSFORM_CHANGED:
 		path_changed.emit()
 
@@ -289,19 +290,17 @@ func _on_assigned_node_changed(_x : Variant = null):
 	if is_instance_valid(line):
 		if lock_assigned_shapes:
 			line.set_meta("_edit_lock_", true)
-		curve_changed()
 	if is_instance_valid(polygon):
 		if lock_assigned_shapes:
 			polygon.set_meta("_edit_lock_", true)
-		curve_changed()
 	if is_instance_valid(collision_polygon):
 		if lock_assigned_shapes:
 			collision_polygon.set_meta("_edit_lock_", true)
-		curve_changed()
 	if is_instance_valid(collision_object):
 		if lock_assigned_shapes:
 			collision_object.set_meta("_edit_lock_", true)
-		curve_changed()
+
+	curve_changed()
 
 
 ## Exposes assigned_node_changed signal to outside callers
@@ -364,7 +363,8 @@ func curve_changed():
 	if clip_paths.size() > 0:
 		var clip_result := Geometry2DUtil.apply_clips_to_polygon(
 			new_points,
-			clip_paths.filter(func(cp): return is_instance_valid(cp)).map(_clip_path_to_local)
+			clip_paths.filter(func(cp): return is_instance_valid(cp))
+					.map(_clip_path_to_local)
 		)
 		var p_count = 0
 		polyline_points = clip_result.outline
