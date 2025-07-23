@@ -362,47 +362,50 @@ func curve_changed():
 	var polygon_points = []
 	var polyline_points = []
 	if clip_paths.size() > 0:
-		# start out with
-		var current_polygons : Array[PackedVector2Array] = [new_points]
-		var holes : Array[PackedVector2Array] = []
-		for clip_path in clip_paths.filter(func(cp): return is_instance_valid(cp)):
-			var result_polygons : Array[PackedVector2Array] = []
-			var clip_poly = _clip_path_to_local(clip_path)
-			for current_points : PackedVector2Array in current_polygons:
-				var result = Geometry2D.clip_polygons(current_points, clip_poly)
-				for poly_points in result:
-					if Geometry2D.is_polygon_clockwise(poly_points):
-						holes.append(poly_points)
-					else:
-						result_polygons.append(poly_points)
-			current_polygons.clear()
-			current_polygons.append_array(result_polygons)
-
-		if not current_polygons.is_empty():
-			polyline_points.append_array(current_polygons[0])
-
-		if not holes.is_empty():
-			var sliced_polygons : Array[PackedVector2Array] = []
-			for current_points : PackedVector2Array in current_polygons:
-				for hole in holes:
-					var result_polygons : Array[PackedVector2Array] = []
-					var slices := Geometry2DUtil.slice_polygon_vertical(
-						current_points, Geometry2DUtil.get_polygon_center(hole)
-					)
-					#sliced_polygons.append_array(slices)
-					for slice in slices:
-						var result = Geometry2D.clip_polygons(slice, hole)
-						for poly_points in result:
-							if not Geometry2D.is_polygon_clockwise(poly_points):
-								sliced_polygons.append(poly_points)
-			current_polygons.clear()
-			current_polygons.append_array(sliced_polygons)
+		var clip_result := Geometry2DUtil.apply_clips_to_polygon(
+			new_points,
+			clip_paths.filter(func(cp): return is_instance_valid(cp)).map(_clip_path_to_local)
+		)
+		## start out with
+		#var current_polygons : Array[PackedVector2Array] = [new_points]
+		#var holes : Array[PackedVector2Array] = []
+		#for clip_path in clip_paths.filter(func(cp): return is_instance_valid(cp)):
+			#var result_polygons : Array[PackedVector2Array] = []
+			#var clip_poly = _clip_path_to_local(clip_path)
+			#for current_points : PackedVector2Array in current_polygons:
+				#var result = Geometry2D.clip_polygons(current_points, clip_poly)
+				#for poly_points in result:
+					#if Geometry2D.is_polygon_clockwise(poly_points):
+						#holes.append(poly_points)
+					#else:
+						#result_polygons.append(poly_points)
+			#current_polygons.clear()
+			#current_polygons.append_array(result_polygons)
+#
+		#if not current_polygons.is_empty():
+			#polyline_points.append_array(current_polygons[0])
+#
+		#if not holes.is_empty():
+			#var result_polygons : Array[PackedVector2Array] = []
+			#for hole in holes:
+				#for current_points : PackedVector2Array in current_polygons:
+					#var slices := Geometry2DUtil.slice_polygon_vertical(
+						#current_points, Geometry2DUtil.get_polygon_center(hole)
+					#)
+					#for slice in slices:
+						#var result = Geometry2D.clip_polygons(slice, hole)
+						#for poly_points in result:
+							#if not Geometry2D.is_polygon_clockwise(poly_points):
+								#result_polygons.append(poly_points)
+				#current_polygons.clear()
+				#current_polygons.append_array(result_polygons)
+				#result_polygons.clear()
 
 		var p_count = 0
-		for poly_points in current_polygons:
+		polyline_points = clip_result.outline
+		for poly_points in clip_result.result:
 			var p_range := range(p_count, poly_points.size() + p_count)
 			polygon_points.append_array(poly_points)
-
 			polygon_indices.append(p_range)
 			p_count += poly_points.size()
 
@@ -433,7 +436,7 @@ func curve_changed():
 	path_changed.emit(new_points)
 
 
-func _clip_path_to_local(clip_path : ScalableVectorShape2D):
+func _clip_path_to_local(clip_path : ScalableVectorShape2D) -> PackedVector2Array:
 	var cpy := PackedVector2Array()
 	for p in clip_path.tessellate():
 		cpy.append((clip_path.to_global(p) - self.global_position).rotated(-self.rotation) / self.global_scale)

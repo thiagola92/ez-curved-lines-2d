@@ -62,9 +62,6 @@ static func slice_polygon_vertical(polygon : PackedVector2Array, slice_target : 
 				polygon.insert(next_index, point_on_segment)
 				break
 
-	#if not does_intersect:
-		#return [polygon]
-
 	var intersection_point_a_index = 0
 	while polygon[intersection_point_a_index].distance_to(intersection_point_a) > THRESHOLD:
 		intersection_point_a_index += 1
@@ -75,15 +72,57 @@ static func slice_polygon_vertical(polygon : PackedVector2Array, slice_target : 
 		while polygon[index].distance_to(intersection_point_b) > THRESHOLD:
 			polyslice.append(polygon[index])
 			index = posmod(index + step, polygon.size())
-
 		polyslice.append(intersection_point_b)
-
 		var internal_points_index = intersection.size() - 2
 		while internal_points_index > 0:
 			polyslice.append(intersection[internal_points_index])
 			internal_points_index -= 1
-
 		result.push_back(polyslice)
-
 	return result
 
+class ClipResult:
+	var outline: PackedVector2Array
+	var holes: Array[PackedVector2Array]
+	var result: Array[PackedVector2Array]
+
+	func _init(ol = [], h = [], r = []):
+		outline = ol
+		holes = h
+		result = r
+
+static func apply_clips_to_polygon(polygon : PackedVector2Array, clips) -> ClipResult:
+	var current_polygons : Array[PackedVector2Array] = [polygon]
+	var holes : Array[PackedVector2Array] = []
+	var outline = polygon
+	for clip_poly in clips:
+		var result_polygons : Array[PackedVector2Array] = []
+		for current_points : PackedVector2Array in current_polygons:
+			var result = Geometry2D.clip_polygons(current_points, clip_poly)
+			for poly_points in result:
+				if Geometry2D.is_polygon_clockwise(poly_points):
+					holes.append(poly_points)
+				else:
+					result_polygons.append(poly_points)
+		current_polygons.clear()
+		current_polygons.append_array(result_polygons)
+
+	if not current_polygons.is_empty():
+		outline = current_polygons[0]
+
+	if not holes.is_empty():
+		var result_polygons : Array[PackedVector2Array] = []
+		for hole in holes:
+			for current_points : PackedVector2Array in current_polygons:
+				var slices := slice_polygon_vertical(
+					current_points, get_polygon_center(hole)
+				)
+				for slice in slices:
+					var result = Geometry2D.clip_polygons(slice, hole)
+					for poly_points in result:
+						if not Geometry2D.is_polygon_clockwise(poly_points):
+							result_polygons.append(poly_points)
+			current_polygons.clear()
+			current_polygons.append_array(result_polygons)
+			result_polygons.clear()
+
+	return ClipResult.new(outline, holes, current_polygons)
