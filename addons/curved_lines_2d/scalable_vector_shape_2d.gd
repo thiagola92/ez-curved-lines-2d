@@ -388,17 +388,33 @@ func curve_changed():
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = new_points
 	if is_instance_valid(collision_object):
-		var ch = collision_object.find_children("*", "CollisionPolygon2D", false)
-		var c_poly : CollisionPolygon2D = null if ch.is_empty() else ch[0]
-		if not c_poly:
-			c_poly = CollisionPolygon2D.new()
-			collision_object.add_child(c_poly, true)
-			if collision_object.owner:
-				c_poly.set_owner(collision_object.owner)
-			if lock_assigned_shapes:
-				c_poly.set_meta("_edit_lock_", true)
-		c_poly.polygon = new_points
+		if polygon_points.is_empty():
+			var ch = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
+			var c_poly : CollisionPolygon2D = _make_new_collision_polygon_2d() if ch.is_empty() else ch[0]
+			c_poly.polygon = new_points
+		else: # handle multiple polygons
+			var existing = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
+			for idx in existing.size():
+				if idx >= polygon_indices.size():
+					existing[idx].queue_free()
+			for polygon_index in polygon_indices.size():
+				var poly_points := PackedVector2Array()
+				for idx : int in polygon_indices[polygon_index]:
+					poly_points.append(polygon_points[idx])
+				if polygon_index >= existing.size():
+					existing.append(_make_new_collision_polygon_2d())
+				existing[polygon_index].polygon = poly_points
 	path_changed.emit(new_points)
+
+
+func _make_new_collision_polygon_2d() -> CollisionPolygon2D:
+	var c_poly = CollisionPolygon2D.new()
+	collision_object.add_child(c_poly, true)
+	if collision_object.owner:
+		c_poly.set_owner(collision_object.owner)
+	if lock_assigned_shapes:
+		c_poly.set_meta("_edit_lock_", true)
+	return c_poly
 
 
 func _clip_path_to_local(clip_path : ScalableVectorShape2D) -> PackedVector2Array:
