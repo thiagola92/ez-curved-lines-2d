@@ -147,7 +147,8 @@ func _create_shape(new_shape : Node2D, scene_root : Node2D, node_name : String, 
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 	var parent = current_selection if current_selection is Node2D else scene_root
 	new_shape.name = node_name
-	new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
+	if not is_instance_valid(is_cutout_for):
+		new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
 	undo_redo.create_action("Add a %s to the scene " % node_name)
 	undo_redo.add_do_method(parent, 'add_child', new_shape, true)
 	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
@@ -1119,7 +1120,9 @@ func _add_point_on_position(svs : ScalableVectorShape2D, pos : Vector2) -> void:
 func _start_cutout_shape(svs : ScalableVectorShape2D, pos : Vector2) -> void:
 	var new_shape = ScalableVectorShape2D.new()
 	new_shape.curve = Curve2D.new()
-	new_shape.curve.add_point(svs.to_local(EditorInterface.get_editor_viewport_2d().get_mouse_position()))
+	new_shape.curve.add_point(Vector2.ZERO)
+	new_shape.position = svs.to_local(EditorInterface.get_editor_viewport_2d().get_mouse_position())
+
 	_create_shape(new_shape, EditorInterface.get_edited_scene_root(), "CutoutOf%s" % svs.name, svs)
 
 
