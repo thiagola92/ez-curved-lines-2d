@@ -2,7 +2,7 @@
 extends Object
 class_name Geometry2DUtil
 
-const THRESHOLD = 1
+const THRESHOLD = 0.1
 
 static func get_polygon_bounding_rect(points : PackedVector2Array) -> Rect2:
 	var minx := INF

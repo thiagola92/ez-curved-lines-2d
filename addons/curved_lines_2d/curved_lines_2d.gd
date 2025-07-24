@@ -601,7 +601,7 @@ func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D,
 	var points = svs.get_poly_points().map(_vp_transform)
 	var color := svs.shape_hint_color if svs.shape_hint_color else Color.LIME_GREEN
 	if not is_selected:
-		color = Color.WEB_GRAY
+		color = Color(0.5, 0.5, 0.5, 0.2)
 	var last_p := Vector2.INF
 	for p : Vector2 in points:
 		if last_p != Vector2.INF:
