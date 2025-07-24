@@ -350,73 +350,96 @@ func curve_changed():
 		# guard against needlessly invoking expensive tessellate operation
 		return
 
-	var new_points := self.tessellate()
+	# recalculate the polygon point for this shape based on curve and arc_list
+	var polygon_points := self.tessellate()
 	# Fixes cases start- and end-node are so close to each other that
 	# polygons won't fill and closed lines won't cap nicely
-	if new_points.size() > 0 and new_points[0].distance_to(new_points[new_points.size()-1]) < 0.001:
-		new_points.remove_at(new_points.size() - 1)
+	if (polygon_points.size() > 0 and
+			polygon_points[0].distance_to(polygon_points[polygon_points.size()-1]) < 0.001):
+		polygon_points.remove_at(polygon_points.size() - 1)
 
-	# used to store result of clipping
-	var polygon_indices = []
-	var polygon_points : PackedVector2Array = []
-	var polyline_points : Array[PackedVector2Array] = []
-	if clip_paths.size() > 0:
-		var clip_result := Geometry2DUtil.apply_clips_to_polygon(
-			new_points,
-			clip_paths.filter(func(cp): return is_instance_valid(cp))
-					.map(_clip_path_to_local)
-		)
-		var p_count = 0
-		polyline_points = clip_result.outlines
-		for poly_points in clip_result.polygons:
-			var p_range := range(p_count, poly_points.size() + p_count)
-			polygon_points.append_array(poly_points)
-			polygon_indices.append(p_range)
-			p_count += poly_points.size()
+	# emit updated path to listeners
+	path_changed.emit(polygon_points)
+
+	if clip_paths.is_empty():
+		_update_assigned_nodes(polygon_points)
+	else:
+		_update_assigned_nodes_with_clips(polygon_points)
+
+
+func _update_assigned_nodes(polygon_points : PackedVector2Array) -> void:
+	if is_instance_valid(line):
+		line.points = polygon_points
+		line.closed = is_curve_closed()
+	if is_instance_valid(polygon):
+		polygon.polygons.clear()
+		polygon.polygon = polygon_points
+		_update_polygon_texture()
+	if is_instance_valid(collision_polygon):
+		collision_polygon.polygon = polygon_points
+	if is_instance_valid(collision_object):
+		var ch = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
+		var c_poly : CollisionPolygon2D = _make_new_collision_polygon_2d() if ch.is_empty() else ch[0]
+		c_poly.polygon = polygon_points
+
+
+func _update_polygon_texture():
+	if polygon.texture is GradientTexture2D:
+		var box := get_bounding_rect()
+		polygon.texture_offset = -box.position
+		polygon.texture.width = 1 if box.size.x < 1 else box.size.x
+		polygon.texture.height = 1 if box.size.y < 1 else box.size.y
+
+
+func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array) -> void:
+	var clipped_polygon_point_indices = []
+	var clipped_polygons : PackedVector2Array = []
+	var clipped_polylines : Array[PackedVector2Array] = []
+	var clip_result := Geometry2DUtil.apply_clips_to_polygon(
+		polygon_points,
+		clip_paths.filter(func(cp): return is_instance_valid(cp))
+				.map(_clip_path_to_local)
+	)
+	var p_count = 0
+	clipped_polylines = clip_result.outlines
+	for poly_points in clip_result.polygons:
+		var p_range := range(p_count, poly_points.size() + p_count)
+		clipped_polygons.append_array(poly_points)
+		clipped_polygon_point_indices.append(p_range)
+		p_count += poly_points.size()
 
 	if is_instance_valid(line):
-		if polyline_points.is_empty():
-			line.points = new_points
-			line.closed = is_curve_closed()
-		else:
-			line.points = polyline_points.pop_front()
-			line.closed = true
-			var existing = line.get_children().filter(func(c): return c is Line2D)
-			for idx in existing.size():
-				if idx >= polyline_points.size():
-					existing[idx].queue_free()
-			for polyline_index in polyline_points.size():
-				if polyline_index >= existing.size():
-					existing.append(_make_new_line_2d())
-				existing[polyline_index].points = polyline_points[polyline_index]
+		line.points = clipped_polylines.pop_front()
+		line.closed = true
+		var existing = line.get_children().filter(func(c): return c is Line2D)
+		for idx in existing.size():
+			if idx >= clipped_polylines.size():
+				existing[idx].queue_free()
+		for polyline_index in clipped_polylines.size():
+			if polyline_index >= existing.size():
+				existing.append(_make_new_line_2d())
+			existing[polyline_index].points = clipped_polylines[polyline_index]
+
 	if is_instance_valid(polygon):
-		polygon.polygons = polygon_indices
-		polygon.polygon = new_points if polygon_points.is_empty() else polygon_points
-		if polygon.texture is GradientTexture2D:
-			var box := get_bounding_rect()
-			polygon.texture_offset = -box.position
-			polygon.texture.width = 1 if box.size.x < 1 else box.size.x
-			polygon.texture.height = 1 if box.size.y < 1 else box.size.y
+		polygon.polygons = clipped_polygon_point_indices
+		polygon.polygon = clipped_polygons
+		_update_polygon_texture()
+
 	if is_instance_valid(collision_polygon):
-		collision_polygon.polygon = new_points
+		collision_polygon.polygon = polygon_points
+
 	if is_instance_valid(collision_object):
-		if polygon_points.is_empty():
-			var ch = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
-			var c_poly : CollisionPolygon2D = _make_new_collision_polygon_2d() if ch.is_empty() else ch[0]
-			c_poly.polygon = new_points
-		else: # handle multiple polygons
-			var existing = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
-			for idx in existing.size():
-				if idx >= polygon_indices.size():
-					existing[idx].queue_free()
-			for polygon_index in polygon_indices.size():
-				var poly_points := PackedVector2Array()
-				for idx : int in polygon_indices[polygon_index]:
-					poly_points.append(polygon_points[idx])
-				if polygon_index >= existing.size():
-					existing.append(_make_new_collision_polygon_2d())
-				existing[polygon_index].polygon = poly_points
-	path_changed.emit(new_points)
+		var existing = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
+		for idx in existing.size():
+			if idx >= clipped_polygon_point_indices.size():
+				existing[idx].queue_free()
+		for polygon_index in clipped_polygon_point_indices.size():
+			var poly_points := PackedVector2Array()
+			for idx : int in clipped_polygon_point_indices[polygon_index]:
+				poly_points.append(clipped_polygons[idx])
+			if polygon_index >= existing.size():
+				existing.append(_make_new_collision_polygon_2d())
+			existing[polygon_index].polygon = poly_points
 
 
 func _make_new_collision_polygon_2d() -> CollisionPolygon2D:
@@ -424,7 +447,7 @@ func _make_new_collision_polygon_2d() -> CollisionPolygon2D:
 	collision_object.add_child(c_poly, true)
 	if collision_object.owner:
 		c_poly.set_owner(collision_object.owner)
-	if lock_assigned_shapes:
+	if Engine.is_editor_hint() and lock_assigned_shapes:
 		c_poly.set_meta("_edit_lock_", true)
 	return c_poly
 
@@ -441,7 +464,7 @@ func _make_new_line_2d() -> Line2D:
 	ln.closed = true
 	if line.owner:
 		ln.set_owner(line.owner)
-	if lock_assigned_shapes:
+	if Engine.is_editor_hint() and lock_assigned_shapes:
 		ln.set_meta("_edit_lock_", true)
 	return ln
 
