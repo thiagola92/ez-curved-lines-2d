@@ -257,8 +257,7 @@ func _exit_tree():
 func _on_clip_paths_changed():
 	for cp in clip_paths:
 		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
-			if Engine.is_editor_hint() or cp.update_curve_at_runtime:
-				cp.path_changed.connect(_on_assigned_node_changed)
+			cp.path_changed.connect(_on_assigned_node_changed)
 			if Engine.is_editor_hint() or update_curve_at_runtime:
 				cp.set_notify_transform(true)
 	_on_assigned_node_changed()
