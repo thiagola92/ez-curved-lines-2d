@@ -470,10 +470,8 @@ func _make_new_line_2d() -> Line2D:
 
 
 func _clip_path_to_local(clip_path : ScalableVectorShape2D) -> PackedVector2Array:
-	var cpy := PackedVector2Array()
-	for p in clip_path.tessellate():
-		cpy.append((clip_path.to_global(p) - self.global_position).rotated(-self.global_rotation) / self.global_scale)
-	return cpy
+	var pts := clip_path.global_transform * clip_path.tessellate()
+	return self.global_transform.affine_inverse() * pts
 
 
 ## Calculate and return the bounding rect in local space
