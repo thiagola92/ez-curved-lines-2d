@@ -392,16 +392,16 @@ func _update_polygon_texture():
 
 
 func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array) -> void:
-	var clipped_polygon_point_indices = []
-	var clipped_polygons : PackedVector2Array = []
-	var clipped_polylines : Array[PackedVector2Array] = []
 	var clip_result := Geometry2DUtil.apply_clips_to_polygon(
 		polygon_points,
 		clip_paths.filter(func(cp): return is_instance_valid(cp))
 				.map(_clip_path_to_local)
 	)
+
 	var p_count = 0
-	clipped_polylines = clip_result.outlines
+	var clipped_polylines := clip_result.outlines
+	var clipped_polygon_point_indices = []
+	var clipped_polygons : PackedVector2Array = []
 	for poly_points in clip_result.polygons:
 		var p_range := range(p_count, poly_points.size() + p_count)
 		clipped_polygons.append_array(poly_points)
@@ -414,11 +414,13 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array) -> v
 		var existing = line.get_children().filter(func(c): return c is Line2D)
 		for idx in existing.size():
 			if idx >= clipped_polylines.size():
-				existing[idx].queue_free()
+				existing[idx].hide()
 		for polyline_index in clipped_polylines.size():
 			if polyline_index >= existing.size():
 				existing.append(_make_new_line_2d())
 			existing[polyline_index].points = clipped_polylines[polyline_index]
+			existing[polyline_index].show()
+
 
 	if is_instance_valid(polygon):
 		polygon.polygons = clipped_polygon_point_indices
@@ -431,15 +433,16 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array) -> v
 	if is_instance_valid(collision_object):
 		var existing = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
 		for idx in existing.size():
-			if idx >= clipped_polygon_point_indices.size():
-				existing[idx].queue_free()
-		for polygon_index in clipped_polygon_point_indices.size():
-			var poly_points := PackedVector2Array()
-			for idx : int in clipped_polygon_point_indices[polygon_index]:
-				poly_points.append(clipped_polygons[idx])
+			if idx >= clip_result.polygons.size():
+				existing[idx].hide()
+				existing[idx].disabled = true
+
+		for polygon_index in clip_result.polygons.size():
 			if polygon_index >= existing.size():
 				existing.append(_make_new_collision_polygon_2d())
-			existing[polygon_index].polygon = poly_points
+			existing[polygon_index].polygon = clip_result.polygons[polygon_index]
+			existing[polygon_index].show()
+			existing[polygon_index].disabled = false
 
 
 func _make_new_collision_polygon_2d() -> CollisionPolygon2D:
