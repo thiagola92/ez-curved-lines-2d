@@ -8,6 +8,7 @@
 - Cutouts can be holes, made possible by multiple polygons
 - Cutouts are `ScalableVectorShape2D` nodes themselves with all the same capabilities
 - A `NavigationRegion2D` can now be assigned via the `navigation_region` property
+- The SVG importer now also supports cutout paths within the `d="..."` attribute (results may vary)
 
 ## 2.8.2 - 2025-21-07
 
