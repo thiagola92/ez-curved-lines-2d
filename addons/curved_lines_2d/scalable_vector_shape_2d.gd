@@ -265,6 +265,8 @@ func _on_clip_paths_changed():
 	for cp in clip_paths:
 		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
 			cp.path_changed.connect(_on_assigned_node_changed)
+			cp.tree_entered.connect(_on_assigned_node_changed)
+			cp.tree_exited.connect(_on_assigned_node_changed)
 			if Engine.is_editor_hint() or update_curve_at_runtime:
 				cp.set_notify_transform(true)
 	_on_assigned_node_changed()
@@ -366,10 +368,15 @@ func curve_changed():
 	# emit updated path to listeners
 	path_changed.emit(polygon_points)
 
+	var valid_clip_paths : Array[ScalableVectorShape2D] = (clip_paths
+			.filter(func(cp): return is_instance_valid(cp))
+			.filter(func(cp : Node2D): return cp.is_inside_tree())
+	)
+
 	if clip_paths.is_empty():
 		_update_assigned_nodes(polygon_points)
 	else:
-		_update_assigned_nodes_with_clips(polygon_points)
+		_update_assigned_nodes_with_clips(polygon_points, valid_clip_paths)
 
 
 func _update_assigned_nodes(polygon_points : PackedVector2Array) -> void:
@@ -400,11 +407,10 @@ func _update_polygon_texture():
 		polygon.texture.height = 1 if box.size.y < 1 else box.size.y
 
 
-func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array) -> void:
+func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> void:
 	var clip_result := Geometry2DUtil.apply_clips_to_polygon(
 		polygon_points,
-		clip_paths.filter(func(cp): return is_instance_valid(cp))
-				.map(_clip_path_to_local)
+		valid_clip_paths.map(_clip_path_to_local)
 	)
 
 	var p_count = 0
