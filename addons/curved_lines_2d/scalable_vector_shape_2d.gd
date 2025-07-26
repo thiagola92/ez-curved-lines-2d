@@ -93,6 +93,13 @@ enum CollisionObjectType {
 		assigned_node_changed.emit()
 
 
+@export_group("Navigation")
+@export var navigation_region: NavigationRegion2D:
+	set(_nav):
+		navigation_region = _nav
+		assigned_node_changed.emit()
+
+
 ## Controls the paramaters used to divide up the line  in segments.
 ## These settings are prefilled with the default values.
 @export_group("Curve settings")
@@ -258,9 +265,14 @@ func _on_clip_paths_changed():
 	for cp in clip_paths:
 		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
 			cp.path_changed.connect(_on_assigned_node_changed)
+			cp.tree_exited.connect(func(): _on_clip_path_removed(cp))
 			if Engine.is_editor_hint() or update_curve_at_runtime:
 				cp.set_notify_transform(true)
 	_on_assigned_node_changed()
+
+
+func _on_clip_path_removed(clip_path : ScalableVectorShape2D):
+	clip_paths = clip_paths.filter(func (cp): return cp != clip_path)
 
 
 func _notification(what: int) -> void:
@@ -286,19 +298,17 @@ func _on_assigned_node_changed(_x : Variant = null):
 		if not arc_list.changed.is_connected(curve_changed):
 			arc_list.changed.connect(curve_changed)
 
-	if is_instance_valid(line):
-		if lock_assigned_shapes:
+	if lock_assigned_shapes:
+		if is_instance_valid(line):
 			line.set_meta("_edit_lock_", true)
-	if is_instance_valid(polygon):
-		if lock_assigned_shapes:
+		if is_instance_valid(polygon):
 			polygon.set_meta("_edit_lock_", true)
-	if is_instance_valid(collision_polygon):
-		if lock_assigned_shapes:
+		if is_instance_valid(collision_polygon):
 			collision_polygon.set_meta("_edit_lock_", true)
-	if is_instance_valid(collision_object):
-		if lock_assigned_shapes:
+		if is_instance_valid(collision_object):
 			collision_object.set_meta("_edit_lock_", true)
-
+		if is_instance_valid(navigation_region):
+			navigation_region.set_meta("_edit_lock_", true)
 	curve_changed()
 
 
@@ -345,6 +355,7 @@ func curve_changed():
 	if (not is_instance_valid(line) and not is_instance_valid(polygon)
 			and not is_instance_valid(collision_polygon)
 			and not is_instance_valid(collision_object)
+			and not is_instance_valid(navigation_region)
 			and not path_changed.has_connections()):
 		# guard against needlessly invoking expensive tessellate operation
 		return
@@ -380,7 +391,11 @@ func _update_assigned_nodes(polygon_points : PackedVector2Array) -> void:
 		var ch = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
 		var c_poly : CollisionPolygon2D = _make_new_collision_polygon_2d() if ch.is_empty() else ch[0]
 		c_poly.polygon = polygon_points
-
+	if is_instance_valid(navigation_region):
+		var navigation_poly = NavigationPolygon.new()
+		navigation_poly.add_outline(polygon_points)
+		NavigationServer2D.bake_from_source_geometry_data(navigation_poly, NavigationMeshSourceGeometryData2D.new())
+		navigation_region.navigation_polygon = navigation_poly
 
 func _update_polygon_texture():
 	if polygon.texture is GradientTexture2D:
@@ -442,6 +457,13 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array) -> v
 			existing[polygon_index].polygon = clip_result.polygons[polygon_index]
 			existing[polygon_index].show()
 			existing[polygon_index].disabled = false
+
+	if is_instance_valid(navigation_region):
+		var navigation_poly = NavigationPolygon.new()
+		for outline in clip_result.polygons:
+			navigation_poly.add_outline(outline)
+		NavigationServer2D.bake_from_source_geometry_data(navigation_poly, NavigationMeshSourceGeometryData2D.new())
+		navigation_region.navigation_polygon = navigation_poly
 
 
 func _make_new_collision_polygon_2d() -> CollisionPolygon2D:
