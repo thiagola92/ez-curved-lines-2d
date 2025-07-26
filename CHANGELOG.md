@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.9.0 - 2025-27-07
+
+### Added
+- Use Ctrl+Shift+Left click to create a cutout shape for the selected shape
+- One shape can have multiple cutout shapes assigned (via the `clip_paths` property)
+- Cutouts can be holes, made possible by multiple polygons
+- Cutouts are `ScalableVectorShape2D` nodes themselves with all the same capabilities
+- A `NavigationRegion2D` can now be assigned via the `navigation_region` property
+
 ## 2.8.2 - 2025-21-07
 
 ### Added
