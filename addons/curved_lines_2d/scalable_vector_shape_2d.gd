@@ -266,7 +266,7 @@ func _on_clip_paths_changed():
 		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
 			cp.path_changed.connect(_on_assigned_node_changed)
 			cp.tree_entered.connect(_on_assigned_node_changed)
-			cp.tree_exited.connect(_on_assigned_node_changed)
+			cp.tree_exited.connect(func(): if is_inside_tree(): _on_assigned_node_changed())
 			if Engine.is_editor_hint() or update_curve_at_runtime:
 				cp.set_notify_transform(true)
 	_on_assigned_node_changed()
