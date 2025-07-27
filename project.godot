@@ -11,20 +11,21 @@ config_version=5
 [addons]
 
 curved_lines_2d/add_collision_enabled=false
-curved_lines_2d/add_stroke_enabled=false
-curved_lines_2d/add_fill_enabled=false
-curved_lines_2d/stroke_color=Color(0.31, 0.2418, 0.217, 1)
-curved_lines_2d/stroke_width=2.0
+curved_lines_2d/add_stroke_enabled=true
+curved_lines_2d/add_fill_enabled=true
+curved_lines_2d/stroke_color=Color(0, 0, 0, 1)
+curved_lines_2d/stroke_width=1.0
 curved_lines_2d/line_joint_mode=0
 curved_lines_2d/line_end_cap=0
 curved_lines_2d/line_begin_cap=0
-curved_lines_2d/paint_order=2
+curved_lines_2d/paint_order=0
 curved_lines_2d/show_point_numbers=true
 curved_lines_2d/hints_enabled=true
 curved_lines_2d/snap_to_pixel=true
-curved_lines_2d/snap_resolution=1.0
+curved_lines_2d/snap_resolution=8.0
 curved_lines_2d/editing_enabled=true
-curved_lines_2d/fill_color=Color(0.89, 0.741667, 0.6675, 1)
+curved_lines_2d/fill_color=Color(1, 1, 1, 1)
+curved_lines_2d/add_collision_type=1
 
 [application]
 
@@ -37,6 +38,19 @@ config/icon="uid://b5yxa1e62b0hb"
 
 enabled=PackedStringArray("res://addons/curved_lines_2d/plugin.cfg", "res://addons/godot-plugin-refresher/plugin.cfg")
 
+[input]
+
+left_flipper={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":65,"key_label":0,"unicode":97,"location":0,"echo":false,"script":null)
+]
+}
+right_flipper={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":68,"key_label":0,"unicode":100,"location":0,"echo":false,"script":null)
+]
+}
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
@@ -44,3 +58,4 @@ renderer/rendering_method.mobile="gl_compatibility"
 anti_aliasing/screen_space_roughness_limiter/amount=4.0
 environment/defaults/default_clear_color=Color(0.211765, 0.239216, 0.290196, 1)
 anti_aliasing/quality/screen_space_aa=1
+global_illumination/merge_rasterizer_cell_scale=1.0

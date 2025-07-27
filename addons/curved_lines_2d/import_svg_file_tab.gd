@@ -323,6 +323,8 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 		string_array_top.append(a)
 	string_arrays.append(string_array_top)
 
+	if string_arrays.size() > 1:
+		log_message("⚠️ Support for the m/M (move to) command is limited to cut-outs in svg paths")
 	var string_array_count = 0
 	var cursor = Vector2.ZERO
 	var main_shape : ScalableVectorShape2D = null
@@ -334,14 +336,12 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 		for i in string_array.size():
 			match string_array[i]:
 				"m":
-					log_message("⚠️ Support for the m/M (move to) command is limited to cut-outs in svg paths")
 					while string_array.size() > i + 2 and string_array[i+1].is_valid_float():
 						cursor += Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor)
 						i += 2
 						cursor_start = cursor
 				"M":
-					log_message("⚠️ Support for the m/M (move to) command is limited to cut-outs in svg paths")
 					while string_array.size() > i + 2 and string_array[i+1].is_valid_float():
 						cursor = Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor)
