@@ -44,6 +44,7 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
   - [Changing the color stop positions](#changing-the-color-stop-positions)
   - [Add new color stops](#add-new-color-stops)
 - [The Project Settings in the Scalable Vector Shapes panel](#the-project-settings-in-the-scalable-vector-shapes-panel)
+- [Ways to prevent 'over-selecting' `ScalableVectorShape2D` nodes](#ways-to-prevent-over-selecting-scalablevectorshape2d-nodes)
 - [Using the Inspector Form for `ScalableVectorShape2D`](#using-the-inspector-form-for-scalablevectorshape2d)
   - [Inspector Form](#inspector-form)
     - [Convert to Path button](#convert-to-path-button)
@@ -272,6 +273,16 @@ A couple of settings in the bottom panel are stored across sessions to represent
   - Stroke color (when creating new shapes in the bottom panel)
   - Choose a `CollisionObject2D` type (when creating new shapes via the bottom panel, default is no collision object assignment)
 - Paint order: a toggle which represent what comes in front of what (when creating new shapes in the bottom panel)
+
+# Ways to prevent 'over-selecting' `ScalableVectorShape2D` nodes
+
+This plugin can sometimes get in the way of the default 2D viewport behavior. Sometimes it is hard _not_ to select a `ScalableVectorShape2D`.
+
+There are 4 ways to get around this:
+1. Locking the `ScalableVectorShape2D` using the lock toggle ![lock toggle](./LockViewport.svg) button above the 2D viewport
+2. Hiding the `ScalableVectorShape2D` via the scene tree
+3. Saving the branch containing the `ScalableVectorShape2D` as a new scene via the scene tree and importing it will also prevent selection
+4. Toggling off Enable/Disable ScalableVectorShape2D Editing altogether in the bottom panel
 
 
 # Using the Inspector Form for `ScalableVectorShape2D`
