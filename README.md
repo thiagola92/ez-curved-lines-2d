@@ -360,7 +360,7 @@ Every time the shape is changed, one or more `Polygon2D` nodes will be added/upd
 
 ## The Navigation inspector form
 
-This form can hold a reference to an assigned `NavigationRegion2D`. When the shape changes, a new navigation polygon is calculated.ß
+This form can hold a reference to an assigned `NavigationRegion2D`. When the shape changes, a new navigation polygon is calculated.
 
 ## The Curve settings inspector form
 
@@ -480,6 +480,7 @@ Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance De
 - This plugin was first inspired by [Mark Hedberg's blog on rendering curves in Godot](https://www.hedberggames.com/blog/rendering-curves-in-godot).
 - The suggestion to support both `Polygon2D` and collisions was done by [GeminiSquishGames](https://github.com/GeminiSquishGames), who's pointers inspired me to go further
 - The SVG Importer code was adapted from the script hosted on github in the [pixelriot/SVG2Godot](https://github.com/pixelriot/SVG2Godot) repository
+- The code for making cutout shapes was adapted from the great [knife tool plugin](https://github.com/mrkdji/knife-tool/) by @mrkdji
 
 
 ## And a big thank you goes to to [@MewPurPur](https://github.com/MewPurPur)
