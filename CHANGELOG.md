@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.9.0 - 2025-27-07
+## 2.9.1 - 2025-27-07
 
 ### Added
 - Use Ctrl+Shift+Left click to create a cutout shape for the selected shape
