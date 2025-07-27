@@ -279,7 +279,7 @@ A couple of settings in the bottom panel are stored across sessions to represent
 This plugin can sometimes get in the way of the default 2D viewport behavior. Sometimes it is hard _not_ to select a `ScalableVectorShape2D`.
 
 There are 4 ways to get around this:
-1. Locking the `ScalableVectorShape2D` using the lock toggle ![lock toggle](./LockViewport.svg) button above the 2D viewport
+1. Locking the `ScalableVectorShape2D` using the lock toggle ![lock toggle](./addons/curved_lines_2d/LockViewport.svg) button above the 2D viewport
 2. Hiding the `ScalableVectorShape2D` via the scene tree
 3. Saving the branch containing the `ScalableVectorShape2D` as a new scene via the scene tree and importing it will also prevent selection
 4. Toggling off Enable/Disable ScalableVectorShape2D Editing altogether in the bottom panel
