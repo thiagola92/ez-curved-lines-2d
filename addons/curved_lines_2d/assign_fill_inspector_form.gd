@@ -4,25 +4,11 @@ extends KeyframeButtonCapableInspectorFormBase
 class_name AssignFillInspectorForm
 
 var scalable_vector_shape_2d : ScalableVectorShape2D
-var create_button : Button
-var select_button : Button
-var color_button : ColorPickerButton
 
-var remove_gradient_toggle_button : Button
-var linear_gradient_toggle_button : Button
-var radial_gradient_toggle_button : Button
-var other_texture_toggle_button : Button
 
 func _enter_tree() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
-	create_button = find_child("CreateFillButton")
-	select_button = find_child("GotoPolygon2DButton")
-	color_button = find_child("ColorPickerButton")
-	remove_gradient_toggle_button = find_child("RemoveGradientToggleButton")
-	linear_gradient_toggle_button = find_child("LinearGradientToggleButton")
-	radial_gradient_toggle_button = find_child("RadialGradientToggleButton")
-	other_texture_toggle_button = find_child("OtherTextureToggleButton")
 	if 'assigned_node_changed' in scalable_vector_shape_2d:
 		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	_on_svs_assignment_changed()
@@ -30,46 +16,46 @@ func _enter_tree() -> void:
 
 
 func _on_key_frame_capabilities_changed():
-	find_child("AddFillKeyFrameButton").visible = _is_key_frame_capable()
-	find_child("BatchInsertGradientKeyFrameButton").visible = _is_key_frame_capable()
+	%AddFillKeyFrameButton.visible = _is_key_frame_capable()
+	%BatchInsertGradientKeyFrameButton.visible = _is_key_frame_capable()
 
 
 func _on_svs_assignment_changed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.polygon):
-		create_button.get_parent().hide()
-		select_button.get_parent().show()
-		find_child("GradientFieldContainer").show()
-		find_child("GradientStopColorButtonContainer").show()
-		create_button.disabled = true
-		select_button.disabled = false
-		color_button.color = scalable_vector_shape_2d.polygon.color
-		radial_gradient_toggle_button.disabled = false
-		linear_gradient_toggle_button.disabled = false
-		remove_gradient_toggle_button.disabled = false
+		%CreateFillButton.get_parent().hide()
+		%GotoPolygon2DButton.get_parent().show()
+		%GradientFieldContainer.show()
+		%GradientStopColorButtonContainer.show()
+		%CreateFillButton.disabled = true
+		%GotoPolygon2DButton.disabled = false
+		%ColorPickerButton.color = scalable_vector_shape_2d.polygon.color
+		%RadialGradientToggleButton.disabled = false
+		%LinearGradientToggleButton.disabled = false
+		%RemoveGradientToggleButton.disabled = false
 		if scalable_vector_shape_2d.polygon.texture is GradientTexture2D:
 			if scalable_vector_shape_2d.polygon.texture.fill == GradientTexture2D.FILL_RADIAL:
-				radial_gradient_toggle_button.button_pressed = true
+				%RadialGradientToggleButton.button_pressed = true
 			else:
-				linear_gradient_toggle_button.button_pressed = true
+				%LinearGradientToggleButton.button_pressed = true
 			_set_gradient_stop_color_buttons()
 		elif scalable_vector_shape_2d.polygon.texture:
-			other_texture_toggle_button.button_pressed = true
-			find_child("GradientStopColorButtonContainer").hide()
+			%OtherTextureToggleButton.button_pressed = true
+			%GradientStopColorButtonContainer.hide()
 		else:
-			remove_gradient_toggle_button.button_pressed = true
-			find_child("GradientStopColorButtonContainer").hide()
+			%RemoveGradientToggleButton.button_pressed = true
+			%GradientStopColorButtonContainer.hide()
 	else:
-		create_button.get_parent().show()
-		select_button.get_parent().hide()
-		find_child("GradientFieldContainer").hide()
-		find_child("GradientStopColorButtonContainer").hide()
-		create_button.disabled = false
-		select_button.disabled = true
-		color_button.color = CurvedLines2D._get_default_fill_color()
-		radial_gradient_toggle_button.disabled = true
-		linear_gradient_toggle_button.disabled = true
-		remove_gradient_toggle_button.disabled = true
-		remove_gradient_toggle_button.button_pressed = true
+		%CreateFillButton.get_parent().show()
+		%GotoPolygon2DButton.get_parent().hide()
+		%GradientFieldContainer.hide()
+		%GradientStopColorButtonContainer.hide()
+		%CreateFillButton.disabled = false
+		%GotoPolygon2DButton.disabled = true
+		%ColorPickerButton.color = CurvedLines2D._get_default_fill_color()
+		%RadialGradientToggleButton.disabled = true
+		%LinearGradientToggleButton.disabled = true
+		%RemoveGradientToggleButton.disabled = true
+		%RemoveGradientToggleButton.button_pressed = true
 
 
 func _on_color_picker_button_color_changed(color: Color) -> void:
@@ -95,7 +81,7 @@ func _on_create_fill_button_pressed():
 	var polygon_2d := Polygon2D.new()
 	var root := EditorInterface.get_edited_scene_root()
 	var undo_redo = EditorInterface.get_editor_undo_redo()
-	polygon_2d.color = color_button.color
+	polygon_2d.color = %ColorPickerButton.color
 	undo_redo.create_action("Add Polygon2D to %s " % str(scalable_vector_shape_2d))
 	undo_redo.add_do_method(scalable_vector_shape_2d, 'add_child', polygon_2d, true)
 	undo_redo.add_do_method(polygon_2d, 'set_owner', root)
@@ -155,18 +141,17 @@ func _set_gradient_stop_color_buttons() -> void:
 	if not scalable_vector_shape_2d.polygon.texture is GradientTexture2D:
 		return
 
-	var container := find_child("StopColorButtonsContainer")
-	for b in container.get_children():
+	for b in %StopColorButtonsContainer.get_children():
 		b.queue_free()
 
 	for idx in range(scalable_vector_shape_2d.polygon.texture.gradient.colors.size()):
 		var color : Color = scalable_vector_shape_2d.polygon.texture.gradient.colors[idx]
 		var new_button := ColorPickerButton.new()
 		new_button.color = color
-		container.add_child(new_button)
 		new_button.color_changed.connect(func(c): _update_stop_color(idx, c))
 		new_button.toggled.connect(func(toggled_on): _handle_stop_color_undo_redo_action(idx, new_button, toggled_on))
 		new_button.custom_minimum_size = Vector2(40, 40)
+		%StopColorButtonsContainer.add_child(new_button)
 
 
 func _on_linear_gradient_toggle_button_button_down() -> void:
@@ -216,7 +201,7 @@ static func _initialize_gradient(box : Rect2) -> GradientTexture2D:
 func _on_add_fill_key_frame_button_pressed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.polygon):
 		add_key_frame(
-			scalable_vector_shape_2d.polygon, "color", color_button.color
+			scalable_vector_shape_2d.polygon, "color", %ColorPickerButton.color
 		)
 
 
@@ -258,5 +243,5 @@ func _on_color_picker_button_toggled(toggled_on: bool) -> void:
 		undo_redo.create_action("Adjust Polygon2D color for %s" % str(scalable_vector_shape_2d))
 		undo_redo.add_undo_property(scalable_vector_shape_2d.polygon, 'color', scalable_vector_shape_2d.polygon.color)
 	else:
-		undo_redo.add_do_property(scalable_vector_shape_2d.polygon, 'color', color_button.color)
+		undo_redo.add_do_property(scalable_vector_shape_2d.polygon, 'color', %ColorPickerButton.color)
 		undo_redo.commit_action(false)

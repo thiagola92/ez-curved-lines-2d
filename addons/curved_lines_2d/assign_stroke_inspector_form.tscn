@@ -60,6 +60,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="ColorPickerButton" type="ColorPickerButton" parent="StrokeColorFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "This will set the default_color of the assigned Line2D."
@@ -67,6 +68,7 @@ text = "Stroke"
 color = Color(1, 1, 1, 1)
 
 [node name="AddStrokeColorKeyFrameButton" type="Button" parent="StrokeColorFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Click to add a key frame to the current animation for the Line2D's default_color property"
 icon = ExtResource("3_2fv2a")
@@ -88,11 +90,13 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="StrokeWidthFloatFieldContainer" type="PanelContainer" parent="StrokeWidthFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "This will set the width of the assign Line2D node"
 
 [node name="AddStrokeWidthKeyFrameButton" type="Button" parent="StrokeWidthFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Click to add a key frame to the current animation for the Line2D's width property"
 icon = ExtResource("3_2fv2a")
@@ -119,6 +123,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="BeginNoCapToggleButton" type="Button" parent="BeginLineCapFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -138,6 +143,7 @@ button_group = SubResource("ButtonGroup_yspdc")
 icon = SubResource("AtlasTexture_skbna")
 
 [node name="BeginBoxCapToggleButton" type="Button" parent="BeginLineCapFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -157,6 +163,7 @@ button_group = SubResource("ButtonGroup_yspdc")
 icon = SubResource("AtlasTexture_kyj8c")
 
 [node name="BeginRoundCapToggleButton" type="Button" parent="BeginLineCapFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -197,6 +204,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="EndNoCapToggleButton" type="Button" parent="EndLineCapFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -216,6 +224,7 @@ button_group = SubResource("ButtonGroup_df4us")
 icon = SubResource("AtlasTexture_skbna")
 
 [node name="EndBoxCapToggleButton" type="Button" parent="EndLineCapFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -235,6 +244,7 @@ button_group = SubResource("ButtonGroup_df4us")
 icon = SubResource("AtlasTexture_kyj8c")
 
 [node name="EndRoundCapToggleButton" type="Button" parent="EndLineCapFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -273,6 +283,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="LineJointSharpToggleButton" type="Button" parent="LineJointFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -291,6 +302,7 @@ button_group = SubResource("ButtonGroup_bop6d")
 icon = SubResource("AtlasTexture_yspdc")
 
 [node name="LineJointBevelToggleButton" type="Button" parent="LineJointFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -308,6 +320,7 @@ button_group = SubResource("ButtonGroup_bop6d")
 icon = SubResource("AtlasTexture_rv3vu")
 
 [node name="LineJointRoundToggleButton" type="Button" parent="LineJointFieldContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -337,6 +350,7 @@ mouse_filter = 0
 text = "Add Stroke"
 
 [node name="CreateStrokeButton" type="Button" parent="ButtonContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 2
 tooltip_text = "This will create a new Line2D node and assign it to the line property of this ScalableVectorScape2D."
@@ -359,6 +373,7 @@ mouse_filter = 0
 text = "Edit Line2D *"
 
 [node name="GotoLine2DButton" type="Button" parent="ButtonContainer2"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 2
 tooltip_text = "Click on this button to select the Line2D node that is assigned to this shape  in the Scene Tree.

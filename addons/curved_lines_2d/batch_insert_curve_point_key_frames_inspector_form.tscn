@@ -30,6 +30,7 @@ mouse_filter = 0
 text = "Insert key frames*"
 
 [node name="BatchInsertButton" type="Button" parent="HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "- Clicking this button will insert key frames for all the curve points and control points at the current animation postion for all their property tracks
