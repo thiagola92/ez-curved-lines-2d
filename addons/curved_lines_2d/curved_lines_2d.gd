@@ -121,7 +121,7 @@ func _on_shape_preview(curve : Curve2D):
 	update_overlays()
 
 
-func _on_rect_created(width : float, height : float, rx : float, ry : float, scene_root : Node2D) -> void:
+func _on_rect_created(width : float, height : float, rx : float, ry : float, scene_root : Node) -> void:
 	var new_rect := ScalableVectorShape2D.new()
 	new_rect.shape_type = ScalableVectorShape2D.ShapeType.RECT
 	new_rect.size = Vector2(width, height)
@@ -130,20 +130,20 @@ func _on_rect_created(width : float, height : float, rx : float, ry : float, sce
 	_create_shape(new_rect, scene_root, "Rectangle")
 
 
-func _on_ellipse_created(rx : float, ry : float, scene_root : Node2D) -> void:
+func _on_ellipse_created(rx : float, ry : float, scene_root : Node) -> void:
 	var new_ellipse := ScalableVectorShape2D.new()
 	new_ellipse.shape_type = ScalableVectorShape2D.ShapeType.ELLIPSE
 	new_ellipse.size = Vector2(rx * 2, ry * 2)
 	_create_shape(new_ellipse, scene_root, "Ellipse")
 
 
-func _on_shape_created(curve : Curve2D, scene_root : Node2D, node_name : String) -> void:
+func _on_shape_created(curve : Curve2D, scene_root : Node, node_name : String) -> void:
 	var new_shape := ScalableVectorShape2D.new()
 	new_shape.curve = curve
 	_create_shape(new_shape, scene_root, node_name)
 
 
-func _create_shape(new_shape : Node2D, scene_root : Node2D, node_name : String, is_cutout_for : ScalableVectorShape2D = null) -> void:
+func _create_shape(new_shape : Node2D, scene_root : Node, node_name : String, is_cutout_for : ScalableVectorShape2D = null) -> void:
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 	var parent = current_selection if current_selection is Node2D else scene_root
 	new_shape.name = node_name
@@ -167,7 +167,7 @@ func _create_shape(new_shape : Node2D, scene_root : Node2D, node_name : String, 
 	undo_redo.commit_action()
 
 
-func _add_fill_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
+func _add_fill_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node) -> void:
 	if _is_add_fill_enabled():
 		var polygon := Polygon2D.new()
 		polygon.name = "Fill"
@@ -179,7 +179,7 @@ func _add_fill_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : 
 		undo_redo.add_undo_method(new_shape, 'remove_child', polygon)
 
 
-func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
+func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node) -> void:
 	if _is_add_stroke_enabled():
 		var line := Line2D.new()
 		line.name = "Stroke"
@@ -196,7 +196,7 @@ func _add_stroke_to_created_shape(new_shape : ScalableVectorShape2D, scene_root 
 		undo_redo.add_undo_method(new_shape, 'remove_child', line)
 
 
-func _add_collision_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node2D) -> void:
+func _add_collision_to_created_shape(new_shape : ScalableVectorShape2D, scene_root : Node) -> void:
 	if _add_collision_object_type() != ScalableVectorShape2D.CollisionObjectType.NONE:
 		var collision : CollisionObject2D = null
 		match  _add_collision_object_type():
