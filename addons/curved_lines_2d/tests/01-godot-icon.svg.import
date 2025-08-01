@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dxynraofh6r7"
-path="res://.godot/imported/cubic_bezier2.svg-ec68d648e9dce6b5bf760ab58bf54740.ctex"
+uid="uid://c0tet2m4kvugc"
+path="res://.godot/imported/01-godot-icon.svg-9889ecc7bb588307638e013527c25d03.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/curved_lines_2d/tests/cubic_bezier2.svg"
-dest_files=["res://.godot/imported/cubic_bezier2.svg-ec68d648e9dce6b5bf760ab58bf54740.ctex"]
+source_file="res://addons/curved_lines_2d/tests/01-godot-icon.svg"
+dest_files=["res://.godot/imported/01-godot-icon.svg-9889ecc7bb588307638e013527c25d03.ctex"]
 
 [params]
 

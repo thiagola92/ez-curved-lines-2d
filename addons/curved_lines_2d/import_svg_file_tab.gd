@@ -267,8 +267,8 @@ func process_svg_rectangle(element:XMLParser, current_node : Node2D, scene_root 
 		gradients : Array[Dictionary]) -> void:
 	var x = float(element.get_named_attribute_value("x"))
 	var y = float(element.get_named_attribute_value("y"))
-	var ry = float(element.get_named_attribute_value("ry")) if element.has_attribute("ry") else 0
-	var rx = float(element.get_named_attribute_value("rx")) if element.has_attribute("rx") else ry
+	var rx = float(element.get_named_attribute_value("rx")) if element.has_attribute("rx") else 0
+	var ry = float(element.get_named_attribute_value("ry")) if element.has_attribute("ry") else rx
 	var width = float(element.get_named_attribute_value("width"))
 	var height = float(element.get_named_attribute_value("height"))
 	var new_rect := ScalableVectorShape2D.new()
@@ -542,17 +542,13 @@ func _post_process_shape(svs : ScalableVectorShape2D, parent : Node, transform :
 
 	if style.has("opacity"):
 		svs.modulate.a = float(style["opacity"])
-	if style.is_empty() and not is_cutout:
-		var line := Line2D.new()
-		line.name = "Stroke"
-		line.antialiased = antialiased_shapes
-		_managed_add_child_and_set_owner(svs, line, scene_root, 'line')
-		line.width = 1.0
-	elif "fill" not in style and "stroke" not in style and not is_cutout:
+
+	if style.is_empty() or ("fill" not in style and "stroke" not in style):
 		style["fill"] = "#000000"
 
-	for func_name in PAINT_ORDER_MAP[get_paint_order(style)]:
-		call(func_name, svs, style, scene_root, gradients, gradient_point_parent)
+	if not is_cutout:
+		for func_name in PAINT_ORDER_MAP[get_paint_order(style)]:
+			call(func_name, svs, style, scene_root, gradients, gradient_point_parent)
 
 	if not keep_drawable_path_node:
 		var bare_node := Node2D.new()
@@ -724,33 +720,48 @@ func get_svg_transform(element:XMLParser) -> Transform2D:
 		return Transform2D.IDENTITY
 
 
-func process_svg_transform(svg_transform : String) -> Transform2D:
+func _parse_svg_transform_params(svg_transform_params : String) -> PackedFloat64Array:
+	return (svg_transform_params
+		.replace("(", "").replace(")", "").replace(",", " ")
+		.split_floats(" ", false))
+
+
+func process_svg_transform(svg_transform_attr : String) -> Transform2D:
+	var svg_commands = (
+			Array(svg_transform_attr.split(")", false))
+					.map(func(cmd): return cmd.lstrip(" \t\r\n") + ")")
+	)
+	svg_commands.reverse()
 	var transform = Transform2D.IDENTITY
-	if svg_transform.begins_with("translate"):
-		svg_transform = svg_transform.replace("translate", "").replacen("(", "").replacen(")", "")
-		var transform_split = svg_transform.split_floats(",")
-		transform[2] = Vector2(transform_split[0], transform_split[1])
-	elif svg_transform.begins_with("scale"):
-		svg_transform = svg_transform.replace("scale", "").replacen("(", "").replacen(")", "")
-		var transform_split = svg_transform.split_floats(",")
-		if transform_split.size() >= 2:
-			transform = transform.scaled(Vector2(transform_split[0], transform_split[1]))
-		else:
-			transform = transform.scaled(Vector2(transform_split[0], transform_split[0]))
-	elif svg_transform.begins_with("rotate"):
-		svg_transform = svg_transform.replace("rotate", "").replacen("(", "").replacen(")", "")
-		var transform_split = svg_transform.split_floats(",")
-		if transform_split.size() == 1:
-			transform = transform.rotated(deg_to_rad(transform_split[0]))
-		elif transform_split.size() == 3:
-			transform = transform.translated(-Vector2(transform_split[1], transform_split[2]))
-			transform = transform.rotated(deg_to_rad(transform_split[0]))
-			transform = transform.translated(Vector2(transform_split[1], transform_split[2]))
-	elif svg_transform.begins_with("matrix"):
-		svg_transform = svg_transform.replace("matrix", "").replacen("(", "").replacen(")", "")
-		var matrix = svg_transform.split_floats(",")
-		for i in 3:
-			transform[i] = Vector2(matrix[i*2], matrix[i*2+1])
+	for svg_transform in svg_commands:
+		if svg_transform.begins_with("translate"):
+			svg_transform = svg_transform.replace("translate", "")
+			var transform_split = _parse_svg_transform_params(svg_transform)
+			if transform_split.size() >= 2:
+				transform = transform.translated(Vector2(transform_split[0], transform_split[1]))
+			else:
+				transform = transform.translated(Vector2(transform_split[0], transform_split[0]))
+		elif svg_transform.begins_with("scale"):
+			svg_transform = svg_transform.replace("scale", "")
+			var transform_split = _parse_svg_transform_params(svg_transform)
+			if transform_split.size() >= 2:
+				transform = transform.scaled(Vector2(transform_split[0], transform_split[1]))
+			else:
+				transform = transform.scaled(Vector2(transform_split[0], transform_split[0]))
+		elif svg_transform.begins_with("rotate"):
+			svg_transform = svg_transform.replace("rotate", "")
+			var transform_split = _parse_svg_transform_params(svg_transform)
+			if transform_split.size() == 1:
+				transform = transform.rotated(deg_to_rad(transform_split[0]))
+			elif transform_split.size() == 3:
+				transform = transform.translated(-Vector2(transform_split[1], transform_split[2]))
+				transform = transform.rotated(deg_to_rad(transform_split[0]))
+				transform = transform.translated(Vector2(transform_split[1], transform_split[2]))
+		elif svg_transform.begins_with("matrix"):
+			svg_transform = svg_transform.replace("matrix", "")
+			var matrix = _parse_svg_transform_params(svg_transform)
+			for i in 3:
+				transform[i] = Vector2(matrix[i*2], matrix[i*2+1])
 	return transform
 
 
