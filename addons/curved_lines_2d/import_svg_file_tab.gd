@@ -116,9 +116,10 @@ func _load_svg(file_path : String) -> void:
 		child.queue_free()
 	var xml_data = XMLParser.new()
 	var scene_root := EditorInterface.get_edited_scene_root()
-
-	if not scene_root is Node2D:
-		log_message("ERROR: Can only import into 2D scene", LogLevel.ERROR)
+	var selected_nodes := EditorInterface.get_selection().get_selected_nodes()
+	var parent_node := scene_root if selected_nodes.is_empty() else selected_nodes[0]
+	if not scene_root is Node:
+		log_message("ERROR: Can only import into an opened scene", LogLevel.ERROR)
 		return
 	if xml_data.open(file_path) != OK:
 		log_message("ERROR: Failed to open %s for reading" % file_path, LogLevel.ERROR)
@@ -130,7 +131,8 @@ func _load_svg(file_path : String) -> void:
 	undo_redo.create_action("Import SVG file as Nodes: %s" % svg_root.name)
 	svg_root.position = _get_viewport_center()
 	svg_root.set_meta(SVG_ROOT_META_NAME, true)
-	_managed_add_child_and_set_owner(scene_root, svg_root, scene_root)
+
+	_managed_add_child_and_set_owner(parent_node, svg_root, scene_root)
 
 	var current_node := svg_root
 	var svg_gradients : Array[Dictionary] = []
@@ -223,7 +225,7 @@ func parse_gradient(element : XMLParser) -> Dictionary:
 	return new_gradient
 
 
-func process_group(element:XMLParser, current_node : Node2D, scene_root : Node2D) -> Node2D:
+func process_group(element:XMLParser, current_node : Node2D, scene_root : Node) -> Node2D:
 	var new_group = Node2D.new()
 	new_group.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Group"
 	new_group.transform = get_svg_transform(element)
@@ -232,7 +234,7 @@ func process_group(element:XMLParser, current_node : Node2D, scene_root : Node2D
 	return new_group
 
 
-func process_svg_circle(element:XMLParser, current_node : Node2D, scene_root : Node2D,
+func process_svg_circle(element:XMLParser, current_node : Node2D, scene_root : Node,
 		gradients : Array[Dictionary]) -> void:
 	var cx = float(element.get_named_attribute_value("cx"))
 	var cy = float(element.get_named_attribute_value("cy"))
@@ -241,7 +243,7 @@ func process_svg_circle(element:XMLParser, current_node : Node2D, scene_root : N
 	create_path_from_ellipse(element, path_name, r, r, Vector2(cx, cy), current_node, scene_root, gradients)
 
 
-func process_svg_ellipse(element:XMLParser, current_node : Node2D, scene_root : Node2D,
+func process_svg_ellipse(element:XMLParser, current_node : Node2D, scene_root : Node,
 		gradients : Array[Dictionary]) -> void:
 	var cx = float(element.get_named_attribute_value("cx"))
 	var cy = float(element.get_named_attribute_value("cy"))
@@ -252,7 +254,7 @@ func process_svg_ellipse(element:XMLParser, current_node : Node2D, scene_root : 
 
 
 func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float, ry: float,
-		pos : Vector2, current_node : Node2D, scene_root : Node2D,
+		pos : Vector2, current_node : Node2D, scene_root : Node,
 		gradients : Array[Dictionary]) -> void:
 	var new_ellipse := ScalableVectorShape2D.new()
 	new_ellipse.shape_type = ScalableVectorShape2D.ShapeType.ELLIPSE
@@ -263,7 +265,7 @@ func create_path_from_ellipse(element:XMLParser, path_name : String, rx : float,
 			scene_root, gradients)
 
 
-func process_svg_rectangle(element:XMLParser, current_node : Node2D, scene_root : Node2D,
+func process_svg_rectangle(element:XMLParser, current_node : Node2D, scene_root : Node,
 		gradients : Array[Dictionary]) -> void:
 	var x = float(element.get_named_attribute_value("x"))
 	var y = float(element.get_named_attribute_value("y"))
@@ -283,7 +285,7 @@ func process_svg_rectangle(element:XMLParser, current_node : Node2D, scene_root 
 			scene_root, gradients)
 
 
-func process_svg_polygon(element:XMLParser, current_node : Node2D, scene_root : Node2D, is_closed : bool,
+func process_svg_polygon(element:XMLParser, current_node : Node2D, scene_root : Node, is_closed : bool,
 		gradients : Array[Dictionary]) -> void:
 	var points_split = element.get_named_attribute_value("points").split(" ", false)
 	var curve = Curve2D.new()
@@ -298,7 +300,7 @@ func process_svg_polygon(element:XMLParser, current_node : Node2D, scene_root : 
 			get_svg_transform(element), get_svg_style(element), scene_root, gradients, is_closed)
 
 
-func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Node2D,
+func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Node,
 		gradients : Array[Dictionary]) -> void:
 
 	# FIXME: implement better parsing here
@@ -494,7 +496,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 
 
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[ScalableArc],
-						transform: Transform2D, style: Dictionary, scene_root: Node2D,
+						transform: Transform2D, style: Dictionary, scene_root: Node,
 						gradients : Array[Dictionary], is_closed := false,
 						is_cutout_for : ScalableVectorShape2D = null) -> ScalableVectorShape2D:
 	var new_path = ScalableVectorShape2D.new()
@@ -522,7 +524,7 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[
 	return new_path
 
 func _post_process_shape(svs : ScalableVectorShape2D, parent : Node, transform : Transform2D,
-			style : Dictionary, scene_root : Node2D, gradients : Array[Dictionary],
+			style : Dictionary, scene_root : Node, gradients : Array[Dictionary],
 			is_cutout := false) -> void:
 	svs.lock_assigned_shapes = keep_drawable_path_node and lock_shapes
 	var ancestor = parent
@@ -570,7 +572,7 @@ func get_paint_order(style : Dictionary) -> String:
 		return "normal"
 
 
-func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2D,
+func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node,
 			_gradients : Array[Dictionary], _gradient_point_parent : Node2D):
 	if style.has("stroke") and style["stroke"] != "none":
 		var line := Line2D.new()
@@ -605,7 +607,7 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node2
 
 
 
-func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene_root : Node2D,
+func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene_root : Node,
 			gradients : Array[Dictionary], gradient_point_parent : Node2D):
 	if style.has("fill") and style["fill"] != "none":
 		var polygon := Polygon2D.new()
@@ -625,7 +627,7 @@ func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene
 				polygon.color.a = float(style["fill-opacity"])
 
 
-func add_collision_to_path(new_path : ScalableVectorShape2D, style : Dictionary, scene_root : Node2D,
+func add_collision_to_path(new_path : ScalableVectorShape2D, style : Dictionary, scene_root : Node,
 			_gradients : Array[Dictionary], _gradient_point_parent : Node2D) -> void:
 	if (collision_object_type != ScalableVectorShape2D.CollisionObjectType.NONE and
 			("fill" in style or import_collision_polygons_for_all_shapes)):
@@ -645,7 +647,7 @@ func add_collision_to_path(new_path : ScalableVectorShape2D, style : Dictionary,
 
 
 func add_gradient_to_fill(new_path : ScalableVectorShape2D, svg_gradient: Dictionary, polygon : Polygon2D,
-		scene_root : Node2D, gradients : Array[Dictionary], gradient_point_parent : Node2D) -> void:
+		scene_root : Node, gradients : Array[Dictionary], gradient_point_parent : Node2D) -> void:
 	if "xlink:href" in svg_gradient:
 		svg_gradient.merge(get_gradient_by_href(svg_gradient["xlink:href"], gradients), false)
 	elif "href" in svg_gradient:
@@ -690,7 +692,7 @@ func add_gradient_to_fill(new_path : ScalableVectorShape2D, svg_gradient: Dictio
 
 
 func apply_gradient(new_path : ScalableVectorShape2D, svg_gradient: Dictionary, polygon : Polygon2D,
-		scene_root : Node2D, gradients : Array[Dictionary], gradient_point_parent : Node2D, box : Rect2,
+		scene_root : Node, gradients : Array[Dictionary], gradient_point_parent : Node2D, box : Rect2,
 		texture : GradientTexture2D, fill_from : Vector2, fill_to : Vector2, gradient_transform : Transform2D) -> void:
 	var gradient_transform_node = create_helper_node("Gradient(%s)" % new_path.name, gradient_point_parent, scene_root, Vector2.ZERO, gradient_transform)
 	var from_node = create_helper_node("From(%s)" % new_path.name, gradient_transform_node, scene_root, fill_from)
@@ -704,7 +706,7 @@ func apply_gradient(new_path : ScalableVectorShape2D, svg_gradient: Dictionary, 
 	box_br_node.queue_free()
 
 
-func create_helper_node(node_name : String, node_parent : Node2D, node_owner : Node2D,
+func create_helper_node(node_name : String, node_parent : Node2D, node_owner : Node,
 		node_position := Vector2.ZERO, node_transform := Transform2D.IDENTITY) -> Node2D:
 	var helper_node := Node2D.new()
 	helper_node.name = node_name
