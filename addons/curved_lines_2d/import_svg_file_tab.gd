@@ -334,19 +334,24 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 		string_array_count += 1
 		var cursor_start := Vector2.ZERO
 		for i in string_array.size():
+			var cursor_start_is_set := false
 			match string_array[i]:
 				"m":
 					while string_array.size() > i + 2 and string_array[i+1].is_valid_float():
 						cursor += Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor)
 						i += 2
-						cursor_start = cursor
+						if not cursor_start_is_set:
+							cursor_start_is_set = true
+							cursor_start = cursor
 				"M":
 					while string_array.size() > i + 2 and string_array[i+1].is_valid_float():
 						cursor = Vector2(float(string_array[i+1]), float(string_array[i+2]))
 						curve.add_point(cursor)
 						i += 2
-						cursor_start = cursor
+						if not cursor_start_is_set:
+							cursor_start_is_set = true
+							cursor_start = cursor
 				"v":
 					while string_array[i+1].is_valid_float():
 						cursor.y += float(string_array[i+1])
@@ -480,7 +485,6 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 						i += 7
 				"z", "Z":
 					cursor = cursor_start
-
 		if curve.get_point_count() > 1:
 			var id = element.get_named_attribute_value("id") if element.has_attribute("id") else "Path"
 			if string_array_count > 1:
