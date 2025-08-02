@@ -147,8 +147,6 @@ func _create_shape(new_shape : Node2D, scene_root : Node, node_name : String, is
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 	var parent = current_selection if current_selection is Node else scene_root
 	new_shape.name = node_name
-	if not is_instance_valid(is_cutout_for):
-		new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
 	undo_redo.create_action("Add a %s to the scene " % node_name)
 	undo_redo.add_do_method(parent, 'add_child', new_shape, true)
 	undo_redo.add_do_method(new_shape, 'set_owner', scene_root)
