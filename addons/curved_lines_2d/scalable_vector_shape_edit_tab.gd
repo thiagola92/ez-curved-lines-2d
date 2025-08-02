@@ -8,6 +8,8 @@ signal rect_created(width : float, height : float, rx : float, ry : float, scene
 signal ellipse_created(rx : float, ry : float, scene_root : Node2D)
 signal set_shape_preview(curve : Curve2D)
 
+const OPEN_SCENE_ERROR_MESSAGE := "Can only create a shape in an open scene"
+
 var stroke_width_input : EditorSpinSlider
 
 var rect_width_input : EditorSpinSlider
@@ -102,13 +104,8 @@ func _get_rect_curve() -> Curve2D:
 
 func _on_create_rect_as_path_button_pressed() -> void:
 	var scene_root := EditorInterface.get_edited_scene_root()
-	if not is_instance_valid(scene_root):
-		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
-		warning_dialog.popup_centered()
-		return
-
-	if not scene_root is Node2D:
-		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+	if not scene_root is Node:
+		warning_dialog.dialog_text = OPEN_SCENE_ERROR_MESSAGE
 		warning_dialog.popup_centered()
 		return
 	shape_created.emit(_get_rect_curve(), scene_root, "Rectangle")
@@ -116,13 +113,8 @@ func _on_create_rect_as_path_button_pressed() -> void:
 
 func _on_create_rect_button_pressed() -> void:
 	var scene_root := EditorInterface.get_edited_scene_root()
-	if not is_instance_valid(scene_root):
-		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
-		warning_dialog.popup_centered()
-		return
-
-	if not scene_root is Node2D:
-		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+	if not scene_root is Node:
+		warning_dialog.dialog_text = OPEN_SCENE_ERROR_MESSAGE
 		warning_dialog.popup_centered()
 		return
 	rect_created.emit(rect_width_input.value, rect_height_input.value,
@@ -131,13 +123,8 @@ func _on_create_rect_button_pressed() -> void:
 
 func _on_create_ellipse_button_pressed() -> void:
 	var scene_root := EditorInterface.get_edited_scene_root()
-	if not is_instance_valid(scene_root):
-		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
-		warning_dialog.popup_centered()
-		return
-
-	if not scene_root is Node2D:
-		warning_dialog.dialog_text = "Can only create a shape in an open 2D scene"
+	if not scene_root is Node:
+		warning_dialog.dialog_text = OPEN_SCENE_ERROR_MESSAGE
 		warning_dialog.popup_centered()
 		return
 	ellipse_created.emit(ellipse_rx_input.value, ellipse_ry_input.value, scene_root)
@@ -159,11 +146,9 @@ func _on_create_rect_button_mouse_exited() -> void:
 
 func _on_create_circle_button_pressed() -> void:
 	var scene_root := EditorInterface.get_edited_scene_root()
-	if not is_instance_valid(scene_root):
-		warning_dialog.dialog_text = "Can only create a Shape in an open 2D scene"
-		return
-	if not scene_root is Node2D:
-		warning_dialog.dialog_text = "Can only create a Shape in an open 2D scene"
+
+	if not scene_root is Node:
+		warning_dialog.dialog_text = OPEN_SCENE_ERROR_MESSAGE
 		warning_dialog.popup_centered()
 		return
 
@@ -181,11 +166,9 @@ func _on_create_circle_button_mouse_exited() -> void:
 
 func _on_create_empty_shape_button_pressed() -> void:
 	var scene_root := EditorInterface.get_edited_scene_root()
-	if not is_instance_valid(scene_root):
-		warning_dialog.dialog_text = "Can only create a Shape in an open 2D scene"
-		return
-	if not scene_root is Node2D:
-		warning_dialog.dialog_text = "Can only create a Shape in an open 2D scene"
+
+	if not scene_root is Node:
+		warning_dialog.dialog_text = OPEN_SCENE_ERROR_MESSAGE
 		warning_dialog.popup_centered()
 		return
 	var curve := Curve2D.new()
