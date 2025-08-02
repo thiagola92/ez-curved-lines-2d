@@ -11,6 +11,7 @@ var _dragging := false
 var _drag_start := Vector2.ZERO
 
 func _enter_tree() -> void:
+	visible = false
 	x_pos_input = _mk_input()
 	y_pos_input = _mk_input()
 	%XPosInputContainer.add_child(x_pos_input)
