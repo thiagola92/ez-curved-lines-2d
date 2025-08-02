@@ -487,15 +487,20 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 					cursor = cursor_start
 		if curve.get_point_count() > 1:
 			var id = element.get_named_attribute_value("id") if element.has_attribute("id") else "Path"
-			if string_array_count > 1:
+			if (string_array_count > 1 and Geometry2D.is_point_in_polygon(curve.get_point_position(0),
+						main_shape.transform * main_shape.tessellate() )):
 				create_path2d("CutoutFor%s" % id, current_node,  curve, arcs,
-							Transform2D.IDENTITY, {}, scene_root, gradients,
+							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
 							string_array[string_array.size()-1].to_upper() == "Z", main_shape)
 			else:
-				main_shape = create_path2d(id, current_node,  curve, arcs,
+				if string_array_count == 1:
+					main_shape = create_path2d(id, current_node,  curve, arcs,
 							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
 							string_array[string_array.size()-1].to_upper() == "Z")
-
+				else:
+					create_path2d(id, current_node,  curve, arcs,
+							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
+							string_array[string_array.size()-1].to_upper() == "Z")
 
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[ScalableArc],
 						transform: Transform2D, style: Dictionary, scene_root: Node2D,
@@ -512,7 +517,7 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[
 	if is_cutout_for:
 		new_path.transform = is_cutout_for.transform.affine_inverse()
 		new_path.set_position_to_center()
-		_post_process_shape(new_path, is_cutout_for, transform, style, scene_root, gradients, is_cutout_for != null)
+		_post_process_shape(new_path, is_cutout_for, transform, style, scene_root, gradients, true)
 		var new_clip_paths := is_cutout_for.clip_paths.duplicate()
 		new_clip_paths.append(new_path)
 		is_cutout_for.clip_paths = new_clip_paths
@@ -520,10 +525,9 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[
 		undo_redo.add_undo_property(is_cutout_for, 'clip_paths', is_cutout_for.clip_paths)
 	else:
 		new_path.set_position_to_center()
-		_post_process_shape(new_path, parent, transform, style, scene_root, gradients, is_cutout_for != null)
-
-
+		_post_process_shape(new_path, parent, transform, style, scene_root, gradients, false)
 	return new_path
+
 
 func _post_process_shape(svs : ScalableVectorShape2D, parent : Node, transform : Transform2D,
 			style : Dictionary, scene_root : Node2D, gradients : Array[Dictionary],
