@@ -34,8 +34,6 @@ const STROKE_JOINT_MAP := {
 }
 
 enum LogLevel { DEBUG, INFO, WARN, ERROR }
-var log_scroll_container : ScrollContainer = null
-var log_container : VBoxContainer = null
 var error_label_settings : LabelSettings = null
 var warning_label_settings : LabelSettings = null
 var info_label_settings : LabelSettings = null
@@ -44,9 +42,7 @@ var debug_label_settings : LabelSettings = null
 ## Settings
 var collision_object_type := ScalableVectorShape2D.CollisionObjectType.NONE
 var import_collision_polygons_for_all_shapes := false
-var import_collision_polygons_for_all_shapes_checkbox : Control = null
 var keep_drawable_path_node := true
-var lock_shapes_checkbox : Control = null
 var lock_shapes := true
 var antialiased_shapes := false
 var import_file_dialog : EditorFileDialog = null
@@ -55,16 +51,12 @@ var undo_redo : EditorUndoRedoManager = null
 var LinkButtonScene : PackedScene = null
 
 func _enter_tree() -> void:
-	log_scroll_container = find_child("ScrollContainer")
-	log_container = find_child("ImportLogContainer")
-	import_collision_polygons_for_all_shapes_checkbox = find_child("ImportCollisionPolygonsForAllShapesCheckBox")
-	lock_shapes_checkbox = find_child("LockShapesCheckBox")
 	error_label_settings = preload("res://addons/curved_lines_2d/error_label_settings.tres")
 	warning_label_settings = preload("res://addons/curved_lines_2d/warn_label_settings.tres")
 	info_label_settings = preload("res://addons/curved_lines_2d/info_label_settings.tres")
 	debug_label_settings = preload("res://addons/curved_lines_2d/debug_label_settings.tres")
 	LinkButtonScene = preload("res://addons/curved_lines_2d/link_button_with_copy_hint.tscn")
-	log_scroll_container.get_v_scroll_bar().connect("changed", func(): log_scroll_container.scroll_vertical = log_scroll_container.get_v_scroll_bar().max_value )
+	%LogScrollContainer.get_v_scroll_bar().connect("changed", func(): %LogScrollContainer.scroll_vertical = %LogScrollContainer.get_v_scroll_bar().max_value )
 	import_file_dialog = EditorFileDialog.new()
 	import_file_dialog.add_filter("*.svg", "SVG image")
 	import_file_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
@@ -96,7 +88,7 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 		LogLevel.INFO,_:
 			lbl.label_settings = info_label_settings
 	lbl.text = msg
-	log_container.add_child(lbl)
+	%ImportLogContainer.add_child(lbl)
 
 
 func _drop_data(at_position: Vector2, data: Variant) -> void:
@@ -112,7 +104,7 @@ func _get_viewport_center() -> Vector2:
 
 
 func _load_svg(file_path : String) -> void:
-	for child in log_container.get_children():
+	for child in %ImportLogContainer.get_children():
 		child.queue_free()
 	var xml_data = XMLParser.new()
 	var scene_root := EditorInterface.get_edited_scene_root()
@@ -186,14 +178,14 @@ func _load_svg(file_path : String) -> void:
 	var link_button : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
 	link_button.text = "Click here to report issues or improvement requests on github"
 	link_button.uri = "https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues"
-	log_container.add_child(link_button)
+	%ImportLogContainer.add_child(link_button)
 
 	log_message("\nClick on the link below to learn more")
 
 	var link_button2 : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
 	link_button2.text = "Watch an explainer about known issues on youtube."
 	link_button2.uri = "https://www.youtube.com/watch?v=nVCKVRBMnWU"
-	log_container.add_child(link_button2)
+	%ImportLogContainer.add_child(link_button2)
 	undo_redo.commit_action(false)
 	EditorInterface.call_deferred('edit_node', svg_root)
 
@@ -806,7 +798,7 @@ static func parse_attribute_string(raw_attribute_str : String) -> String:
 
 func _on_collision_object_type_option_button_type_selected(obj_type: ScalableVectorShape2D.CollisionObjectType) -> void:
 	collision_object_type = obj_type
-	import_collision_polygons_for_all_shapes_checkbox.visible = obj_type != ScalableVectorShape2D.CollisionObjectType.NONE
+	%ImportCollisionPolygonsForAllShapesCheckBox.visible = obj_type != ScalableVectorShape2D.CollisionObjectType.NONE
 
 
 func _on_import_collision_polygons_for_all_shapes_check_box_toggled(toggled_on: bool) -> void:
@@ -815,7 +807,7 @@ func _on_import_collision_polygons_for_all_shapes_check_box_toggled(toggled_on: 
 
 func _on_keep_drawable_path_2d_node_check_box_toggled(toggled_on: bool) -> void:
 	keep_drawable_path_node = toggled_on
-	lock_shapes_checkbox.visible = toggled_on
+	%LockShapesCheckBox.visible = toggled_on
 
 
 func _on_lock_shapes_check_box_toggled(toggled_on: bool) -> void:
@@ -828,5 +820,3 @@ func _on_antialiased_check_box_toggled(toggled_on: bool) -> void:
 
 func _on_open_file_dialog_button_pressed() -> void:
 	import_file_dialog.popup_file_dialog()
-
-

@@ -28,7 +28,7 @@ border_width_bottom = 4
 border_color = Color(0.439216, 0.729412, 0.980392, 1)
 border_blend = true
 
-[node name="Import SVG File" type="HBoxContainer"]
+[node name="ImportSVGFileTab" type="HBoxContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -55,15 +55,15 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_rycm0")
 [node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer2/PanelContainer"]
 layout_mode = 2
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer2/PanelContainer/VBoxContainer2"]
+[node name="SettingsScrollContainer" type="ScrollContainer" parent="VBoxContainer2/PanelContainer/VBoxContainer2"]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 10.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer"]
 layout_mode = 2
 
-[node name="KeepDrawablePath2DNodeCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer"]
+[node name="KeepDrawablePath2DNodeCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "- When checked on, all shapes in the SVG file will be imported as ScalableVectorShape2D (this is advised)
 - Checking this off will only add builtin nodes the scene (Line2D, Polygon2D, CollisionPolygon2D as child of Node2D). It will print errors, because of missing references.
@@ -71,7 +71,8 @@ tooltip_text = "- When checked on, all shapes in the SVG file will be imported a
 button_pressed = true
 text = "Import as ScalableVectorShape2D*"
 
-[node name="LockShapesCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer"]
+[node name="LockShapesCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "- Adds a lock to the Line2D, Polygon2D and CollisionPolygon2D assigned to the ScalableVectorShape2D
 - This lock makes sure these nodes are not transformed via the 2D editor"
@@ -79,15 +80,16 @@ button_pressed = true
 text = "Lock imported shapes in editor *"
 icon = ExtResource("2_38alv")
 
-[node name="AntialiasedCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer"]
+[node name="AntialiasedCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer"]
 layout_mode = 2
 tooltip_text = "It's probably better to use project settings for this, but checking this on will ensure that the antialised property is checked on for imported Line2D and Polygon2D"
 text = "Flag on antialiased for Polygon2D and Line2D*"
 
-[node name="CollisionObjectTypeOptionButton" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer" instance=ExtResource("3_kpb1b")]
+[node name="CollisionObjectTypeOptionButton" parent="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer" instance=ExtResource("3_kpb1b")]
 layout_mode = 2
 
-[node name="ImportCollisionPolygonsForAllShapesCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer"]
+[node name="ImportCollisionPolygonsForAllShapesCheckBox" type="CheckBox" parent="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer"]
+unique_name_in_owner = true
 visible = false
 layout_mode = 2
 tooltip_text = "- Checking this on will make sure that shapes with only strokes will still generate a CollisionPolygon2D
@@ -107,25 +109,27 @@ size_flags_horizontal = 3
 layout_mode = 2
 text = "SVG Import Log"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+[node name="LogScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_gt4al")
 
-[node name="ImportLogContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+[node name="ImportLogContainer" type="VBoxContainer" parent="VBoxContainer/LogScrollContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = -5
 
-[node name="Label" type="Label" parent="VBoxContainer/ScrollContainer/ImportLogContainer"]
+[node name="Label" type="Label" parent="VBoxContainer/LogScrollContainer/ImportLogContainer"]
 layout_mode = 2
 size_flags_vertical = 10
 text = " - Drag/Drop an svg-file here to start import -"
 label_settings = ExtResource("1_x2xey")
 horizontal_alignment = 1
 
-[node name="LinkButton2" parent="VBoxContainer/ScrollContainer/ImportLogContainer" instance=ExtResource("2_fhkel")]
+[node name="LinkButton2" parent="VBoxContainer/LogScrollContainer/ImportLogContainer" instance=ExtResource("2_fhkel")]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 2
@@ -134,9 +138,9 @@ Right click to copy this link"
 text = "Watch an explainer on Youtube"
 uri = "https://youtu.be/3j_OEfU8qbo?feature=shared"
 
-[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/KeepDrawablePath2DNodeCheckBox" to="." method="_on_keep_drawable_path_2d_node_check_box_toggled"]
-[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/LockShapesCheckBox" to="." method="_on_lock_shapes_check_box_toggled"]
-[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/AntialiasedCheckBox" to="." method="_on_antialiased_check_box_toggled"]
-[connection signal="type_selected" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/CollisionObjectTypeOptionButton" to="." method="_on_collision_object_type_option_button_type_selected"]
-[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/ScrollContainer/VBoxContainer/ImportCollisionPolygonsForAllShapesCheckBox" to="." method="_on_import_collision_polygons_for_all_shapes_check_box_toggled"]
+[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer/KeepDrawablePath2DNodeCheckBox" to="." method="_on_keep_drawable_path_2d_node_check_box_toggled"]
+[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer/LockShapesCheckBox" to="." method="_on_lock_shapes_check_box_toggled"]
+[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer/AntialiasedCheckBox" to="." method="_on_antialiased_check_box_toggled"]
+[connection signal="type_selected" from="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer/CollisionObjectTypeOptionButton" to="." method="_on_collision_object_type_option_button_type_selected"]
+[connection signal="toggled" from="VBoxContainer2/PanelContainer/VBoxContainer2/SettingsScrollContainer/VBoxContainer/ImportCollisionPolygonsForAllShapesCheckBox" to="." method="_on_import_collision_polygons_for_all_shapes_check_box_toggled"]
 [connection signal="pressed" from="VBoxContainer2/PanelContainer/VBoxContainer2/OpenFileDialogButton" to="." method="_on_open_file_dialog_button_pressed"]

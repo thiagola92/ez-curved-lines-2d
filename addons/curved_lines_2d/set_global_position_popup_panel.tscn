@@ -69,6 +69,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="XPosInputContainer" type="PanelContainer" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_vlbak")
@@ -92,6 +93,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="YPosInputContainer" type="PanelContainer" parent="VBoxContainer/PanelContainer2/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_vlbak")
