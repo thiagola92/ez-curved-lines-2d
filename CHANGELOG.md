@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.10.2 - 2025-02-08
+
+### Added
+- You can now import an SVG file into any type of opened scene (3D, GUI, Node)
+- You can now create a new ScalableVectorShape2D in any type of opened scene
+
+### Changed
+- Using uniqe names in stead of `find_node` to refer to tool controls
+- SVG importer only creates cutout when initial point of follow-up path is _inside_ first shape
+- Bugfix: svg transform attribute now supports multiple transform commands
+- Bugfix: can now perform svg transform translate(...) with one parameter as well as two
+- Bugfix: resets the cursor position of follow-up paths correcty now (after the z/Z command)
+- Bugfix: SVG importer sets rx/ry values compliantly now
+
 ## 2.9.1 - 2025-27-07
 
 ### Added
