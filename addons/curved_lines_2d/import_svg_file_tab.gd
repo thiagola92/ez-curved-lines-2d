@@ -268,7 +268,11 @@ func process_svg_rectangle(element:XMLParser, current_node : Node2D, scene_root 
 	var x = float(element.get_named_attribute_value("x"))
 	var y = float(element.get_named_attribute_value("y"))
 	var rx = float(element.get_named_attribute_value("rx")) if element.has_attribute("rx") else 0
-	var ry = float(element.get_named_attribute_value("ry")) if element.has_attribute("ry") else rx
+	var ry = float(element.get_named_attribute_value("ry")) if element.has_attribute("ry") else 0
+	if rx == 0 and ry != 0:
+		rx = ry
+	if ry == 0 and rx != 0:
+		ry = rx
 	var width = float(element.get_named_attribute_value("width"))
 	var height = float(element.get_named_attribute_value("height"))
 	var new_rect := ScalableVectorShape2D.new()
