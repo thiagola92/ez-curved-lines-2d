@@ -28,6 +28,7 @@ mouse_filter = 0
 text = "⚠️ CollisionPolygon2D*"
 
 [node name="GotoCollisionButton" type="Button" parent="ButtonContainer2"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 2
 tooltip_text = "Click on this button to select the CollisionPolygon2D node that is assigned to this shape  in the Scene Tree.

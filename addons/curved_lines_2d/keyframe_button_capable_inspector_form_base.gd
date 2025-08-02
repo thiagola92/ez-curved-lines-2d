@@ -38,7 +38,7 @@ func _is_key_frame_capable() -> bool:
 
 
 func _find_animation_player(with_anim_name : String) -> AnimationPlayer:
-	for n  in EditorInterface.get_edited_scene_root().find_children("*", "AnimationPlayer", true):
+	for n in EditorInterface.get_edited_scene_root().find_children("*", "AnimationPlayer", true):
 		if n is AnimationPlayer and (n as AnimationPlayer).has_animation(with_anim_name):
 			return n
 	return null

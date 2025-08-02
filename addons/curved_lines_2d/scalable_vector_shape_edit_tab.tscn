@@ -105,18 +105,21 @@ mouse_filter = 0
 text = "Editor Settings*"
 
 [node name="EnableEditingCheckbox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 button_pressed = true
 text = "Enable ScalableVectorShape2D Editing"
 
 [node name="EnableHintsCheckbox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 button_pressed = true
 text = "Show Edit Hints"
 
 [node name="EnablePointNumbersCheckbox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "When active, when hovering over a point / handle in the curve
@@ -126,6 +129,7 @@ button_pressed = true
 text = "Show Point Details*"
 
 [node name="SnapToPixelCheckBox" type="CheckBox" parent="VBoxContainer/EditorSettingsContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 tooltip_text = "When active, points you move will snap to whole numbers:
@@ -135,6 +139,7 @@ button_pressed = true
 text = "Snap to pixel*"
 
 [node name="SnapResolutionInputContainer" type="PanelContainer" parent="VBoxContainer/EditorSettingsContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -152,6 +157,7 @@ mouse_filter = 0
 text = "Draw Settings*"
 
 [node name="FillCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "- Toggled On: when creating a new shape via this panel, a Fill (Polygon2D) of this color will be automatically added
@@ -162,6 +168,7 @@ text = "Fill*"
 alignment = 2
 
 [node name="FillPickerButton" type="ColorPickerButton" parent="VBoxContainer/DrawSettingsContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
@@ -169,6 +176,7 @@ text = "Fill"
 color = Color(1, 1, 1, 1)
 
 [node name="StrokeCheckButton" type="CheckButton" parent="VBoxContainer/DrawSettingsContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8
 tooltip_text = "- Toggled On: when creating a new shape via this panel, a Stroke (Line2D) of this color will be automatically added
@@ -179,6 +187,7 @@ text = "Stroke*"
 alignment = 2
 
 [node name="StrokePickerButton" type="ColorPickerButton" parent="VBoxContainer/DrawSettingsContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 size_flags_horizontal = 8
@@ -186,6 +195,7 @@ text = "Fill"
 color = Color(1, 1, 1, 1)
 
 [node name="CollisionObjectTypeOptionButton" parent="VBoxContainer/DrawSettingsContainer" instance=ExtResource("2_kh00m")]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="Label" type="Label" parent="VBoxContainer/DrawSettingsContainer"]
@@ -309,6 +319,7 @@ mouse_filter = 0
 text = "Stroke Settings*"
 
 [node name="StrokeWidthContainer" type="PanelContainer" parent="VBoxContainer/StrokeSettingsContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -332,6 +343,7 @@ text = "Begin Cap Mode*"
 horizontal_alignment = 2
 
 [node name="BeginNoCapToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -351,6 +363,7 @@ button_group = SubResource("ButtonGroup_kh00m")
 icon = SubResource("AtlasTexture_85hwe")
 
 [node name="BeginBoxCapToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -370,6 +383,7 @@ button_group = SubResource("ButtonGroup_kh00m")
 icon = SubResource("AtlasTexture_nh347")
 
 [node name="BeginRoundCapToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -407,6 +421,7 @@ text = "End Cap Mode *"
 horizontal_alignment = 2
 
 [node name="EndNoCapToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer2"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -426,6 +441,7 @@ button_group = SubResource("ButtonGroup_k2toy")
 icon = SubResource("AtlasTexture_2t4g6")
 
 [node name="EndBoxCapToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer2"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -445,6 +461,7 @@ button_group = SubResource("ButtonGroup_k2toy")
 icon = SubResource("AtlasTexture_pf6gx")
 
 [node name="EndRoundCapToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer2"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -480,6 +497,7 @@ text = "Joint Mode*"
 horizontal_alignment = 2
 
 [node name="LineJointSharpToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -498,6 +516,7 @@ button_group = SubResource("ButtonGroup_xku8w")
 icon = SubResource("AtlasTexture_k2toy")
 
 [node name="LineJointBevelToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -515,6 +534,7 @@ button_group = SubResource("ButtonGroup_xku8w")
 icon = SubResource("AtlasTexture_em7di")
 
 [node name="LineJointRoundToggleButton" type="Button" parent="VBoxContainer/StrokeSettingsContainer/HBoxContainer3"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
 size_flags_horizontal = 0
@@ -547,20 +567,24 @@ mouse_filter = 0
 text = "Create Rectangle*"
 
 [node name="WidthSliderContainer" type="PanelContainer" parent="VBoxContainer/RectBuilderContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="HeightSliderContainer" type="PanelContainer" parent="VBoxContainer/RectBuilderContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="XRadiusSliderContainer" type="PanelContainer" parent="VBoxContainer/RectBuilderContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="YRadiusSliderContainer" type="PanelContainer" parent="VBoxContainer/RectBuilderContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -594,10 +618,12 @@ mouse_filter = 0
 text = "Create Ellipse*"
 
 [node name="EllipseXRadiusSliderContainer" type="PanelContainer" parent="VBoxContainer/EllipseBuilderContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="EllipseYRadiusSliderContainer" type="PanelContainer" parent="VBoxContainer/EllipseBuilderContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 

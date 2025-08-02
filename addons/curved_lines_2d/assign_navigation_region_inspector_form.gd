@@ -15,11 +15,11 @@ func _enter_tree() -> void:
 
 func _on_svs_assignment_changed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.navigation_region):
-		get_node("%GoToNavigationRegionButton").show()
-		get_node("%AddNavigationRegionButton").hide()
+		%GoToNavigationRegionButton.show()
+		%AddNavigationRegionButton.hide()
 	else:
-		get_node("%GoToNavigationRegionButton").hide()
-		get_node("%AddNavigationRegionButton").show()
+		%GoToNavigationRegionButton.hide()
+		%AddNavigationRegionButton.show()
 
 
 func _on_add_navigation_region_button_pressed() -> void:

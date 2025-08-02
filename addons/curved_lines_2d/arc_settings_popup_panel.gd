@@ -4,8 +4,6 @@ extends PopupPanel
 var rx_input : EditorSpinSlider
 var ry_input : EditorSpinSlider
 var rotation_input : EditorSpinSlider
-var large_arc_checkbox : CheckBox
-var sweep_checkbox : CheckBox
 var _arc_under_edit : ScalableArc
 
 var _dragging := false
@@ -16,11 +14,9 @@ func _enter_tree() -> void:
 	rx_input = _mk_input()
 	ry_input = _mk_input()
 	rotation_input = _mk_input(1.0)
-	large_arc_checkbox = find_child("LargeArcCheckBox")
-	sweep_checkbox = find_child("SweepCheckBox")
-	find_child("RxInputContainer").add_child(rx_input)
-	find_child("RyInputContainer").add_child(ry_input)
-	find_child("RotationInputContainer").add_child(rotation_input)
+	%RxInputContainer.add_child(rx_input)
+	%RyInputContainer.add_child(ry_input)
+	%RotationInputContainer.add_child(rotation_input)
 	if not rx_input.value_changed.is_connected(_on_radius_changed):
 		rx_input.value_changed.connect(_on_radius_changed)
 	if not ry_input.value_changed.is_connected(_on_radius_changed):
@@ -69,8 +65,8 @@ func popup_with_value(arc : ScalableArc):
 	rx_input.set_value_no_signal(arc.radius.x)
 	ry_input.set_value_no_signal(arc.radius.y)
 	rotation_input.set_value_no_signal(arc.rotation_deg)
-	large_arc_checkbox.set_pressed_no_signal(arc.large_arc_flag)
-	sweep_checkbox.set_pressed_no_signal(arc.sweep_flag)
+	%LargeArcCheckBox.set_pressed_no_signal(arc.large_arc_flag)
+	%SweepCheckBox.set_pressed_no_signal(arc.sweep_flag)
 	popup_centered()
 
 

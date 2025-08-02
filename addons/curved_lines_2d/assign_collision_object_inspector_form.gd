@@ -15,12 +15,12 @@ func _enter_tree() -> void:
 
 func _on_svs_assignment_changed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.collision_object):
-		find_child("GoToCollisionObjectButton").show()
-		find_child("CollisionObjectTypeOptionButton").hide()
+		%GoToCollisionObjectButton.show()
+		%CollisionObjectTypeOptionButton.hide()
 	else:
-		find_child("GoToCollisionObjectButton").hide()
-		find_child("CollisionObjectTypeOptionButton").show()
-		(find_child("CollisionObjectTypeOptionButton") as OptionButton).select(0)
+		%GoToCollisionObjectButton.hide()
+		%CollisionObjectTypeOptionButton.show()
+		%CollisionObjectTypeOptionButton.select(0)
 
 func _on_collision_object_type_option_button_type_selected(obj_type: ScalableVectorShape2D.CollisionObjectType) -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
@@ -63,4 +63,3 @@ func _on_go_to_collision_object_button_pressed() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d.collision_object):
 		return
 	EditorInterface.call_deferred('edit_node', scalable_vector_shape_2d.collision_object)
-
