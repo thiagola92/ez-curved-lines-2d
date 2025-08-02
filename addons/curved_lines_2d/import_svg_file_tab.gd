@@ -488,7 +488,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 			if (string_array_count > 1 and Geometry2D.is_point_in_polygon(curve.get_point_position(0),
 						main_shape.transform * main_shape.tessellate() )):
 				create_path2d("CutoutFor%s" % id, current_node,  curve, arcs,
-							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
+							Transform2D.IDENTITY, {}, scene_root, gradients,
 							string_array[string_array.size()-1].to_upper() == "Z", main_shape)
 			else:
 				if string_array_count == 1:
