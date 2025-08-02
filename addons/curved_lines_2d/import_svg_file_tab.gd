@@ -491,14 +491,12 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 							Transform2D.IDENTITY, {}, scene_root, gradients,
 							string_array[string_array.size()-1].to_upper() == "Z", main_shape)
 			else:
+				var result := create_path2d(id, current_node,  curve, arcs,
+							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
+							string_array[string_array.size()-1].to_upper() == "Z")
 				if string_array_count == 1:
-					main_shape = create_path2d(id, current_node,  curve, arcs,
-							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
-							string_array[string_array.size()-1].to_upper() == "Z")
-				else:
-					create_path2d(id, current_node,  curve, arcs,
-							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
-							string_array[string_array.size()-1].to_upper() == "Z")
+					main_shape = result
+
 
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[ScalableArc],
 						transform: Transform2D, style: Dictionary, scene_root: Node,
