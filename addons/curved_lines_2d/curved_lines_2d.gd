@@ -145,7 +145,7 @@ func _on_shape_created(curve : Curve2D, scene_root : Node, node_name : String) -
 
 func _create_shape(new_shape : Node2D, scene_root : Node, node_name : String, is_cutout_for : ScalableVectorShape2D = null) -> void:
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
-	var parent = current_selection if current_selection is Node2D else scene_root
+	var parent = current_selection if current_selection is Node else scene_root
 	new_shape.name = node_name
 	if not is_instance_valid(is_cutout_for):
 		new_shape.position = _get_viewport_center() if parent == scene_root else Vector2.ZERO
@@ -713,7 +713,7 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 		var pos = _get_viewport_center()
 		var stroke_width = (_get_default_stroke_width() * EditorInterface.get_editor_viewport_2d()
 				.get_final_transform().get_scale().x)
-		if _is_svs_valid(current_selection):
+		if current_selection is Node2D:
 			points = points.map(current_selection.to_global)
 			pos = Vector2.ZERO
 			stroke_width *= current_selection.global_scale.x
