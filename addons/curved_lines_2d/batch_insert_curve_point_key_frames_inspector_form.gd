@@ -1,19 +1,17 @@
 @tool
 extends KeyframeButtonCapableInspectorFormBase
 
-var batch_insert_button : Button
 var scalable_vector_shape_2d : ScalableVectorShape2D
 
 func _enter_tree() -> void:
-	batch_insert_button = find_child("BatchInsertButton")
 	_initialize_keyframe_capabilities()
 
 
 func _on_key_frame_capabilities_changed() -> void:
 	if _is_key_frame_capable():
-		batch_insert_button.disabled = false
+		%BatchInsertButton.disabled = false
 	else:
-		batch_insert_button.disabled = true
+		%BatchInsertButton.disabled = true
 
 
 func _on_batch_insert_button_pressed() -> void:

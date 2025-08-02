@@ -9,8 +9,6 @@ signal ellipse_created(rx : float, ry : float, scene_root : Node2D)
 signal set_shape_preview(curve : Curve2D)
 
 var stroke_width_input : EditorSpinSlider
-var stroke_color_button : ColorPickerButton
-var fill_color_button : ColorPickerButton
 
 var rect_width_input : EditorSpinSlider
 var rect_height_input : EditorSpinSlider
@@ -35,42 +33,40 @@ func _enter_tree() -> void:
 	rect_ry_input = _make_number_input("Corner Radius Y", 0, 0, 500, "")
 	snap_resolution_input = _make_number_input("Snap distance", 1.0, 1.0, 1024.0, "px", 1.0)
 
-	stroke_color_button = find_child("StrokePickerButton")
-	fill_color_button = find_child("FillPickerButton")
 	stroke_width_input = _make_number_input("Width", 10.0, 0.0, 100.0, "", 0.01)
-	find_child("WidthSliderContainer").add_child(rect_width_input)
-	find_child("HeightSliderContainer").add_child(rect_height_input)
-	find_child("XRadiusSliderContainer").add_child(rect_rx_input)
-	find_child("YRadiusSliderContainer").add_child(rect_ry_input)
-	find_child("StrokeWidthContainer").add_child(stroke_width_input)
+	%WidthSliderContainer.add_child(rect_width_input)
+	%HeightSliderContainer.add_child(rect_height_input)
+	%XRadiusSliderContainer.add_child(rect_rx_input)
+	%YRadiusSliderContainer.add_child(rect_ry_input)
+	%StrokeWidthContainer.add_child(stroke_width_input)
 	ellipse_rx_input = _make_number_input("Horizontal Radius (RX)", 50, 1, 500, "")
 	ellipse_ry_input = _make_number_input("Vertical Radius (RY)", 50, 1, 500, "")
-	find_child("EllipseXRadiusSliderContainer").add_child(ellipse_rx_input)
-	find_child("EllipseYRadiusSliderContainer").add_child(ellipse_ry_input)
-	find_child("EnableEditingCheckbox").button_pressed = CurvedLines2D._is_editing_enabled()
-	find_child("EnableHintsCheckbox").button_pressed = CurvedLines2D._are_hints_enabled()
-	find_child("EnablePointNumbersCheckbox").button_pressed = CurvedLines2D._am_showing_point_numbers()
-	find_child("SnapToPixelCheckBox").button_pressed = CurvedLines2D._is_snapped_to_pixel()
+	%EllipseXRadiusSliderContainer.add_child(ellipse_rx_input)
+	%EllipseYRadiusSliderContainer.add_child(ellipse_ry_input)
+	%EnableEditingCheckbox.button_pressed = CurvedLines2D._is_editing_enabled()
+	%EnableHintsCheckbox.button_pressed = CurvedLines2D._are_hints_enabled()
+	%EnablePointNumbersCheckbox.button_pressed = CurvedLines2D._am_showing_point_numbers()
+	%SnapToPixelCheckBox.button_pressed = CurvedLines2D._is_snapped_to_pixel()
 	stroke_width_input.value = CurvedLines2D._get_default_stroke_width()
 	stroke_width_input.value_changed.connect(_on_stroke_width_input_value_changed)
-	stroke_color_button.color = CurvedLines2D._get_default_stroke_color()
-	fill_color_button.color = CurvedLines2D._get_default_fill_color()
-	find_child("StrokeCheckButton").button_pressed = CurvedLines2D._is_add_stroke_enabled()
-	find_child("FillCheckButton").button_pressed = CurvedLines2D._is_add_fill_enabled()
-	(find_child("CollisionObjectTypeOptionButton") as OptionButton).select(CurvedLines2D._add_collision_object_type())
-	find_child("SnapResolutionInputContainer").add_child(snap_resolution_input)
+	%StrokePickerButton.color = CurvedLines2D._get_default_stroke_color()
+	%FillPickerButton.color = CurvedLines2D._get_default_fill_color()
+	%StrokeCheckButton.button_pressed = CurvedLines2D._is_add_stroke_enabled()
+	%FillCheckButton.button_pressed = CurvedLines2D._is_add_fill_enabled()
+	(%CollisionObjectTypeOptionButton as OptionButton).select(CurvedLines2D._add_collision_object_type())
+	%SnapResolutionInputContainer.add_child(snap_resolution_input)
 	snap_resolution_input.value = CurvedLines2D._get_snap_resolution()
 	snap_resolution_input.value_changed.connect(_on_snap_resolution_value_changed)
 
-	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("BeginNoCapToggleButton")
-	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("BeginBoxCapToggleButton")
-	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("BeginRoundCapToggleButton")
-	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("EndNoCapToggleButton")
-	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("EndBoxCapToggleButton")
-	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("EndRoundCapToggleButton")
-	joint_button_map[Line2D.LineJointMode.LINE_JOINT_SHARP] = find_child("LineJointSharpToggleButton")
-	joint_button_map[Line2D.LineJointMode.LINE_JOINT_BEVEL] = find_child("LineJointBevelToggleButton")
-	joint_button_map[Line2D.LineJointMode.LINE_JOINT_ROUND] = find_child("LineJointRoundToggleButton")
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = %BeginNoCapToggleButton
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = %BeginBoxCapToggleButton
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = %BeginRoundCapToggleButton
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = %EndNoCapToggleButton
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = %EndBoxCapToggleButton
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = %EndRoundCapToggleButton
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_SHARP] = %LineJointSharpToggleButton
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_BEVEL] = %LineJointBevelToggleButton
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_ROUND] = %LineJointRoundToggleButton
 	begin_cap_button_map[CurvedLines2D._get_default_begin_cap()].button_pressed = true
 	end_cap_button_map[CurvedLines2D._get_default_end_cap()].button_pressed = true
 	joint_button_map[CurvedLines2D._get_default_joint_mode()].button_pressed = true
@@ -78,10 +74,10 @@ func _enter_tree() -> void:
 
 	if not stroke_width_input.value_focus_exited.is_connected(ProjectSettings.save):
 		stroke_width_input.value_focus_exited.connect(ProjectSettings.save)
-	if not stroke_color_button.focus_exited.is_connected(ProjectSettings.save):
-		stroke_color_button.focus_exited.connect(ProjectSettings.save)
-	if not fill_color_button.focus_exited.is_connected(ProjectSettings.save):
-		fill_color_button.focus_exited.connect(ProjectSettings.save)
+	if not %StrokePickerButton.focus_exited.is_connected(ProjectSettings.save):
+		%StrokePickerButton.focus_exited.connect(ProjectSettings.save)
+	if not %FillPickerButton.focus_exited.is_connected(ProjectSettings.save):
+		%FillPickerButton.focus_exited.connect(ProjectSettings.save)
 	if not snap_resolution_input.focus_exited.is_connected(ProjectSettings.save):
 		snap_resolution_input.focus_exited.connect(ProjectSettings.save)
 	find_children("PaintOrderButton*")[CurvedLines2D._get_default_paint_order()].button_pressed = true

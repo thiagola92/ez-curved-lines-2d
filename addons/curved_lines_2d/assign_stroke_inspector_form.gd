@@ -4,9 +4,6 @@ extends KeyframeButtonCapableInspectorFormBase
 class_name AssignStrokeInspectorForm
 
 var scalable_vector_shape_2d : ScalableVectorShape2D
-var create_button : Button
-var select_button : Button
-var color_button : ColorPickerButton
 var stroke_width_input : EditorSpinSlider
 
 var begin_cap_button_map = {}
@@ -16,22 +13,19 @@ var joint_button_map = {}
 func _enter_tree() -> void:
 	if not is_instance_valid(scalable_vector_shape_2d):
 		return
-	create_button = find_child("CreateStrokeButton")
-	select_button = find_child("GotoLine2DButton")
-	color_button = find_child("ColorPickerButton")
 	if 'assigned_node_changed' in scalable_vector_shape_2d:
 		scalable_vector_shape_2d.assigned_node_changed.connect(_on_svs_assignment_changed)
 	stroke_width_input = _make_float_input("Stroke Width", 10.0, 0.0, 100.0, "px")
-	find_child("StrokeWidthFloatFieldContainer").add_child(stroke_width_input)
-	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("BeginNoCapToggleButton")
-	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("BeginBoxCapToggleButton")
-	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("BeginRoundCapToggleButton")
-	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = find_child("EndNoCapToggleButton")
-	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = find_child("EndBoxCapToggleButton")
-	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = find_child("EndRoundCapToggleButton")
-	joint_button_map[Line2D.LineJointMode.LINE_JOINT_SHARP] = find_child("LineJointSharpToggleButton")
-	joint_button_map[Line2D.LineJointMode.LINE_JOINT_BEVEL] = find_child("LineJointBevelToggleButton")
-	joint_button_map[Line2D.LineJointMode.LINE_JOINT_ROUND] = find_child("LineJointRoundToggleButton")
+	%StrokeWidthFloatFieldContainer.add_child(stroke_width_input)
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = %BeginNoCapToggleButton
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = %BeginBoxCapToggleButton
+	begin_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = %BeginRoundCapToggleButton
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_NONE] = %EndNoCapToggleButton
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_BOX] = %EndBoxCapToggleButton
+	end_cap_button_map[Line2D.LineCapMode.LINE_CAP_ROUND] = %EndRoundCapToggleButton
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_SHARP] = %LineJointSharpToggleButton
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_BEVEL] = %LineJointBevelToggleButton
+	joint_button_map[Line2D.LineJointMode.LINE_JOINT_ROUND] = %LineJointRoundToggleButton
 	_on_svs_assignment_changed()
 	stroke_width_input.value_changed.connect(_on_stroke_width_changed)
 	_initialize_keyframe_capabilities()
@@ -39,22 +33,22 @@ func _enter_tree() -> void:
 
 func _on_svs_assignment_changed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.line):
-		create_button.get_parent().hide()
-		select_button.get_parent().show()
-		create_button.disabled = true
-		select_button.disabled = false
+		%CreateStrokeButton.get_parent().hide()
+		%GotoLine2DButton.get_parent().show()
+		%CreateStrokeButton.disabled = true
+		%GotoLine2DButton.disabled = false
 		stroke_width_input.value = scalable_vector_shape_2d.line.width
-		color_button.color = scalable_vector_shape_2d.line.default_color
+		%ColorPickerButton.color = scalable_vector_shape_2d.line.default_color
 		begin_cap_button_map[scalable_vector_shape_2d.line.begin_cap_mode].button_pressed = true
 		end_cap_button_map[scalable_vector_shape_2d.line.end_cap_mode].button_pressed = true
 		joint_button_map[scalable_vector_shape_2d.line.joint_mode].button_pressed = true
 	else:
-		create_button.get_parent().show()
-		select_button.get_parent().hide()
-		create_button.disabled = false
-		select_button.disabled = true
+		%CreateStrokeButton.get_parent().show()
+		%GotoLine2DButton.get_parent().hide()
+		%CreateStrokeButton.disabled = false
+		%GotoLine2DButton.disabled = true
 		stroke_width_input.value = CurvedLines2D._get_default_stroke_width()
-		color_button.color = CurvedLines2D._get_default_stroke_color()
+		%ColorPickerButton.color = CurvedLines2D._get_default_stroke_color()
 		begin_cap_button_map[CurvedLines2D._get_default_begin_cap()].button_pressed = true
 		end_cap_button_map[CurvedLines2D._get_default_end_cap()].button_pressed = true
 		joint_button_map[CurvedLines2D._get_default_joint_mode()].button_pressed = true
@@ -116,7 +110,7 @@ func _on_create_stroke_button_pressed():
 	var line_2d := Line2D.new()
 	var root := EditorInterface.get_edited_scene_root()
 	var undo_redo = EditorInterface.get_editor_undo_redo()
-	line_2d.default_color = color_button.color
+	line_2d.default_color = %ColorPickerButton.color
 	line_2d.width = stroke_width_input.value
 	line_2d.begin_cap_mode = _get_selected_begin_cap_mode()
 	line_2d.end_cap_mode = _get_selected_end_cap_mode()
@@ -154,13 +148,13 @@ func _on_add_stroke_width_key_frame_button_pressed() -> void:
 func _on_add_stroke_color_key_frame_button_pressed() -> void:
 	if is_instance_valid(scalable_vector_shape_2d.line):
 		add_key_frame(
-			scalable_vector_shape_2d.line, "default_color", color_button.color
+			scalable_vector_shape_2d.line, "default_color", %ColorPickerButton.color
 		)
 
 
 func _on_key_frame_capabilities_changed():
-	find_child("AddStrokeColorKeyFrameButton").visible = _is_key_frame_capable()
-	find_child("AddStrokeWidthKeyFrameButton").visible = _is_key_frame_capable()
+	%AddStrokeColorKeyFrameButton.visible = _is_key_frame_capable()
+	%AddStrokeWidthKeyFrameButton.visible = _is_key_frame_capable()
 
 
 func _on_color_picker_button_toggled(toggled_on: bool) -> void:
@@ -170,10 +164,10 @@ func _on_color_picker_button_toggled(toggled_on: bool) -> void:
 	if toggled_on:
 		undo_redo.create_action("Adjust Line2D default_color for %s" % str(scalable_vector_shape_2d))
 		undo_redo.add_undo_property(scalable_vector_shape_2d.line, 'default_color', scalable_vector_shape_2d.line.default_color)
-		undo_redo.add_undo_property(color_button, 'color', scalable_vector_shape_2d.line.default_color)
+		undo_redo.add_undo_property(%ColorPickerButton, 'color', scalable_vector_shape_2d.line.default_color)
 	else:
-		undo_redo.add_do_property(scalable_vector_shape_2d.line, 'default_color', color_button.color)
-		undo_redo.add_do_property(color_button, 'color', color_button.color)
+		undo_redo.add_do_property(scalable_vector_shape_2d.line, 'default_color', %ColorPickerButton.color)
+		undo_redo.add_do_property(%ColorPickerButton, 'color', %ColorPickerButton.color)
 		undo_redo.commit_action(false)
 
 

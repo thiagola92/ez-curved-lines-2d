@@ -13,8 +13,8 @@ var _drag_start := Vector2.ZERO
 func _enter_tree() -> void:
 	x_pos_input = _mk_input()
 	y_pos_input = _mk_input()
-	find_child("XPosInputContainer").add_child(x_pos_input)
-	find_child("YPosInputContainer").add_child(y_pos_input)
+	%XPosInputContainer.add_child(x_pos_input)
+	%YPosInputContainer.add_child(y_pos_input)
 	if not x_pos_input.value_changed.is_connected(_on_value_changed):
 		x_pos_input.value_changed.connect(_on_value_changed)
 	if not y_pos_input.value_changed.is_connected(_on_value_changed):
