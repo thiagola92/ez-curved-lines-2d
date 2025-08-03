@@ -7,6 +7,10 @@ class_name ScalableVectorShape2D
 ## Emitted when a new set of points was calculated for the [member curve].
 signal path_changed(new_points : PackedVector2Array)
 
+## Emitted when [member CanvasItem.set_notify_transform] was toggled on upon
+## every transformation (used internally to handle changes in the position of cutouts)
+signal transform_changed(ref_to_self : ScalableVectorShape2D)
+
 ## This signal is used internally in editor-mode to tell the DrawablePath2D tool that
 ## the instance of assigned [member line], [member polygon], or [member collision_polygon] has changed.
 signal assigned_node_changed()
@@ -207,6 +211,8 @@ enum CollisionObjectType {
 ## controls them
 @export var lock_assigned_shapes := true
 
+var _clip_path_transform_cache = {}
+
 # Wire up signals at runtime
 func _ready():
 	if update_curve_at_runtime:
@@ -265,6 +271,7 @@ func _on_clip_paths_changed():
 	for cp in clip_paths:
 		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
 			cp.path_changed.connect(_on_assigned_node_changed)
+			cp.transform_changed.connect(_on_clip_path_transform_changed)
 			cp.tree_entered.connect(_on_assigned_node_changed)
 			cp.tree_exited.connect(func(): if is_inside_tree(): _on_assigned_node_changed())
 			if Engine.is_editor_hint() or update_curve_at_runtime:
@@ -274,7 +281,15 @@ func _on_clip_paths_changed():
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSFORM_CHANGED:
-		path_changed.emit()
+		transform_changed.emit(self)
+
+
+func _on_clip_path_transform_changed(clip_path : ScalableVectorShape2D):
+	if clip_path not in _clip_path_transform_cache:
+		_clip_path_transform_cache[clip_path] = Transform2D.IDENTITY
+	if not _clip_path_transform_cache[clip_path].is_equal_approx(clip_path.transform):
+		_on_assigned_node_changed()
+	_clip_path_transform_cache[clip_path] = Transform2D(clip_path.transform)
 
 
 func _on_dimensions_changed():
