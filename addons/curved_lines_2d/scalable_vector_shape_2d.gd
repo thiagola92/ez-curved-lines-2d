@@ -211,6 +211,9 @@ enum CollisionObjectType {
 ## controls them
 @export var lock_assigned_shapes := true
 
+
+var cached_outline : PackedVector2Array = []
+
 # Wire up signals at runtime
 func _ready():
 	if update_curve_at_runtime:
@@ -320,6 +323,8 @@ func notify_assigned_node_change():
 
 
 func tessellate() -> PackedVector2Array:
+	if not cached_outline.is_empty():
+		return cached_outline
 	if not arc_list or arc_list.arcs.is_empty():
 		return curve.tessellate(max_stages, tolerance_degrees)
 	var poly_points = []
@@ -363,15 +368,19 @@ func curve_changed():
 		return
 
 	# recalculate the polygon point for this shape based on curve and arc_list
-	var polygon_points := self.tessellate()
+	cached_outline.clear()
+	cached_outline.append_array(self.tessellate())
+
+	# emit updated path to listeners
+	path_changed.emit(cached_outline)
+
+	var polygon_points := cached_outline.duplicate()
 	# Fixes cases start- and end-node are so close to each other that
 	# polygons won't fill and closed lines won't cap nicely
 	if (polygon_points.size() > 0 and
 			polygon_points[0].distance_to(polygon_points[polygon_points.size()-1]) < 0.001):
 		polygon_points.remove_at(polygon_points.size() - 1)
 
-	# emit updated path to listeners
-	path_changed.emit(polygon_points)
 
 	var valid_clip_paths : Array[ScalableVectorShape2D] = (clip_paths
 			.filter(func(cp): return is_instance_valid(cp))
