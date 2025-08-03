@@ -78,16 +78,21 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 	var lbl := Label.new()
 	match log_level:
 		LogLevel.ERROR:
+			printerr("ERROR: ", msg)
 			warning_dialog.dialog_text = msg
 			warning_dialog.popup_centered()
 			lbl.label_settings = error_label_settings
 		LogLevel.WARN:
+			print("WARN: ", msg)
 			lbl.label_settings = warning_label_settings
 		LogLevel.DEBUG:
+			print_debug("DEBUG: ",  msg)
 			lbl.label_settings = debug_label_settings
 		LogLevel.INFO,_:
+			print("INFO: ",  msg)
 			lbl.label_settings = info_label_settings
 	lbl.text = msg
+
 	%ImportLogContainer.add_child(lbl)
 
 
@@ -173,19 +178,13 @@ func _load_svg(file_path : String) -> void:
 			svg_gradients.append(parse_gradient(xml_data))
 		elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
-	log_message("Import finished.\n\nThe SVG importer is in a very early stage of development.")
+	log_message("Import finished.\n\nThe SVG importer is still incrementally improving (slowly).")
 
 	var link_button : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
 	link_button.text = "Click here to report issues or improvement requests on github"
 	link_button.uri = "https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues"
 	%ImportLogContainer.add_child(link_button)
 
-	log_message("\nClick on the link below to learn more")
-
-	var link_button2 : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
-	link_button2.text = "Watch an explainer about known issues on youtube."
-	link_button2.uri = "https://www.youtube.com/watch?v=nVCKVRBMnWU"
-	%ImportLogContainer.add_child(link_button2)
 	undo_redo.commit_action(false)
 	EditorInterface.call_deferred('edit_node', svg_root)
 
@@ -326,6 +325,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 	var string_array_count = 0
 	var cursor = Vector2.ZERO
 	var main_shape : ScalableVectorShape2D = null
+	var new_clip_paths : Array[ScalableVectorShape2D] = []
 	for string_array in string_arrays:
 		var curve = Curve2D.new()
 		var arcs : Array[ScalableArc] = []
@@ -487,15 +487,21 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 			var id = element.get_named_attribute_value("id") if element.has_attribute("id") else "Path"
 			if (string_array_count > 1 and Geometry2D.is_point_in_polygon(curve.get_point_position(0),
 						main_shape.transform * main_shape.tessellate() )):
-				create_path2d("CutoutFor%s" % id, current_node,  curve, arcs,
+				new_clip_paths.append(create_path2d("CutoutFor%s" % id, current_node,  curve, arcs,
 							Transform2D.IDENTITY, {}, scene_root, gradients,
-							string_array[string_array.size()-1].to_upper() == "Z", main_shape)
+							string_array[string_array.size()-1].to_upper() == "Z", main_shape))
 			else:
 				var result := create_path2d(id, current_node,  curve, arcs,
 							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
 							string_array[string_array.size()-1].to_upper() == "Z")
 				if string_array_count == 1:
 					main_shape = result
+
+	if not new_clip_paths.is_empty():
+		log_message("Processing %d cutouts for %s" % [new_clip_paths.size(), main_shape.name], LogLevel.DEBUG)
+		main_shape.clip_paths = new_clip_paths
+		undo_redo.add_do_property(main_shape, 'clip_paths', new_clip_paths)
+		undo_redo.add_undo_property(main_shape, 'clip_paths', [])
 
 
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[ScalableArc],
@@ -514,11 +520,6 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[
 		new_path.transform = is_cutout_for.transform.affine_inverse()
 		new_path.set_position_to_center()
 		_post_process_shape(new_path, is_cutout_for, transform, style, scene_root, gradients, true)
-		var new_clip_paths := is_cutout_for.clip_paths.duplicate()
-		new_clip_paths.append(new_path)
-		is_cutout_for.clip_paths = new_clip_paths
-		undo_redo.add_do_property(is_cutout_for, 'clip_paths', new_clip_paths)
-		undo_redo.add_undo_property(is_cutout_for, 'clip_paths', is_cutout_for.clip_paths)
 	else:
 		new_path.set_position_to_center()
 		_post_process_shape(new_path, parent, transform, style, scene_root, gradients, false)
