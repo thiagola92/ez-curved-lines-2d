@@ -211,8 +211,6 @@ enum CollisionObjectType {
 ## controls them
 @export var lock_assigned_shapes := true
 
-var _clip_path_transform_cache = {}
-
 # Wire up signals at runtime
 func _ready():
 	if update_curve_at_runtime:
@@ -271,25 +269,17 @@ func _on_clip_paths_changed():
 	for cp in clip_paths:
 		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
 			cp.path_changed.connect(_on_assigned_node_changed)
-			cp.transform_changed.connect(_on_clip_path_transform_changed)
+			cp.transform_changed.connect(_on_assigned_node_changed)
 			cp.tree_entered.connect(_on_assigned_node_changed)
 			cp.tree_exited.connect(func(): if is_inside_tree(): _on_assigned_node_changed())
 			if Engine.is_editor_hint() or update_curve_at_runtime:
-				cp.set_notify_transform(true)
+				cp.set_notify_local_transform(true)
 	_on_assigned_node_changed()
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_TRANSFORM_CHANGED:
+	if what == NOTIFICATION_LOCAL_TRANSFORM_CHANGED:
 		transform_changed.emit(self)
-
-
-func _on_clip_path_transform_changed(clip_path : ScalableVectorShape2D):
-	if clip_path not in _clip_path_transform_cache:
-		_clip_path_transform_cache[clip_path] = Transform2D.IDENTITY
-	if not _clip_path_transform_cache[clip_path].is_equal_approx(clip_path.transform):
-		_on_assigned_node_changed()
-	_clip_path_transform_cache[clip_path] = Transform2D(clip_path.transform)
 
 
 func _on_dimensions_changed():
