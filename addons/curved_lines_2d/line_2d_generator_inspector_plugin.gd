@@ -173,10 +173,10 @@ func _export_baked_scene(svs : ScalableVectorShape2D, filename : String, dialog 
 	var svs_parent: Node = svs.get_parent()
 	var svs_index: int = svs.get_index()
 	var svs_children := svs.get_children()
+	var replace_map: Dictionary[Node, Node]
 	var root := Node2D.new()
 	root.name = svs.name
-	svs.replace_by(root, true)
-	svs.queue_free()
+	replace_map[svs] = root
 	
 	while svs_children.size() > 0:
 		var child: Node = svs_children.pop_back()
@@ -186,9 +186,9 @@ func _export_baked_scene(svs : ScalableVectorShape2D, filename : String, dialog 
 			var node := Node2D.new()
 			node.name = child.name
 			node.unique_name_in_owner = child.unique_name_in_owner
-			child.replace_by(node, true)
-			child.queue_free()
+			replace_map[child] = node
 	
+	_replace_all(replace_map)
 	_set_owner_recursive(root, root)
 	
 	var scene := PackedScene.new()
@@ -201,16 +201,25 @@ func _export_baked_scene(svs : ScalableVectorShape2D, filename : String, dialog 
 		push_error("Failed to save the baked scene.")
 		return
 	
-	var ps: PackedScene = ResourceLoader.load(filename)
-	var node: Node = ps.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE)
+	var linked_scene: PackedScene = ResourceLoader.load(filename)
+	var node: Node = linked_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE)
+	
 	svs_parent.remove_child(root)
 	svs_parent.add_child(node, true)
 	svs_parent.move_child(node, svs_index)
 	node.owner = svs_parent
 
 
+func _replace_all(replace_map: Dictionary[Node, Node], left_by_right: bool = true) -> void:
+	for left in replace_map:
+		if left_by_right:
+			left.replace_by(replace_map[left], true)
+		else:
+			replace_map[left].replace_by(left, true)
+
+
 # https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L3492
-func _set_owner_recursive(node: Node, owner: Node):
+func _set_owner_recursive(node: Node, owner: Node) -> void:
 	for child in node.get_children():
 		child.owner = owner
 		_set_owner_recursive(child, owner)
