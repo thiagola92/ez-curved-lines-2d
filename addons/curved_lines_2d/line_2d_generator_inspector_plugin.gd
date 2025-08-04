@@ -32,6 +32,13 @@ func _parse_begin(object: Object) -> void:
 				assigned nodes outside this subtree will not be drawn."
 		add_custom_control(button)
 		button.pressed.connect(func(): _on_export_png_button_pressed(object))
+	if object is ScalableVectorShape2D:
+		var button : Button = Button.new()
+		button.text = "Export as baked scene*"
+		button.tooltip_text = "The export will only contain this node and its children,
+				assigned nodes outside this subtree will not be included."
+		add_custom_control(button)
+		button.pressed.connect(func(): _on_export_baked_scene_pressed(object))
 
 
 func _parse_group(object: Object, group: String) -> void:
@@ -109,6 +116,16 @@ func _on_export_png_button_pressed(svs : ScalableVectorShape2D) -> void:
 	dialog.popup_centered(Vector2i(800, 400))
 
 
+func _on_export_baked_scene_pressed(svs : ScalableVectorShape2D) -> void:
+	var dialog := EditorFileDialog.new()
+	dialog.add_filter("*.tscn", "Scene")
+	dialog.current_file = svs.name.to_snake_case()
+	dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
+	dialog.file_selected.connect(func(path): _export_baked_scene(svs, path, dialog))
+	EditorInterface.get_base_control().add_child(dialog)
+	dialog.popup_centered(Vector2i(800, 400))
+
+
 func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) -> void:
 	dialog.queue_free()
 	var sub_viewport := SubViewport.new()
@@ -144,3 +161,56 @@ func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) 
 	img.save_png(filename)
 	EditorInterface.get_resource_filesystem().scan()
 	sub_viewport.queue_free()
+
+
+# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L1197
+# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L1143
+# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L3484C3-L3484C29
+# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L439
+func _export_baked_scene(svs : ScalableVectorShape2D, filename : String, dialog : Node) -> void:
+	dialog.queue_free()
+	
+	var svs_parent: Node = svs.get_parent()
+	var svs_index: int = svs.get_index()
+	var svs_children := svs.get_children()
+	var root := Node2D.new()
+	root.name = svs.name
+	svs.replace_by(root, true)
+	svs.queue_free()
+	
+	while svs_children.size() > 0:
+		var child: Node = svs_children.pop_back()
+		svs_children.append_array(child.get_children())
+		
+		if child is ScalableVectorShape2D:
+			var node := Node2D.new()
+			node.name = child.name
+			node.unique_name_in_owner = child.unique_name_in_owner
+			child.replace_by(node, true)
+			child.queue_free()
+	
+	_set_owner_recursive(root, root)
+	
+	var scene := PackedScene.new()
+	var result: Error = scene.pack(root)
+	
+	if result == OK:
+		result = ResourceSaver.save(scene, filename, ResourceSaver.FLAG_NONE)
+	
+	if result != OK:
+		push_error("Failed to save the baked scene.")
+		return
+	
+	var ps: PackedScene = ResourceLoader.load(filename)
+	var node: Node = ps.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE)
+	svs_parent.remove_child(root)
+	svs_parent.add_child(node, true)
+	svs_parent.move_child(node, svs_index)
+	node.owner = svs_parent
+
+
+# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L3492
+func _set_owner_recursive(node: Node, owner: Node):
+	for child in node.get_children():
+		child.owner = owner
+		_set_owner_recursive(child, owner)
