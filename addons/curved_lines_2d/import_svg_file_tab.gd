@@ -88,6 +88,7 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 		LogLevel.INFO,_:
 			lbl.label_settings = info_label_settings
 	lbl.text = msg
+
 	%ImportLogContainer.add_child(lbl)
 
 
@@ -165,6 +166,8 @@ func _load_svg(file_path : String) -> void:
 				elif xml_data.get_named_attribute_value("width").ends_with("cm"):
 					log_message("⚠️ Units for this image are centimeters (cm), image scale set to 37.8")
 					svg_root.scale *= 37.8
+			if xml_data.has_attribute("style"):
+				current_node.set_meta(SVG_STYLE_META_NAME, get_svg_style(xml_data))
 		elif xml_data.get_node_name() == "style" and xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping <style> node, only inline style attribute and some presentation attributes are supported", LogLevel.WARN)
 		elif xml_data.get_node_name() == "defs":
@@ -173,19 +176,13 @@ func _load_svg(file_path : String) -> void:
 			svg_gradients.append(parse_gradient(xml_data))
 		elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
-	log_message("Import finished.\n\nThe SVG importer is in a very early stage of development.")
+	log_message("Import finished.\n\nThe SVG importer is still incrementally improving (slowly).")
 
 	var link_button : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
 	link_button.text = "Click here to report issues or improvement requests on github"
 	link_button.uri = "https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues"
 	%ImportLogContainer.add_child(link_button)
 
-	log_message("\nClick on the link below to learn more")
-
-	var link_button2 : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
-	link_button2.text = "Watch an explainer about known issues on youtube."
-	link_button2.uri = "https://www.youtube.com/watch?v=nVCKVRBMnWU"
-	%ImportLogContainer.add_child(link_button2)
 	undo_redo.commit_action(false)
 	EditorInterface.call_deferred('edit_node', svg_root)
 
@@ -326,6 +323,7 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 	var string_array_count = 0
 	var cursor = Vector2.ZERO
 	var main_shape : ScalableVectorShape2D = null
+	var new_clip_paths : Array[ScalableVectorShape2D] = []
 	for string_array in string_arrays:
 		var curve = Curve2D.new()
 		var arcs : Array[ScalableArc] = []
@@ -487,15 +485,21 @@ func process_svg_path(element:XMLParser, current_node : Node2D, scene_root : Nod
 			var id = element.get_named_attribute_value("id") if element.has_attribute("id") else "Path"
 			if (string_array_count > 1 and Geometry2D.is_point_in_polygon(curve.get_point_position(0),
 						main_shape.transform * main_shape.tessellate() )):
-				create_path2d("CutoutFor%s" % id, current_node,  curve, arcs,
+				new_clip_paths.append(create_path2d("CutoutFor%s" % id, current_node,  curve, arcs,
 							Transform2D.IDENTITY, {}, scene_root, gradients,
-							string_array[string_array.size()-1].to_upper() == "Z", main_shape)
+							string_array[string_array.size()-1].to_upper() == "Z", main_shape))
 			else:
 				var result := create_path2d(id, current_node,  curve, arcs,
 							get_svg_transform(element), get_svg_style(element), scene_root, gradients,
 							string_array[string_array.size()-1].to_upper() == "Z")
 				if string_array_count == 1:
 					main_shape = result
+
+	if not new_clip_paths.is_empty():
+		log_message("Processing %d cutouts for %s" % [new_clip_paths.size(), main_shape.name], LogLevel.DEBUG)
+		main_shape.clip_paths = new_clip_paths
+		undo_redo.add_do_property(main_shape, 'clip_paths', new_clip_paths)
+		undo_redo.add_undo_property(main_shape, 'clip_paths', [])
 
 
 func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[ScalableArc],
@@ -514,11 +518,6 @@ func create_path2d(path_name: String, parent: Node, curve: Curve2D, arcs: Array[
 		new_path.transform = is_cutout_for.transform.affine_inverse()
 		new_path.set_position_to_center()
 		_post_process_shape(new_path, is_cutout_for, transform, style, scene_root, gradients, true)
-		var new_clip_paths := is_cutout_for.clip_paths.duplicate()
-		new_clip_paths.append(new_path)
-		is_cutout_for.clip_paths = new_clip_paths
-		undo_redo.add_do_property(is_cutout_for, 'clip_paths', new_clip_paths)
-		undo_redo.add_undo_property(is_cutout_for, 'clip_paths', is_cutout_for.clip_paths)
 	else:
 		new_path.set_position_to_center()
 		_post_process_shape(new_path, parent, transform, style, scene_root, gradients, false)
@@ -533,6 +532,7 @@ func _post_process_shape(svs : ScalableVectorShape2D, parent : Node, transform :
 	while !ancestor.has_meta(SVG_ROOT_META_NAME):
 		style.merge(ancestor.get_meta(SVG_STYLE_META_NAME, {}))
 		ancestor = ancestor.get_parent()
+	style.merge(ancestor.get_meta(SVG_STYLE_META_NAME, {}))
 	var gradient_point_parent : Node2D = parent
 	if transform == Transform2D.IDENTITY:
 		_managed_add_child_and_set_owner(parent, svs, scene_root)
@@ -579,6 +579,12 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node,
 		_managed_add_child_and_set_owner(new_path, line, scene_root, 'line')
 		if style["stroke"].begins_with("url"):
 			log_message("⚠️ Unsupported stroke style: " + style["stroke"])
+		elif style["stroke"].begins_with("rgba"):
+			var parts := _parse_svg_transform_params(style["stroke"].replace("rgba", ""))
+			line.default_color = Color.from_rgba8(parts[0], parts[1], parts[2], parts[3])
+		elif style["stroke"].begins_with("rgb"):
+			var parts := _parse_svg_transform_params(style["stroke"].replace("rgb", ""))
+			line.default_color = Color.from_rgba8(parts[0], parts[1], parts[2])
 		else:
 			line.default_color = Color(style["stroke"])
 		if style.has("stroke-width"):
@@ -619,6 +625,12 @@ func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene
 				log_message("⚠️ Cannot find gradient for href=%s" % href, LogLevel.WARN)
 			else:
 				add_gradient_to_fill(new_path, svg_gradient, polygon, scene_root, gradients, gradient_point_parent)
+		elif style["fill"].begins_with("rgba"):
+			var parts := _parse_svg_transform_params(style["fill"].replace("rgba", ""))
+			polygon.color = Color.from_rgba8(parts[0], parts[1], parts[2], parts[3])
+		elif style["fill"].begins_with("rgb"):
+			var parts := _parse_svg_transform_params(style["fill"].replace("rgb", ""))
+			polygon.color = Color.from_rgba8(parts[0], parts[1], parts[2])
 		else:
 			polygon.color = Color(style["fill"])
 			if style.has("fill-opacity"):

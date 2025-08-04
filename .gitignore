@@ -6,3 +6,4 @@ builds/
 addons/godot-plugin-refresher
 .vscode
 export_presets.cfg
+/*.svg*

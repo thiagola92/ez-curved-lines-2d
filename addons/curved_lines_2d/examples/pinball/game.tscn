@@ -137,7 +137,6 @@ polygon = NodePath("Polygon2D")
 curve = SubResource("Curve2D_ara7v")
 update_curve_at_runtime = true
 arc_list = SubResource("Resource_8v3mp")
-metadata/_select_hint_ = true
 
 [node name="Polygon2D" type="Polygon2D" parent="Rectangle/CutoutOfRectangle"]
 texture = SubResource("GradientTexture2D_gdr51")

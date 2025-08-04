@@ -7,6 +7,10 @@ class_name ScalableVectorShape2D
 ## Emitted when a new set of points was calculated for the [member curve].
 signal path_changed(new_points : PackedVector2Array)
 
+## Emitted when [member CanvasItem.set_notify_transform] was toggled on upon
+## every transformation (used internally to handle changes in the position of cutouts)
+signal transform_changed(ref_to_self : ScalableVectorShape2D)
+
 ## This signal is used internally in editor-mode to tell the DrawablePath2D tool that
 ## the instance of assigned [member line], [member polygon], or [member collision_polygon] has changed.
 signal assigned_node_changed()
@@ -207,6 +211,9 @@ enum CollisionObjectType {
 ## controls them
 @export var lock_assigned_shapes := true
 
+
+var cached_outline : PackedVector2Array = []
+
 # Wire up signals at runtime
 func _ready():
 	if update_curve_at_runtime:
@@ -265,16 +272,17 @@ func _on_clip_paths_changed():
 	for cp in clip_paths:
 		if is_instance_valid(cp) and not cp.path_changed.is_connected(_on_assigned_node_changed):
 			cp.path_changed.connect(_on_assigned_node_changed)
+			cp.transform_changed.connect(_on_assigned_node_changed)
 			cp.tree_entered.connect(_on_assigned_node_changed)
 			cp.tree_exited.connect(func(): if is_inside_tree(): _on_assigned_node_changed())
 			if Engine.is_editor_hint() or update_curve_at_runtime:
-				cp.set_notify_transform(true)
+				cp.set_notify_local_transform(true)
 	_on_assigned_node_changed()
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_TRANSFORM_CHANGED:
-		path_changed.emit()
+	if what == NOTIFICATION_LOCAL_TRANSFORM_CHANGED:
+		transform_changed.emit(self)
 
 
 func _on_dimensions_changed():
@@ -315,6 +323,8 @@ func notify_assigned_node_change():
 
 
 func tessellate() -> PackedVector2Array:
+	if not cached_outline.is_empty():
+		return cached_outline
 	if not arc_list or arc_list.arcs.is_empty():
 		return curve.tessellate(max_stages, tolerance_degrees)
 	var poly_points = []
@@ -358,15 +368,19 @@ func curve_changed():
 		return
 
 	# recalculate the polygon point for this shape based on curve and arc_list
-	var polygon_points := self.tessellate()
+	cached_outline.clear()
+	cached_outline.append_array(self.tessellate())
+
+	# emit updated path to listeners
+	path_changed.emit(cached_outline)
+
+	var polygon_points := cached_outline.duplicate()
 	# Fixes cases start- and end-node are so close to each other that
 	# polygons won't fill and closed lines won't cap nicely
 	if (polygon_points.size() > 0 and
 			polygon_points[0].distance_to(polygon_points[polygon_points.size()-1]) < 0.001):
 		polygon_points.remove_at(polygon_points.size() - 1)
 
-	# emit updated path to listeners
-	path_changed.emit(polygon_points)
 
 	var valid_clip_paths : Array[ScalableVectorShape2D] = (clip_paths
 			.filter(func(cp): return is_instance_valid(cp))
