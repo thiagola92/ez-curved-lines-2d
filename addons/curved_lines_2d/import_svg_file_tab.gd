@@ -78,18 +78,14 @@ func log_message(msg : String, log_level : LogLevel = LogLevel.INFO) -> void:
 	var lbl := Label.new()
 	match log_level:
 		LogLevel.ERROR:
-			printerr("ERROR: ", msg)
 			warning_dialog.dialog_text = msg
 			warning_dialog.popup_centered()
 			lbl.label_settings = error_label_settings
 		LogLevel.WARN:
-			print("WARN: ", msg)
 			lbl.label_settings = warning_label_settings
 		LogLevel.DEBUG:
-			print_debug("DEBUG: ",  msg)
 			lbl.label_settings = debug_label_settings
 		LogLevel.INFO,_:
-			print("INFO: ",  msg)
 			lbl.label_settings = info_label_settings
 	lbl.text = msg
 
@@ -170,6 +166,8 @@ func _load_svg(file_path : String) -> void:
 				elif xml_data.get_named_attribute_value("width").ends_with("cm"):
 					log_message("⚠️ Units for this image are centimeters (cm), image scale set to 37.8")
 					svg_root.scale *= 37.8
+			if xml_data.has_attribute("style"):
+				current_node.set_meta(SVG_STYLE_META_NAME, get_svg_style(xml_data))
 		elif xml_data.get_node_name() == "style" and xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping <style> node, only inline style attribute and some presentation attributes are supported", LogLevel.WARN)
 		elif xml_data.get_node_name() == "defs":
@@ -534,6 +532,7 @@ func _post_process_shape(svs : ScalableVectorShape2D, parent : Node, transform :
 	while !ancestor.has_meta(SVG_ROOT_META_NAME):
 		style.merge(ancestor.get_meta(SVG_STYLE_META_NAME, {}))
 		ancestor = ancestor.get_parent()
+	style.merge(ancestor.get_meta(SVG_STYLE_META_NAME, {}))
 	var gradient_point_parent : Node2D = parent
 	if transform == Transform2D.IDENTITY:
 		_managed_add_child_and_set_owner(parent, svs, scene_root)
@@ -580,6 +579,12 @@ func add_stroke_to_path(new_path : Node2D, style: Dictionary, scene_root : Node,
 		_managed_add_child_and_set_owner(new_path, line, scene_root, 'line')
 		if style["stroke"].begins_with("url"):
 			log_message("⚠️ Unsupported stroke style: " + style["stroke"])
+		elif style["stroke"].begins_with("rgba"):
+			var parts := _parse_svg_transform_params(style["stroke"].replace("rgba", ""))
+			line.default_color = Color.from_rgba8(parts[0], parts[1], parts[2], parts[3])
+		elif style["stroke"].begins_with("rgb"):
+			var parts := _parse_svg_transform_params(style["stroke"].replace("rgb", ""))
+			line.default_color = Color.from_rgba8(parts[0], parts[1], parts[2])
 		else:
 			line.default_color = Color(style["stroke"])
 		if style.has("stroke-width"):
@@ -620,6 +625,12 @@ func add_fill_to_path(new_path : ScalableVectorShape2D, style: Dictionary, scene
 				log_message("⚠️ Cannot find gradient for href=%s" % href, LogLevel.WARN)
 			else:
 				add_gradient_to_fill(new_path, svg_gradient, polygon, scene_root, gradients, gradient_point_parent)
+		elif style["fill"].begins_with("rgba"):
+			var parts := _parse_svg_transform_params(style["fill"].replace("rgba", ""))
+			polygon.color = Color.from_rgba8(parts[0], parts[1], parts[2], parts[3])
+		elif style["fill"].begins_with("rgb"):
+			var parts := _parse_svg_transform_params(style["fill"].replace("rgb", ""))
+			polygon.color = Color.from_rgba8(parts[0], parts[1], parts[2])
 		else:
 			polygon.color = Color(style["fill"])
 			if style.has("fill-opacity"):
