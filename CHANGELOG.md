@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.10.3 - 2025-04-08
+
+### Changed
+- Bugfix: SVG importer can now handle rgb() and rgba() colors for stroke and fill
+- Bugfix: Style attribute of root element not is ignored anymore
+- SVG importer evaluates all cutouts for a shape at once
+- ScalableVectorShape2D caches outlines after tessellate and only reinvokes tessellate when the curve actually changes
+- Only recalculate curve when local transform of cutout changes (cutout has to be direct child of parent for this to trigger correctly)
+- Prevent global position form from being visible when plugin is enabled
+
 ## 2.10.2 - 2025-02-08
 
 ### Added
