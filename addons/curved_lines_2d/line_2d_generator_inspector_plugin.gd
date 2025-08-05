@@ -32,6 +32,13 @@ func _parse_begin(object: Object) -> void:
 				assigned nodes outside this subtree will not be drawn."
 		add_custom_control(button)
 		button.pressed.connect(func(): _on_export_png_button_pressed(object))
+	if object is ScalableVectorShape2D:
+		var button : Button = Button.new()
+		button.text = "Export as baked scene*"
+		button.tooltip_text = "The export will only contain this node and its children,
+				assigned nodes outside this subtree will not be included."
+		add_custom_control(button)
+		button.pressed.connect(func(): _on_export_baked_scene_pressed(object))
 
 
 func _parse_group(object: Object, group: String) -> void:
@@ -109,6 +116,17 @@ func _on_export_png_button_pressed(svs : ScalableVectorShape2D) -> void:
 	dialog.popup_centered(Vector2i(800, 400))
 
 
+func _on_export_baked_scene_pressed(svs : ScalableVectorShape2D) -> void:
+	var dialog := EditorFileDialog.new()
+	dialog.add_filter("*.tscn", "Scene")
+	dialog.current_file = svs.name.to_snake_case()
+	dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
+	dialog.current_path = svs.name.to_lower()
+	dialog.file_selected.connect(func(path): _export_baked_scene(svs, path, dialog))
+	EditorInterface.get_base_control().add_child(dialog)
+	dialog.popup_centered(Vector2i(800, 400))
+
+
 func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) -> void:
 	dialog.queue_free()
 	var sub_viewport := SubViewport.new()
@@ -144,3 +162,7 @@ func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) 
 	img.save_png(filename)
 	EditorInterface.get_resource_filesystem().scan()
 	sub_viewport.queue_free()
+
+
+func _export_baked_scene(svs : ScalableVectorShape2D, filename : String, dialog : Node) -> void:
+	pass
