@@ -29,7 +29,7 @@ curved_lines_2d/fill_color=Color(1, 1, 1, 1)
 [application]
 
 config/name="EZ Curved Lines 2D"
-run/main_scene="uid://dyu5ge11cxxva"
+run/main_scene="uid://c6dfjd23olqhh"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="uid://b5yxa1e62b0hb"
 
