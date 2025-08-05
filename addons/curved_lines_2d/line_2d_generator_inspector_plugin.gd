@@ -32,6 +32,18 @@ func _parse_begin(object: Object) -> void:
 				assigned nodes outside this subtree will not be drawn."
 		add_custom_control(button)
 		button.pressed.connect(func(): _on_export_png_button_pressed(object))
+	if object is ScalableVectorShape2D:
+		var button : Button = Button.new()
+		button.text = "Export as baked scene*"
+		button.tooltip_text = "The export will only contain this node and its children,
+				assigned nodes outside this subtree will not be drawn.\n
+				Warning:
+				- AnimationPlayer will not be included.
+				- Cutouts are not yet supported for this feature. Alternatively,
+				  you can manually unlock any generated polygons and lines
+				  and copy+paste them into a new scene."
+		add_custom_control(button)
+		button.pressed.connect(func(): _on_export_baked_scene_pressed(object))
 
 
 func _parse_group(object: Object, group: String) -> void:
@@ -109,6 +121,17 @@ func _on_export_png_button_pressed(svs : ScalableVectorShape2D) -> void:
 	dialog.popup_centered(Vector2i(800, 400))
 
 
+func _on_export_baked_scene_pressed(svs : ScalableVectorShape2D) -> void:
+	var dialog := EditorFileDialog.new()
+	dialog.add_filter("*.tscn", "Scene")
+	dialog.current_file = svs.name.to_snake_case()
+	dialog.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
+	dialog.current_path = svs.name.to_lower()
+	dialog.file_selected.connect(func(path): _export_baked_scene(svs, path, dialog))
+	EditorInterface.get_base_control().add_child(dialog)
+	dialog.popup_centered(Vector2i(800, 400))
+
+
 func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) -> void:
 	dialog.queue_free()
 	var sub_viewport := SubViewport.new()
@@ -144,3 +167,60 @@ func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) 
 	img.save_png(filename)
 	EditorInterface.get_resource_filesystem().scan()
 	sub_viewport.queue_free()
+
+
+func _export_baked_scene(svs : ScalableVectorShape2D, filepath : String, dialog : Node) -> void:
+	dialog.queue_free()
+	
+	# Let's temporarily modify the current branch so we can create the baked scene.
+	var svs_owner: Node = svs.owner
+	var svs_children: Array[Node] = svs.get_children()
+	var svs_ownership: Array[Node]
+	var replace_map: Dictionary[Node, Node]
+	var root := Node2D.new()
+	root.name = svs.name
+	replace_map[svs] = root
+	
+	# Collect all nodes to be replaced.
+	while svs_children.size() > 0:
+		var child: Node = svs_children.pop_back()
+		
+		if child is AnimationPlayer:
+			continue
+		
+		svs_children.append_array(child.get_children())
+		
+		# Store ownership so we can undo later.
+		if child.owner == svs_owner:
+			svs_ownership.append(child)
+		
+		if child is ScalableVectorShape2D:
+			var node := Node2D.new()
+			node.name = child.name
+			node.unique_name_in_owner = child.unique_name_in_owner
+			node.transform = child.transform
+			replace_map[child] = node
+	
+	# Do modifications and create scene.
+	for node in replace_map:
+		node.replace_by(replace_map[node], true)
+	
+	for child in svs_ownership:
+		if child in replace_map:
+			replace_map[child].owner = root
+		else:
+			child.owner = root
+	
+	var scene := PackedScene.new()
+	scene.pack(root)
+	ResourceSaver.save(scene, filepath, ResourceSaver.FLAG_NONE)
+	
+	# Undo modifications and clear temporary nodes.
+	for node in replace_map:
+		replace_map[node].replace_by(node, true)
+		replace_map[node].queue_free()
+	
+	for child in svs_ownership:
+		child.owner = svs_owner
+	
+	EditorInterface.open_scene_from_path(filepath)
