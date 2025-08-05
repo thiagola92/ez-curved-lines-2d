@@ -163,11 +163,7 @@ func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) 
 	sub_viewport.queue_free()
 
 
-# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L1197
-# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L1143
-# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L3484C3-L3484C29
-# https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L439
-func _export_baked_scene(svs : ScalableVectorShape2D, filename : String, dialog : Node) -> void:
+func _export_baked_scene(svs : ScalableVectorShape2D, filepath : String, dialog : Node) -> void:
 	dialog.queue_free()
 	
 	var svs_parent: Node = svs.get_parent()
@@ -187,36 +183,75 @@ func _export_baked_scene(svs : ScalableVectorShape2D, filename : String, dialog 
 			node.name = child.name
 			node.unique_name_in_owner = child.unique_name_in_owner
 			replace_map[child] = node
+		#elif child is AnimationPlayer:
+			#pass
 	
 	_replace_all(replace_map)
 	_set_owner_recursive(root, root)
 	
 	var scene := PackedScene.new()
-	var result: Error = scene.pack(root)
+	var error: Error = scene.pack(root)
 	
-	if result == OK:
-		result = ResourceSaver.save(scene, filename, ResourceSaver.FLAG_NONE)
+	if not error:
+		error = ResourceSaver.save(scene, filepath, ResourceSaver.FLAG_NONE)
 	
-	if result != OK:
-		push_error("Failed to save the baked scene.")
+	if error:
+		push_error("Failed to export the SVS as 'baked' scene.")
+		
+		# Undoing actions.
+		_replace_all(replace_map, true)
+		_set_owner_recursive(svs, svs)
+		
+		for node in replace_map.values():
+			(node as Node).queue_free()
+		
+		root.queue_free()
+		
 		return
 	
-	var linked_scene: PackedScene = ResourceLoader.load(filename)
-	var node: Node = linked_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE)
+	# Changes to this new scene will reflect into others.
+	var linked_scene: PackedScene = ResourceLoader.load(filepath)
+	var linked_root: Node = linked_scene.instantiate(PackedScene.GEN_EDIT_STATE_INSTANCE)
+	var undo_redo := EditorInterface.get_editor_undo_redo()
+	replace_map[svs] = linked_root
 	
+	# NOTE: When using replace_by(), doesn't make new scene reflect into
+	# current scene until reopening.
 	svs_parent.remove_child(root)
-	svs_parent.add_child(node, true)
-	svs_parent.move_child(node, svs_index)
-	node.owner = svs_parent
+	svs_parent.add_child(linked_root)
+	svs_parent.move_child(linked_root, svs_index)
+	
+	linked_root.owner = svs_parent
+	
+	undo_redo.create_action("Export SVS as 'baked' scene")
+	undo_redo.add_do_method(self, "_replace_all", replace_map)
+	undo_redo.add_undo_method(self, "_replace_all", replace_map, true)
+	undo_redo.add_undo_method(self, "_set_owner_recursive", svs, svs)
+	
+	#for n in replace_map:
+		#undo_redo.add_do_reference(replace_map[n])
+		#undo_redo.add_undo_reference(n)
+	
+	#undo_redo.add_do_method(svs_parent, "remove_child", svs)
+	#undo_redo.add_undo_method(svs_parent, "remove_child", linked_root)
+	#undo_redo.add_do_method(svs_parent, "add_child", linked_root, true)
+	#undo_redo.add_undo_method(svs_parent, "add_child", svs, true)
+	#undo_redo.add_do_method(svs_parent, "move_child", linked_root, svs_index)
+	#undo_redo.add_undo_method(svs_parent, "move_child", svs, svs_index)
+	
+	undo_redo.commit_action(false)
 
 
-func _replace_all(replace_map: Dictionary[Node, Node], left_by_right: bool = true) -> void:
-	for left in replace_map:
-		if left_by_right:
-			left.replace_by(replace_map[left], true)
-		else:
-			replace_map[left].replace_by(left, true)
-
+func _replace_all(replace_map: Dictionary[Node, Node], reverse: bool = false) -> void:
+	if reverse:
+		for node in replace_map:
+			prints("Replacing", replace_map[node], "by", node)
+			replace_map[node].replace_by(node, true)
+	else:
+		for node in replace_map:
+			prints("Replacing", node, "by", replace_map[node])
+			node.replace_by(replace_map[node], true)
+	print("-----------------")
 
 # https://github.com/godotengine/godot/blob/45509c284cc8779f7e791b0d7dc3d639b3cc2fcc/editor/docks/scene_tree_dock.cpp#L3492
 func _set_owner_recursive(node: Node, owner: Node) -> void:
