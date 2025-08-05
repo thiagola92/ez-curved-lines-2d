@@ -37,6 +37,13 @@ config/icon="uid://b5yxa1e62b0hb"
 
 enabled=PackedStringArray("res://addons/curved_lines_2d/plugin.cfg", "res://addons/godot-plugin-refresher/plugin.cfg")
 
+[input]
+
+asd={
+"deadzone": 0.2,
+"events": []
+}
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
