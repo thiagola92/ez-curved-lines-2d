@@ -164,5 +164,53 @@ func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) 
 	sub_viewport.queue_free()
 
 
-func _export_baked_scene(svs : ScalableVectorShape2D, filename : String, dialog : Node) -> void:
-	pass
+func _export_baked_scene(svs : ScalableVectorShape2D, filepath : String, dialog : Node) -> void:
+	dialog.queue_free()
+	
+	var svs_parent: Node = svs.get_parent()
+	var svs_index: int = svs.get_index()
+	var svs_children: Array[Node] = svs.get_children()
+	var replace_map: Dictionary[Node, Node]
+	var root := Node2D.new()
+	root.name = svs.name
+	replace_map[svs] = root
+	
+	while svs_children.size() > 0:
+		var child: Node = svs_children.pop_back()
+		svs_children.append_array(child.get_children())
+		
+		if child is ScalableVectorShape2D:
+			var node := Node2D.new()
+			node.name = child.name
+			node.unique_name_in_owner = child.unique_name_in_owner
+			replace_map[child] = node
+	
+	_replace_all(replace_map)
+	_set_owner_recursive(root, root)
+	
+	var scene := PackedScene.new()
+	scene.pack(root)
+	ResourceSaver.save(scene, filepath, ResourceSaver.FLAG_NONE)
+	
+	# FIXME: Not enough to link scene with node, it doesn't react to scene changes
+	# until you reopen.
+	root.owner = svs_parent
+	root.scene_file_path = filepath
+
+# Replace nodes in the map by the counterpart (key <-> value).
+func _replace_all(map: Dictionary[Node, Node], reverse: bool = false) -> void:
+	if reverse:
+		for node in map:
+			map[node].replace_by(node, true)
+	else:
+		for node in map:
+			node.replace_by(map[node], true)
+
+
+# We need to set owner because:
+# "In the editor, nodes not owned by the scene root are usually not displayed
+# in the Scene dock, and will not be saved."
+func _set_owner_recursive(node: Node, owner: Node) -> void:
+	for child in node.get_children():
+		child.owner = owner
+		_set_owner_recursive(child, owner)
