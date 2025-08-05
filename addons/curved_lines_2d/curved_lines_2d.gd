@@ -116,6 +116,10 @@ func select_node_reversibly(target_node : Node) -> void:
 		EditorInterface.edit_node(target_node)
 
 
+func _is_ctrl_or_cmd_pressed() -> bool:
+	return Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_META)
+
+
 func _on_shape_preview(curve : Curve2D):
 	shape_preview = curve
 	update_overlays()
@@ -538,7 +542,7 @@ func _draw_handles(viewport_control : Control, svs : ScalableVectorShape2D) -> v
 		if svs.has_meta(META_NAME_HOVER_GRADIENT_COLOR_STOP_IDX):
 			hint_txt = "- Drag to move color stop\n- Right click to remove color stop"
 		if (svs.has_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE)
-				and not Input.is_key_pressed(KEY_CTRL)
+				and not _is_ctrl_or_cmd_pressed()
 				and not Input.is_key_pressed(KEY_SHIFT)):
 			_draw_crosshair(viewport_control, svs.get_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE))
 			hint_txt = "- Double click to add color stop here"
@@ -629,27 +633,27 @@ func _draw_crosshair(viewport_control : Control, p : Vector2, orbit := 2.0, oute
 func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 	var p := _vp_transform(mouse_pos)
-	if Input.is_key_pressed(KEY_CTRL) and Input.is_key_pressed(KEY_SHIFT):
+	if _is_ctrl_or_cmd_pressed() and Input.is_key_pressed(KEY_SHIFT):
 		if svs.has_fine_point(mouse_pos):
 			_draw_crosshair(viewport_control, p)
 			_draw_hint(viewport_control, "- Click to start a cutout shape here (Ctrl+Shift held)")
 		else:
 			_draw_hint(viewport_control, "- Start a cutout shape while hovering over selected shape (Ctrl+Shift held)")
-	elif Input.is_key_pressed(KEY_CTRL):
+	elif _is_ctrl_or_cmd_pressed():
 		_draw_crosshair(viewport_control, p)
 		_draw_hint(viewport_control, "- Click to add point here (Ctrl held)")
 	elif Input.is_key_pressed(KEY_SHIFT):
 		_draw_hint(viewport_control, "- Use mousewheel to resize shape (Shift held)")
 	elif not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE):
-		var hint := "- Hold Ctrl to add points to selected shape
+		var hint := "- Hold Ctrl to add points to selected shape (or Cmd for mac)
 				- Hold Shift to resize shape with mouswheel"
 		if svs.has_fine_point(mouse_pos):
-			hint += "\n- Hold Ctrl-Shift to start a cutout shape here"
+			hint += "\n- Hold Ctrl+Shift to start a cutout shape here (or Cmd+Shift for mac)"
 		_draw_hint(viewport_control, hint)
 
 
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
-	if Input.is_key_pressed(KEY_CTRL) or Input.is_key_pressed(KEY_SHIFT):
+	if _is_ctrl_or_cmd_pressed() or Input.is_key_pressed(KEY_SHIFT):
 		_draw_add_point_hint(viewport_control, svs)
 		return
 
@@ -1222,12 +1226,12 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 							_get_snap_resolution()
 					)
 				return true
-			elif _is_svs_valid(current_selection) and Input.is_key_pressed(KEY_CTRL) and Input.is_key_pressed(KEY_SHIFT):
+			elif _is_svs_valid(current_selection) and _is_ctrl_or_cmd_pressed() and Input.is_key_pressed(KEY_SHIFT):
 				if (not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and
 							current_selection.has_fine_point(mouse_pos)):
 					_start_cutout_shape(current_selection, mouse_pos)
 				return true
-			elif _is_svs_valid(current_selection) and Input.is_key_pressed(KEY_CTRL):
+			elif _is_svs_valid(current_selection) and _is_ctrl_or_cmd_pressed():
 				if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 					_add_point_on_position(current_selection, mouse_pos)
 				return true

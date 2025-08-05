@@ -141,7 +141,9 @@ The hints in the 2D viewport should have you covered, but this section lists all
 
 ## Adding a point to a shape
 
-Using `Ctrl` + `Left Click` you can add a point anywhere in the 2D viewport, while your shape is selected.
+Using `Ctrl`[^5] + `Left Click` you can add a point anywhere in the 2D viewport, while your shape is selected.
+
+[^5]: Use `Cmd` in stead of `Ctrl` on a mac
 
 By double clicking on a line segment you can add a point _inbetween_ 2 existing points:
 
@@ -187,11 +189,11 @@ Using `Alt+Click` you can now open a form to set the global position of a point 
 
 ## Create a cutout shape (a hole)
 
-Using `Ctrl+Shift+Click` __on__ your selected shape will create _and_ select a new `ScalableVectorShape2D` which will act as a cutout (a hole / scissors if you will):
+Using `Ctrl+Shift+Click`[^5] __on__ your selected shape will create _and_ select a new `ScalableVectorShape2D` which will act as a cutout (a hole / scissors if you will):
 
 ![add a hole](./screenshots/add_a_hole.png)
 
-The created cutout will have only _one_ point, so to see the effect you'd need to add more points to using regular `Ctrl+Click`:
+The created cutout will have only _one_ point, so to see the effect you'd need to add more points to using regular `Ctrl+Click`[^5]:
 
 ![a hole was added](./screenshots/hole_added.png)
 
