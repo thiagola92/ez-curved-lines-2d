@@ -749,14 +749,14 @@ func _commit_undo_redo_transaction() -> void:
 		return
 	in_undo_redo_transaction = false
 	undo_redo.create_action(undo_redo_transaction[UndoRedoEntry.NAME])
-	for undo_method in undo_redo_transaction[UndoRedoEntry.UNDOS]:
-		undo_redo.callv('add_undo_method', undo_method)
-	for undo_prop in undo_redo_transaction[UndoRedoEntry.UNDO_PROPS]:
-		undo_redo.callv('add_undo_property', undo_prop)
 	for do_method in undo_redo_transaction[UndoRedoEntry.DOS]:
 		undo_redo.callv('add_do_method', do_method)
 	for do_prop in undo_redo_transaction[UndoRedoEntry.DO_PROPS]:
 		undo_redo.callv('add_do_property', do_prop)
+	for undo_method in undo_redo_transaction[UndoRedoEntry.UNDOS]:
+		undo_redo.callv('add_undo_method', undo_method)
+	for undo_prop in undo_redo_transaction[UndoRedoEntry.UNDO_PROPS]:
+		undo_redo.callv('add_undo_property', undo_prop)
 	undo_redo.commit_action(false)
 	undo_redo_transaction = {
 		UndoRedoEntry.NAME: name,
