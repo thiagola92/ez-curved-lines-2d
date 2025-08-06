@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.11.0 - 2025-06-08
+
+### Added
+- Preparations for svg clipPath support by adding flag `use_intersect_when_clipping` to `ScalableVectorShape2D` which turns a cutout into a clip_path by invoking `Geometry2D.intersect_polygons(...)` in stead of `Geometry2D.clip_polygons(...)`
+
+### Changed
+- Bugfix: svg importer can now also use gradients defined _after_ the element referring to it via `href`
+
 ## 2.10.4 - 2025-04-08
 
 ### Added
