@@ -133,13 +133,18 @@ enum CollisionObjectType {
 		tolerance_degrees = _tolerance_degrees
 		assigned_node_changed.emit()
 
-
+## Manages the line segments which should be treated as arcs in stead of Bézier
+## curves, see [class ScalableArc] for arc properties
 @export var arc_list : ScalableArcList = ScalableArcList.new():
 	set(_arc_list):
 		arc_list = _arc_list if _arc_list != null else ScalableArcList.new()
 		assigned_node_changed.emit()
 
+@export_group("Masking")
 
+## Holds the list of shapes used to make cutouts out of this shape, or
+## clippings of this shape when their [member ScalableVectorShape2D.use_interect_when_clipping]
+## is flagged on
 @export var clip_paths : Array[ScalableVectorShape2D] = []:
 	set(_clip_paths):
 		clip_paths = _clip_paths if clip_paths != null else []
@@ -147,6 +152,14 @@ enum CollisionObjectType {
 			if clip_paths[i] == self:
 				clip_paths[i] = null
 		clip_paths_changed.emit()
+
+## When this shape is used as a cutout, this tells the parent shape to use
+## the  [method Geometry2D.intersect_polygons] operation in stead of the
+## [method Geometry2D.clip_polygons] operation
+@export var use_interect_when_clipping := false:
+	set(flag):
+		use_interect_when_clipping = flag
+		path_changed.emit()
 
 
 @export_group("Shape Type Settings")
@@ -210,7 +223,6 @@ enum CollisionObjectType {
 ## inadvertently changing them, whilst the idea is that [ScalableVectorShape2D]
 ## controls them
 @export var lock_assigned_shapes := true
-
 
 var cached_outline : PackedVector2Array = []
 
@@ -381,7 +393,6 @@ func curve_changed():
 			polygon_points[0].distance_to(polygon_points[polygon_points.size()-1]) < 0.001):
 		polygon_points.remove_at(polygon_points.size() - 1)
 
-
 	var valid_clip_paths : Array[ScalableVectorShape2D] = (clip_paths
 			.filter(func(cp): return is_instance_valid(cp))
 			.filter(func(cp : Node2D): return cp.is_inside_tree())
@@ -422,9 +433,15 @@ func _update_polygon_texture():
 
 
 func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> void:
+	var clip_paths := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return cp.use_interect_when_clipping)
+	var cutouts := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return not cp.use_interect_when_clipping)
+	var intersect_results := Geometry2DUtil.apply_clips_to_polygon(
+		[polygon_points],
+		clip_paths.map(_clip_path_to_local), true
+	)
 	var clip_result := Geometry2DUtil.apply_clips_to_polygon(
-		polygon_points,
-		valid_clip_paths.map(_clip_path_to_local)
+		intersect_results.polygons,
+		cutouts.map(_clip_path_to_local)
 	)
 
 	var p_count = 0
@@ -437,7 +454,7 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, vali
 		clipped_polygon_point_indices.append(p_range)
 		p_count += poly_points.size()
 
-	if is_instance_valid(line):
+	if is_instance_valid(line) and not clipped_polylines.is_empty():
 		line.points = clipped_polylines.pop_front()
 		line.closed = true
 		var existing = line.get_children().filter(func(c): return c is Line2D)
