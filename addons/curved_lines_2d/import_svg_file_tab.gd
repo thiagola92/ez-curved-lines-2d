@@ -130,6 +130,15 @@ func _load_svg(file_path : String) -> void:
 	var current_node := svg_root
 	var svg_gradients : Array[Dictionary] = []
 
+	# first pass
+	while xml_data.read() == OK:
+		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
+			continue
+		if xml_data.get_node_name() == "linearGradient" or xml_data.get_node_name() == "radialGradient":
+			svg_gradients.append(parse_gradient(xml_data))
+
+	# second pass
+	xml_data.open(file_path)
 	while xml_data.read() == OK:
 		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
 			continue
@@ -172,8 +181,6 @@ func _load_svg(file_path : String) -> void:
 			log_message("⚠️ Skipping <style> node, only inline style attribute and some presentation attributes are supported", LogLevel.WARN)
 		elif xml_data.get_node_name() == "defs":
 			pass
-		elif xml_data.get_node_name() == "linearGradient" or xml_data.get_node_name() == "radialGradient":
-			svg_gradients.append(parse_gradient(xml_data))
 		elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
 	log_message("Import finished.\n\nThe SVG importer is still incrementally improving (slowly).")
