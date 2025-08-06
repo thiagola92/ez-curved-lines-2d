@@ -1,6 +1,9 @@
 # Changelog
 
-## 2.10.3 - 2025-04-08
+## 2.10.4 - 2025-04-08
+
+### Added
+- Mac users can now use the Cmd key in stead of Ctrl key
 
 ### Changed
 - Bugfix: SVG importer can now handle rgb() and rgba() colors for stroke and fill
@@ -9,6 +12,7 @@
 - ScalableVectorShape2D caches outlines after tessellate and only reinvokes tessellate when the curve actually changes
 - Only recalculate curve when local transform of cutout changes (cutout has to be direct child of parent for this to trigger correctly)
 - Prevent global position form from being visible when plugin is enabled
+- Bugfix: order of undo/redo operations fixed for dragging operations
 
 ## 2.10.2 - 2025-02-08
 
