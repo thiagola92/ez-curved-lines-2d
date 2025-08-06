@@ -54,6 +54,7 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [The Collision inspector form](#the-collision-inspector-form)
 	- [The Navigation inspector form](#the-navigation-inspector-form)
 	- [The Curve settings inspector form](#the-curve-settings-inspector-form)
+	- [The Masking Inspector form](#the-masking-inspector-form)
 	- [The Shape type inspector form](#the-shape-type-inspector-form)
 	- [The Editor settings inspector form](#the-editor-settings-inspector-form)
 - [More about assigned `Line2D`, `Polygon2D` and `CollisionObject2D`](#more-about-assigned-line2d-polygon2d-and-collisionobject2d)
@@ -302,6 +303,7 @@ The following custom forms were added, with extensive tooltips to help explain t
 - [Collision](#the-collision-inspector-form) (manages an assigned `CollisionObject2D`)
 - [Navigation](#the-navigation-inspector-form) (manages an assigned `NavigationRegion2D`)
 - [Curve Settings](#the-curve-settings-inspector-form)
+- [Masking](#the-masking-inspector-form)
 - [Shape Type Settings](#the-shape-type-inspector-form)
 - [Editor Settings](#the-editor-settings-inspector-form)
 
@@ -379,7 +381,14 @@ The curve settings inspector form provides the following options
 - The `max_stages` property which influences smoothness (and performance!) of curve drawing; a higher value means smoother lines
 - The `tolerance_degrees` property, which also influences smoothness (and performance) of curve drawing: a lower value adds a smoother curve, especially for very subtle bends
 - The `arc_list` property: a container for the metadata-objects describing elliptical arc segments of the curve (implemented via `ScalableArc2D` and `ScalableArcList` resource-classes).
+
+
+## The Masking Inspector form
+
+These properties are used for clipping this shape and cutting out of this shape.
+
 - The `clip_paths` property: an array of assigned `ScalableVectorShape2D`-nodes, which describe the shape to cut out of this shape
+- When the `use_interect_when_clipping` property is checked on and this `ScalableVectorShape2D` is used in another's clip_paths array, the `Geometry2D.intersect_polygons(...)` operation is used in stead of the `Geometry2D.clip_polygons(...) operation`
 
 
 ## The Shape type inspector form
