@@ -130,6 +130,15 @@ func _load_svg(file_path : String) -> void:
 	var current_node := svg_root
 	var svg_gradients : Array[Dictionary] = []
 
+	# first pass
+	while xml_data.read() == OK:
+		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
+			continue
+		if xml_data.get_node_name() == "linearGradient" or xml_data.get_node_name() == "radialGradient":
+			svg_gradients.append(parse_gradient(xml_data))
+
+	# second pass
+	xml_data.open(file_path)
 	while xml_data.read() == OK:
 		if not xml_data.get_node_type() in [XMLParser.NODE_ELEMENT, XMLParser.NODE_ELEMENT_END]:
 			continue
@@ -138,7 +147,7 @@ func _load_svg(file_path : String) -> void:
 				current_node = process_group(xml_data, current_node, scene_root)
 			elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT_END:
 				if current_node == svg_root:
-					printerr("Hierarchy error, current not is already scene root")
+					printerr("Hierarchy error, current node is already scene root")
 					break
 				current_node = current_node.get_parent()
 		elif xml_data.get_node_name() == "rect":
@@ -172,11 +181,10 @@ func _load_svg(file_path : String) -> void:
 			log_message("⚠️ Skipping <style> node, only inline style attribute and some presentation attributes are supported", LogLevel.WARN)
 		elif xml_data.get_node_name() == "defs":
 			pass
-		elif xml_data.get_node_name() == "linearGradient" or xml_data.get_node_name() == "radialGradient":
-			svg_gradients.append(parse_gradient(xml_data))
 		elif xml_data.get_node_type() == XMLParser.NODE_ELEMENT:
 			log_message("⚠️ Skipping  unsupported node: <%s>" % xml_data.get_node_name(), LogLevel.DEBUG)
 	log_message("Import finished.\n\nThe SVG importer is still incrementally improving (slowly).")
+
 
 	var link_button : LinkButtonWithCopyHint = LinkButtonScene.instantiate()
 	link_button.text = "Click here to report issues or improvement requests on github"
@@ -218,8 +226,12 @@ func process_group(element:XMLParser, current_node : Node2D, scene_root : Node) 
 	var new_group = Node2D.new()
 	new_group.name = element.get_named_attribute_value("id") if element.has_attribute("id") else "Group"
 	new_group.transform = get_svg_transform(element)
+	var style := get_svg_style(element)
+	new_group.set_meta(SVG_STYLE_META_NAME, style)
+
+	if style.has("display") and style['display'] == "none":
+		new_group.visible = false
 	_managed_add_child_and_set_owner(current_node, new_group, scene_root)
-	new_group.set_meta(SVG_STYLE_META_NAME, get_svg_style(element))
 	return new_group
 
 
@@ -549,6 +561,9 @@ func _post_process_shape(svs : ScalableVectorShape2D, parent : Node, transform :
 
 	if style.is_empty() or ("fill" not in style and "stroke" not in style):
 		style["fill"] = "#000000"
+
+	if style.has("display") and style['display'] == "none":
+		svs.visible = false
 
 	if not is_cutout:
 		for func_name in PAINT_ORDER_MAP[get_paint_order(style)]:

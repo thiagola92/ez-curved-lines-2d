@@ -602,6 +602,8 @@ func _set_handle_hover(g_mouse_pos : Vector2, svs : ScalableVectorShape2D) -> vo
 
 func _draw_curve(viewport_control : Control, svs : ScalableVectorShape2D,
 		is_selected := true) -> void:
+	if not svs.is_visible_in_tree():
+		return
 	var points = svs.get_poly_points().map(_vp_transform)
 	var color := svs.shape_hint_color if svs.shape_hint_color else Color.LIME_GREEN
 	if not is_selected:
