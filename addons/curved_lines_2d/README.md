@@ -65,6 +65,10 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
   - [Add keyframes in an animation player](#add-keyframes-in-an-animation-player)
   - [Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead](#dont-duplicate-scalablevectorshape2d-use-the-path_changed-signal-in-stead)
   - [Performance impact](#performance-impact)
+- [FAQ's](#faqs)
+  - [Can I draw shapes programmatically?](#can-i-draw-shapes-programmatically)
+  - [Should I draw shapes programmatically?](#should-i-draw-shapes-programmatically)
+  - [Can I change shapes in the 2D editor while running the game?](#can-i-change-shapes-in-the-2d-editor-while-running-the-game)
 - [Attributions](#attributions)
   - [Lots of thanks go out to those who helped me out getting started:](#lots-of-thanks-go-out-to-those-who-helped-me-out-getting-started)
   - [And a big thank you goes to to @MewPurPur](#and-a-big-thank-you-goes-to-to-mewpurpur)
@@ -455,7 +459,6 @@ You can then add an `AnimationPlayer` node to your scene, create a new animation
 
 ![the new key frame buttons in the inspector](./screenshots/animating-in-2.4.0.png)
 
-
 ## Don't duplicate `ScalableVectorShape2D`, use the `path_changed` signal in stead
 
 When the `update_curve_at_runtime` property is checked, every time the curve changes in your game the `path_changed` signal is emitted.
@@ -475,6 +478,33 @@ Animating curve points at runtime does, however, impact performance of your game
 
 Under `Tesselation settings` you can lower `Max Stages` or bump up `Tolerance Degrees` to reduce curve smoothness and increase performance (and vice-versa)
 
+# FAQ's
+
+## Can I draw shapes programmatically?
+
+Yes you can. There are a couple of small things to be aware of:
+1. You need to set `my_shape.up_date_curve_at_runtime = true`
+2. To draw anything, your shape needs a Stroke, Fill, or Collision Object:
+  1. Setting a stroke: `my_shape.line = Line2D.new()`
+  2. Setting a fill: `my_shape.polygon = Polygon2D.new()`
+  3. Setting a collision object: `my_shape.collision_object = StaticBody2D.new()`
+3. The Stroke, Fill, Collision Object need to be inside the scene tree, i.e.: `my_shape.add_child(my_shape.line)`
+
+I added a [small example](./examples/add_shapes_programmatically/click_ellipse.gd) based on [this question](https://github.com/Teaching-myself-Godot/ez-curved-lines-2d/issues/111)
+
+## Should I draw shapes programmatically?
+
+This depends on the complexity of what you want to achieve.
+
+In many  cases just drawing something in the editor and saving it as a scene to import elsewhere (or `instantiate()` via preloading) is a better option, adhering to the _Keep it Simple_ principle.
+
+But that's just my personal opinion.
+
+## Can I change shapes in the 2D editor while running the game?
+
+When the `Update Curve At Runtime` checkbox is checked, the shape will also sync up with a scene running in debug mode.
+
+Once you're done drawing and do not need the shape to change anymore at runtime you can turn this checkbox off again.
 
 # Attributions
 
