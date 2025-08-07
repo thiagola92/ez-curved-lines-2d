@@ -158,8 +158,22 @@ enum CollisionObjectType {
 ## [method Geometry2D.clip_polygons] operation
 @export var use_interect_when_clipping := false:
 	set(flag):
+		if flag:
+			use_union_in_stead_of_clipping = false
 		use_interect_when_clipping = flag
 		path_changed.emit()
+
+## When this shape is used as a cutout, this tells the parent shape to use
+## the  [method Geometry2D.intersect_polygons] operation in stead of the
+## [method Geometry2D.clip_polygons] operation
+@export var use_union_in_stead_of_clipping := false:
+	set(flag):
+		if flag:
+			use_interect_when_clipping = false
+		use_union_in_stead_of_clipping = flag
+		path_changed.emit()
+
+
 
 
 @export_group("Shape Type Settings")
@@ -433,15 +447,24 @@ func _update_polygon_texture():
 
 
 func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> void:
+	var merges := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return cp.use_union_in_stead_of_clipping)
 	var clip_paths := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return cp.use_interect_when_clipping)
-	var cutouts := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return not cp.use_interect_when_clipping)
-	var intersect_results := Geometry2DUtil.apply_clips_to_polygon(
+	var cutouts := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return not cp.use_interect_when_clipping and not cp.use_union_in_stead_of_clipping)
+
+	var merge_results := Geometry2DUtil.apply_clips_to_polygon(
 		[polygon_points],
-		clip_paths.map(_clip_path_to_local), true
+		merges.map(_clip_path_to_local),
+		Geometry2D.PolyBooleanOperation.OPERATION_UNION
+	)
+	var intersect_results := Geometry2DUtil.apply_clips_to_polygon(
+		merge_results.polygons,
+		clip_paths.map(_clip_path_to_local),
+		Geometry2D.PolyBooleanOperation.OPERATION_INTERSECTION
 	)
 	var clip_result := Geometry2DUtil.apply_clips_to_polygon(
 		intersect_results.polygons,
-		cutouts.map(_clip_path_to_local)
+		cutouts.map(_clip_path_to_local),
+		Geometry2D.PolyBooleanOperation.OPERATION_DIFFERENCE
 	)
 
 	var p_count = 0

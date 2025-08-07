@@ -89,14 +89,18 @@ class ClipResult:
 		polygons = p
 
 
-static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array], clips, use_intersect := false) -> ClipResult:
+static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array], clips,
+			operation : Geometry2D.PolyBooleanOperation) -> ClipResult:
 	var holes : Array[PackedVector2Array] = []
 	var outlines : Array[PackedVector2Array] = []
 	for clip_poly in clips:
 		var result_polygons : Array[PackedVector2Array] = []
 		for current_points : PackedVector2Array in current_polygons:
 			var result = (
-					Geometry2D.intersect_polygons(current_points, clip_poly) if use_intersect else
+					Geometry2D.merge_polygons(current_points, clip_poly)
+						if operation == Geometry2D.PolyBooleanOperation.OPERATION_UNION else
+					Geometry2D.intersect_polygons(current_points, clip_poly)
+						if operation == Geometry2D.PolyBooleanOperation.OPERATION_INTERSECTION else
 					Geometry2D.clip_polygons(current_points, clip_poly)
 			)
 			for poly_points in result:
