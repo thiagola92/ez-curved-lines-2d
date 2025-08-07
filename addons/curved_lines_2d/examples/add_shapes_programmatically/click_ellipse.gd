@@ -22,6 +22,8 @@ func add_clip_to_ellipses(at_pos: Vector2):
 	rect.shape_type = ScalableVectorShape2D.ShapeType.RECT
 	rect.position = at_pos - ellipse.position
 	rect.size = Vector2(100, 100)
+	rect.rx = 15
+	rect.ry = 15
 	ellipse.add_child(rect, true)
 	ellipse.add_clip_path(rect)
 
@@ -33,7 +35,7 @@ func add_ellipse(at_pos: Vector2):
 	ellipse.update_curve_at_runtime = true
 	ellipse.shape_type = ScalableVectorShape2D.ShapeType.ELLIPSE
 	ellipse.position = at_pos
-	ellipse.size = Vector2(200, 150)
+	ellipse.size = Vector2(500, 250)
 	# assign a Line2D as stroke
 	ellipse.line = Line2D.new()
 	ellipse.line.default_color = Color.BLACK

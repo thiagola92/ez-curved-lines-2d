@@ -93,6 +93,12 @@ static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array],
 			operation : Geometry2D.PolyBooleanOperation) -> ClipResult:
 	var holes : Array[PackedVector2Array] = []
 	var outlines : Array[PackedVector2Array] = []
+
+	# plan of attack:
+	# 1. test if we're calculating outlines
+	# 2. if yes, resort clips based on which clips cause holes
+	# 3. clips causing holes come last
+	# 4. run this loop again, which should cause less holes now
 	for clip_poly in clips:
 		var result_polygons : Array[PackedVector2Array] = []
 		for current_points : PackedVector2Array in current_polygons:
@@ -114,7 +120,9 @@ static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array],
 	if not current_polygons.is_empty():
 		outlines = current_polygons.duplicate()
 
+
 	if not holes.is_empty():
+		# plan of attack part 2: perform a union on holes here first
 		var result_polygons : Array[PackedVector2Array] = []
 		for hole in holes:
 			for current_points : PackedVector2Array in current_polygons:
@@ -129,5 +137,8 @@ static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array],
 			current_polygons.clear()
 			current_polygons.append_array(result_polygons)
 			result_polygons.clear()
-	outlines.append_array(holes)
+
+		# the holes resulting from the union should now not intersect with
+		# the outer rim due to the resort (or at least, chances are a lot slimmer)
+		outlines.append_array(holes)
 	return ClipResult.new(outlines, current_polygons)
