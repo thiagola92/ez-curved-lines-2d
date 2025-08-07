@@ -158,7 +158,19 @@ enum CollisionObjectType {
 ## [method Geometry2D.clip_polygons] operation
 @export var use_interect_when_clipping := false:
 	set(flag):
+		if flag:
+			use_union_in_stead_of_clipping = false
 		use_interect_when_clipping = flag
+		path_changed.emit()
+
+## When this shape is used as a cutout, this tells the parent shape to use
+## the  [method Geometry2D.intersect_polygons] operation in stead of the
+## [method Geometry2D.clip_polygons] operation
+@export var use_union_in_stead_of_clipping := false:
+	set(flag):
+		if flag:
+			use_interect_when_clipping = false
+		use_union_in_stead_of_clipping = flag
 		path_changed.emit()
 
 
@@ -266,6 +278,9 @@ func _enter_tree():
 			curve.changed.connect(curve_changed)
 		if not arc_list.changed.is_connected(curve_changed):
 			arc_list.changed.connect(curve_changed)
+		if not clip_paths_changed.is_connected(_on_clip_paths_changed):
+			clip_paths_changed.connect(_on_clip_paths_changed)
+			_on_clip_paths_changed()
 	# updates the curve points when size, offset, rx, or ry prop changes
 	# (used for ShapeType.RECT and ShapeType.ELLIPSE)
 	if not dimensions_changed.is_connected(_on_dimensions_changed):
@@ -424,6 +439,13 @@ func _update_assigned_nodes(polygon_points : PackedVector2Array) -> void:
 		NavigationServer2D.bake_from_source_geometry_data(navigation_poly, NavigationMeshSourceGeometryData2D.new())
 		navigation_region.navigation_polygon = navigation_poly
 
+
+func add_clip_path(svs : ScalableVectorShape2D):
+	clip_paths.append(svs)
+	_on_clip_paths_changed()
+
+
+
 func _update_polygon_texture():
 	if polygon.texture is GradientTexture2D:
 		var box := get_bounding_rect()
@@ -432,18 +454,29 @@ func _update_polygon_texture():
 		polygon.texture.height = 1 if box.size.y < 1 else box.size.y
 
 
-func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> void:
-	var clip_paths := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return cp.use_interect_when_clipping)
-	var cutouts := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return not cp.use_interect_when_clipping)
-	var intersect_results := Geometry2DUtil.apply_clips_to_polygon(
+func _apply_polygon_operations_on_clip_paths(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> Geometry2DUtil.ClipResult:
+	var merges := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return cp.use_union_in_stead_of_clipping)
+	var clips := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return cp.use_interect_when_clipping)
+	var cutouts := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return not cp.use_interect_when_clipping and not cp.use_union_in_stead_of_clipping)
+
+	var merge_results := Geometry2DUtil.apply_clips_to_polygon(
 		[polygon_points],
-		clip_paths.map(_clip_path_to_local), true
+		merges.map(_clip_path_to_local),
+		Geometry2D.PolyBooleanOperation.OPERATION_UNION
 	)
-	var clip_result := Geometry2DUtil.apply_clips_to_polygon(
+	var intersect_results := Geometry2DUtil.apply_clips_to_polygon(
+		merge_results.polygons,
+		clips.map(_clip_path_to_local),
+		Geometry2D.PolyBooleanOperation.OPERATION_INTERSECTION
+	)
+	return Geometry2DUtil.apply_clips_to_polygon(
 		intersect_results.polygons,
-		cutouts.map(_clip_path_to_local)
+		cutouts.map(_clip_path_to_local),
+		Geometry2D.PolyBooleanOperation.OPERATION_DIFFERENCE
 	)
 
+func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> void:
+	var clip_result := _apply_polygon_operations_on_clip_paths(polygon_points, valid_clip_paths)
 	var p_count = 0
 	var clipped_polylines := clip_result.outlines
 	var clipped_polygon_point_indices = []
@@ -550,6 +583,18 @@ func has_point(global_pos : Vector2) -> bool:
 func has_fine_point(global_pos : Vector2) -> bool:
 	var poly_points := self.tessellate()
 	return Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points)
+
+
+func clipped_polygon_has_point(global_pos : Vector2) -> bool:
+	var clip_result := _apply_polygon_operations_on_clip_paths(
+		self.tessellate(), clip_paths
+			.filter(func(cp): return is_instance_valid(cp))
+			.filter(func(cp : Node2D): return cp.is_inside_tree())
+	)
+	for poly_points in clip_result.polygons:
+		if Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points):
+			return true
+	return false
 
 
 func set_position_to_center() -> void:
