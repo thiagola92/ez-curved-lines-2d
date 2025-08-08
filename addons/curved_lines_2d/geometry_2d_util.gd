@@ -152,7 +152,27 @@ static func apply_clips_to_polygon(
 	# 2. if yes, resort clips based on which clips cause holes (DONE)
 	var enclosed_clips := clips.filter(func(c): return all_polygons_have_all_points(current_polygons, c))
 	var unenclosed_clips := clips.filter(func(c): return not all_polygons_have_all_points(current_polygons, c))
+
+	# plan of attack part 2:
+	# 1. test if doing outlines (TODO)
+	# 2. if yes perform a union on holes here first (TODO)
+	if enclosed_clips.size() > 1:
+		var intersecting_count = 1
+		while intersecting_count > 0:
+			intersecting_count = 0
+			for hole in enclosed_clips:
+				var intersecting := enclosed_clips.filter(func(h): return polygon_has_one_point(h, hole))
+				intersecting_count += intersecting.size()
+				if intersecting.size() > 0:
+					apply_polygon_bool_operation_in_place(
+						enclosed_clips, [intersecting[0]], Geometry2D.OPERATION_UNION
+					)
+
+
+
 	# 3. clips causing holes come last (DONE)
+
+
 
 	var holes := apply_polygon_bool_operation_in_place(
 		current_polygons, unenclosed_clips + enclosed_clips, operation
@@ -162,14 +182,6 @@ static func apply_clips_to_polygon(
 		outlines = current_polygons.duplicate()
 
 	if not holes.is_empty():
-		# plan of attack part 2:
-		# 1. test if doing outlines (TODO)
-		# 2. if yes perform a union on holes here first (TODO)
-		if holes.size() > 1:
-			for hole in holes:
-				var intersecting := holes.filter(func(h): return polygon_has_one_point(h, hole))
-				print("intersecting holes: ", intersecting.size())
-			print("---\n")
 		var result_polygons : Array[PackedVector2Array] = []
 		for hole in holes:
 			for current_points : PackedVector2Array in current_polygons:
@@ -188,4 +200,6 @@ static func apply_clips_to_polygon(
 		# the holes resulting from the union should now not intersect with
 		# the outer rim due to the resort (or at least, chances are a lot slimmer)
 		outlines.append_array(holes)
+	if current_polygons.is_empty():
+		outlines = []
 	return ClipResult.new(outlines, current_polygons)

@@ -488,6 +488,7 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, vali
 		p_count += poly_points.size()
 
 	if is_instance_valid(line) and not clipped_polylines.is_empty():
+		line.show()
 		line.points = clipped_polylines.pop_front()
 		line.closed = true
 		var existing = line.get_children().filter(func(c): return c is Line2D)
@@ -499,7 +500,8 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, vali
 				existing.append(_make_new_line_2d())
 			existing[polyline_index].points = clipped_polylines[polyline_index]
 			existing[polyline_index].show()
-
+	elif is_instance_valid(line) and clipped_polylines.is_empty():
+		line.hide()
 
 	if is_instance_valid(polygon):
 		polygon.polygons = clipped_polygon_point_indices
