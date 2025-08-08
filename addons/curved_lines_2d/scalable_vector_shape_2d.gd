@@ -461,17 +461,17 @@ func _apply_polygon_operations_on_clip_paths(polygon_points : PackedVector2Array
 
 	var merge_results := Geometry2DUtil.apply_clips_to_polygon(
 		[polygon_points],
-		merges.map(_clip_path_to_local),
+		Array(merges.map(_clip_path_to_local), TYPE_PACKED_VECTOR2_ARRAY, "", null),
 		Geometry2D.PolyBooleanOperation.OPERATION_UNION
 	)
 	var intersect_results := Geometry2DUtil.apply_clips_to_polygon(
 		merge_results.polygons,
-		clips.map(_clip_path_to_local),
+		Array(clips.map(_clip_path_to_local), TYPE_PACKED_VECTOR2_ARRAY, "", null),
 		Geometry2D.PolyBooleanOperation.OPERATION_INTERSECTION
 	)
 	return Geometry2DUtil.apply_clips_to_polygon(
 		intersect_results.polygons,
-		cutouts.map(_clip_path_to_local),
+		Array(cutouts.map(_clip_path_to_local), TYPE_PACKED_VECTOR2_ARRAY, "", null),
 		Geometry2D.PolyBooleanOperation.OPERATION_DIFFERENCE
 	)
 

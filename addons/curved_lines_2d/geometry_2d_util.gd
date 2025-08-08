@@ -84,12 +84,14 @@ static func slice_polygon_vertical(polygon : PackedVector2Array, slice_target : 
 class ClipResult:
 	var outlines: Array[PackedVector2Array]
 	var polygons: Array[PackedVector2Array]
-	func _init(ol = [], p = []):
+	func _init(ol : Array[PackedVector2Array], p : Array[PackedVector2Array]):
 		outlines = ol
 		polygons = p
 
 
-static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array], clips,
+static func apply_clips_to_polygon(
+			current_polygons : Array[PackedVector2Array],
+			clips : Array[PackedVector2Array],
 			operation : Geometry2D.PolyBooleanOperation) -> ClipResult:
 	var holes : Array[PackedVector2Array] = []
 	var outlines : Array[PackedVector2Array] = []
