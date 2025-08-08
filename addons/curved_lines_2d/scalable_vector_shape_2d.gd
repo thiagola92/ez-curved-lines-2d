@@ -454,7 +454,7 @@ func _update_polygon_texture():
 		polygon.texture.height = 1 if box.size.y < 1 else box.size.y
 
 
-func _apply_polygon_operations_on_clip_paths(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> Geometry2DUtil.ClipResult:
+func _apply_polygon_operations_on_clip_paths(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> Array[PackedVector2Array]:
 	var merges := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return cp.use_union_in_stead_of_clipping)
 	var clips := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return cp.use_interect_when_clipping)
 	var cutouts := valid_clip_paths.filter(func(cp : ScalableVectorShape2D): return not cp.use_interect_when_clipping and not cp.use_union_in_stead_of_clipping)
@@ -465,28 +465,30 @@ func _apply_polygon_operations_on_clip_paths(polygon_points : PackedVector2Array
 		Geometry2D.PolyBooleanOperation.OPERATION_UNION
 	)
 	var intersect_results := Geometry2DUtil.apply_clips_to_polygon(
-		merge_results.polygons,
+		merge_results,
 		Array(clips.map(_clip_path_to_local), TYPE_PACKED_VECTOR2_ARRAY, "", null),
 		Geometry2D.PolyBooleanOperation.OPERATION_INTERSECTION
 	)
 	return Geometry2DUtil.apply_clips_to_polygon(
-		intersect_results.polygons,
+		intersect_results,
 		Array(cutouts.map(_clip_path_to_local), TYPE_PACKED_VECTOR2_ARRAY, "", null),
 		Geometry2D.PolyBooleanOperation.OPERATION_DIFFERENCE
 	)
 
+
 func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> void:
 	var clip_result := _apply_polygon_operations_on_clip_paths(polygon_points, valid_clip_paths)
 	var p_count = 0
-	var clipped_polylines := clip_result.outlines
 	var clipped_polygon_point_indices = []
 	var clipped_polygons : PackedVector2Array = []
-	for poly_points in clip_result.polygons:
+	for poly_points in clip_result:
 		var p_range := range(p_count, poly_points.size() + p_count)
 		clipped_polygons.append_array(poly_points)
 		clipped_polygon_point_indices.append(p_range)
 		p_count += poly_points.size()
 
+
+	var clipped_polylines = clip_result.duplicate()
 	if is_instance_valid(line) and not clipped_polylines.is_empty():
 		line.show()
 		line.points = clipped_polylines.pop_front()
@@ -514,20 +516,20 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, vali
 	if is_instance_valid(collision_object):
 		var existing = collision_object.get_children().filter(func(c): return c is CollisionPolygon2D)
 		for idx in existing.size():
-			if idx >= clip_result.polygons.size():
+			if idx >= clip_result.size():
 				existing[idx].hide()
 				existing[idx].disabled = true
 
-		for polygon_index in clip_result.polygons.size():
+		for polygon_index in clip_result.size():
 			if polygon_index >= existing.size():
 				existing.append(_make_new_collision_polygon_2d())
-			existing[polygon_index].polygon = clip_result.polygons[polygon_index]
+			existing[polygon_index].polygon = clip_result[polygon_index]
 			existing[polygon_index].show()
 			existing[polygon_index].disabled = false
 
 	if is_instance_valid(navigation_region):
 		var navigation_poly = NavigationPolygon.new()
-		for outline in clip_result.polygons:
+		for outline in clip_result:
 			navigation_poly.add_outline(outline)
 		NavigationServer2D.bake_from_source_geometry_data(navigation_poly, NavigationMeshSourceGeometryData2D.new())
 		navigation_region.navigation_polygon = navigation_poly
@@ -588,12 +590,14 @@ func has_fine_point(global_pos : Vector2) -> bool:
 
 
 func clipped_polygon_has_point(global_pos : Vector2) -> bool:
+	if not has_point(global_pos) or not has_fine_point(global_pos):
+		return false
 	var clip_result := _apply_polygon_operations_on_clip_paths(
 		self.tessellate(), clip_paths
 			.filter(func(cp): return is_instance_valid(cp))
 			.filter(func(cp : Node2D): return cp.is_inside_tree())
 	)
-	for poly_points in clip_result.polygons:
+	for poly_points in clip_result:
 		if Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points):
 			return true
 	return false
