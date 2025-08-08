@@ -134,16 +134,38 @@ static func apply_clips_to_polygon(
 	return current_polygons
 
 
-static func calculate_outlines(polygon_list : Array[PackedVector2Array]) -> Array[PackedVector2Array]:
-	var result := polygon_list.duplicate()
+static func calculate_outlines(result : Array[PackedVector2Array]) -> Array[PackedVector2Array]:
 	if result.size() <= 1:
 		return result
-	var current_poly := result.pop_front()
-	for other_poly in result:
-		var merge_result := Geometry2D.merge_polygons(current_poly, other_poly)
-		print(
-			"regular: ", merge_result.filter(func(x): return not Geometry2D.is_polygon_clockwise(x)).size(),
-			" / clockwise: ", merge_result.filter(Geometry2D.is_polygon_clockwise).size()
-		)
-	print("--fin--")
-	return result
+	var succesful_merges := true
+	var guard = 0
+	var holes : Array[PackedVector2Array] = []
+	while succesful_merges and result.size() > 1 and guard < 1000:
+		succesful_merges = false
+		guard += 1
+		var indices_to_be_removed : Dictionary[int, bool] = {}
+		var merged_to_be_appended : Array[PackedVector2Array] = []
+
+		for current_poly_idx in result.size():
+			if current_poly_idx in indices_to_be_removed:
+				continue
+			for other_poly_idx in result.size():
+				if current_poly_idx == other_poly_idx or other_poly_idx in indices_to_be_removed:
+					continue
+				var merge_result := Geometry2D.merge_polygons(
+						result[current_poly_idx], result[other_poly_idx])
+				var regular := merge_result.filter(func(x): return not Geometry2D.is_polygon_clockwise(x))
+				var clockwise := merge_result.filter(Geometry2D.is_polygon_clockwise)
+				if regular.size() == 1:
+					succesful_merges = true
+					indices_to_be_removed[current_poly_idx] = true
+					indices_to_be_removed[other_poly_idx] = true
+					merged_to_be_appended.append(regular[0])
+					holes.append_array(clockwise)
+		var sorted_indices = indices_to_be_removed.keys()
+		sorted_indices.sort()
+		sorted_indices.reverse()
+		for idx in sorted_indices:
+			result.remove_at(idx)
+		result.append_array(merged_to_be_appended)
+	return result + holes

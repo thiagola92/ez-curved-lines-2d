@@ -488,27 +488,34 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, vali
 		p_count += poly_points.size()
 
 
-	var clipped_polylines = Geometry2DUtil.calculate_outlines(clip_result)
-	if is_instance_valid(line) and not clipped_polylines.is_empty():
-		line.show()
-		line.points = clipped_polylines.pop_front()
-		line.closed = true
-		var existing = line.get_children().filter(func(c): return c is Line2D)
-		for idx in existing.size():
-			if idx >= clipped_polylines.size():
-				existing[idx].hide()
-		for polyline_index in clipped_polylines.size():
-			if polyline_index >= existing.size():
-				existing.append(_make_new_line_2d())
-			existing[polyline_index].points = clipped_polylines[polyline_index]
-			existing[polyline_index].show()
-	elif is_instance_valid(line) and clipped_polylines.is_empty():
-		line.hide()
+	if is_instance_valid(line):
+		if clip_result.is_empty():
+			line.hide()
+		else:
+			var clipped_polylines = Geometry2DUtil.calculate_outlines(clip_result.duplicate())
+			line.show()
+			line.points = clipped_polylines.pop_front()
+			line.closed = true
+			var existing = line.get_children().filter(func(c): return c is Line2D)
+			for idx in existing.size():
+				if idx >= clipped_polylines.size():
+					existing[idx].hide()
+			for polyline_index in clipped_polylines.size():
+				if polyline_index >= existing.size():
+					existing.append(_make_new_line_2d())
+				existing[polyline_index].points = clipped_polylines[polyline_index]
+				existing[polyline_index].show()
+
 
 	if is_instance_valid(polygon):
-		polygon.polygons = clipped_polygon_point_indices
-		polygon.polygon = clipped_polygons
-		_update_polygon_texture()
+		if clip_result.is_empty():
+			polygon.hide()
+		else:
+			polygon.show()
+			polygon.polygons = clipped_polygon_point_indices
+			polygon.polygon = clipped_polygons
+			_update_polygon_texture()
+
 
 	if is_instance_valid(collision_polygon):
 		collision_polygon.polygon = polygon_points
