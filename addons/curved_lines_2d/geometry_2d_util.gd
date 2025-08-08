@@ -103,12 +103,48 @@ static func all_polygons_have_all_points(polygons : Array[PackedVector2Array], u
 	return true
 
 
+static func polygon_has_one_point(poly : PackedVector2Array, under_test : PackedVector2Array) -> bool:
+	if poly == under_test:
+		return false
+	for p in under_test:
+		if Geometry2D.is_point_in_polygon(p, poly):
+			return true
+	return false
+
+
+## TODO: document
+static func apply_polygon_bool_operation_in_place(
+		current_polygons : Array[PackedVector2Array],
+		other_polygons : Array[PackedVector2Array],
+		operation : Geometry2D.PolyBooleanOperation) -> Array[PackedVector2Array]:
+	var holes : Array[PackedVector2Array] = []
+	for other_poly in other_polygons:
+		var result_polygons : Array[PackedVector2Array] = []
+		for current_points : PackedVector2Array in current_polygons:
+			if other_poly == current_points:
+				continue
+			var result = (
+					Geometry2D.merge_polygons(current_points, other_poly)
+						if operation == Geometry2D.PolyBooleanOperation.OPERATION_UNION else
+					Geometry2D.intersect_polygons(current_points, other_poly)
+						if operation == Geometry2D.PolyBooleanOperation.OPERATION_INTERSECTION else
+					Geometry2D.clip_polygons(current_points, other_poly)
+			)
+			for poly_points in result:
+				if Geometry2D.is_polygon_clockwise(poly_points):
+					holes.append(poly_points)
+				else:
+					result_polygons.append(poly_points)
+		current_polygons.clear()
+		current_polygons.append_array(result_polygons)
+	return holes
+
+## TODO: document
 static func apply_clips_to_polygon(
 			current_polygons : Array[PackedVector2Array],
 			clips : Array[PackedVector2Array],
 			operation : Geometry2D.PolyBooleanOperation) -> ClipResult:
 
-	var holes : Array[PackedVector2Array] = []
 	var outlines : Array[PackedVector2Array] = []
 
 	# plan of attack:
@@ -118,23 +154,9 @@ static func apply_clips_to_polygon(
 	var unenclosed_clips := clips.filter(func(c): return not all_polygons_have_all_points(current_polygons, c))
 	# 3. clips causing holes come last (DONE)
 
-	for clip_poly in unenclosed_clips + enclosed_clips:
-		var result_polygons : Array[PackedVector2Array] = []
-		for current_points : PackedVector2Array in current_polygons:
-			var result = (
-					Geometry2D.merge_polygons(current_points, clip_poly)
-						if operation == Geometry2D.PolyBooleanOperation.OPERATION_UNION else
-					Geometry2D.intersect_polygons(current_points, clip_poly)
-						if operation == Geometry2D.PolyBooleanOperation.OPERATION_INTERSECTION else
-					Geometry2D.clip_polygons(current_points, clip_poly)
-			)
-			for poly_points in result:
-				if Geometry2D.is_polygon_clockwise(poly_points):
-					holes.append(poly_points)
-				else:
-					result_polygons.append(poly_points)
-		current_polygons.clear()
-		current_polygons.append_array(result_polygons)
+	var holes := apply_polygon_bool_operation_in_place(
+		current_polygons, unenclosed_clips + enclosed_clips, operation
+	)
 
 	if not current_polygons.is_empty():
 		outlines = current_polygons.duplicate()
@@ -143,7 +165,11 @@ static func apply_clips_to_polygon(
 		# plan of attack part 2:
 		# 1. test if doing outlines (TODO)
 		# 2. if yes perform a union on holes here first (TODO)
-
+		if holes.size() > 1:
+			for hole in holes:
+				var intersecting := holes.filter(func(h): return polygon_has_one_point(h, hole))
+				print("intersecting holes: ", intersecting.size())
+			print("---\n")
 		var result_polygons : Array[PackedVector2Array] = []
 		for hole in holes:
 			for current_points : PackedVector2Array in current_polygons:
