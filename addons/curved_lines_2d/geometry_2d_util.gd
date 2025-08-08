@@ -89,19 +89,36 @@ class ClipResult:
 		polygons = p
 
 
+static func polygon_has_all_points(poly : PackedVector2Array, under_test : PackedVector2Array) -> bool:
+	for p in under_test:
+		if not Geometry2D.is_point_in_polygon(p, poly):
+			return false
+	return true
+
+
+static func all_polygons_have_all_points(polygons : Array[PackedVector2Array], under_test : PackedVector2Array) -> bool:
+	for p in polygons:
+		if not polygon_has_all_points(p, under_test):
+			return false
+	return true
+
+
 static func apply_clips_to_polygon(
 			current_polygons : Array[PackedVector2Array],
 			clips : Array[PackedVector2Array],
 			operation : Geometry2D.PolyBooleanOperation) -> ClipResult:
+
 	var holes : Array[PackedVector2Array] = []
 	var outlines : Array[PackedVector2Array] = []
 
 	# plan of attack:
-	# 1. test if we're calculating outlines
-	# 2. if yes, resort clips based on which clips cause holes
-	# 3. clips causing holes come last
-	# 4. run this loop again, which should cause less holes now
-	for clip_poly in clips:
+	# 1. test if we're calculating outlines (TODO)
+	# 2. if yes, resort clips based on which clips cause holes (DONE)
+	var enclosed_clips := clips.filter(func(c): return all_polygons_have_all_points(current_polygons, c))
+	var unenclosed_clips := clips.filter(func(c): return not all_polygons_have_all_points(current_polygons, c))
+	# 3. clips causing holes come last (DONE)
+
+	for clip_poly in unenclosed_clips + enclosed_clips:
 		var result_polygons : Array[PackedVector2Array] = []
 		for current_points : PackedVector2Array in current_polygons:
 			var result = (
@@ -122,9 +139,11 @@ static func apply_clips_to_polygon(
 	if not current_polygons.is_empty():
 		outlines = current_polygons.duplicate()
 
-
 	if not holes.is_empty():
-		# plan of attack part 2: perform a union on holes here first
+		# plan of attack part 2:
+		# 1. test if doing outlines (TODO)
+		# 2. if yes perform a union on holes here first (TODO)
+
 		var result_polygons : Array[PackedVector2Array] = []
 		for hole in holes:
 			for current_points : PackedVector2Array in current_polygons:
