@@ -132,3 +132,18 @@ static func apply_clips_to_polygon(
 			current_polygons.append_array(result_polygons)
 			result_polygons.clear()
 	return current_polygons
+
+
+static func calculate_outlines(polygon_list : Array[PackedVector2Array]) -> Array[PackedVector2Array]:
+	var result := polygon_list.duplicate()
+	if result.size() <= 1:
+		return result
+	var current_poly := result.pop_front()
+	for other_poly in result:
+		var merge_result := Geometry2D.merge_polygons(current_poly, other_poly)
+		print(
+			"regular: ", merge_result.filter(func(x): return not Geometry2D.is_polygon_clockwise(x)).size(),
+			" / clockwise: ", merge_result.filter(Geometry2D.is_polygon_clockwise).size()
+		)
+	print("--fin--")
+	return result

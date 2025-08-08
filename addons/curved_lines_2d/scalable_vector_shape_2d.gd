@@ -488,7 +488,7 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, vali
 		p_count += poly_points.size()
 
 
-	var clipped_polylines = clip_result.duplicate()
+	var clipped_polylines = Geometry2DUtil.calculate_outlines(clip_result)
 	if is_instance_valid(line) and not clipped_polylines.is_empty():
 		line.show()
 		line.points = clipped_polylines.pop_front()
