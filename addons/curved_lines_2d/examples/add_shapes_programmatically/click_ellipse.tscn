@@ -4,3 +4,5 @@
 
 [node name="ClickEllipse" type="Node2D"]
 script = ExtResource("1_1ehuy")
+draw_navigation = true
+draw_collision = true

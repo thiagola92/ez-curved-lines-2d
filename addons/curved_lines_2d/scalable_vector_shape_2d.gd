@@ -237,6 +237,8 @@ enum CollisionObjectType {
 @export var lock_assigned_shapes := true
 
 var cached_outline : PackedVector2Array = []
+var cached_clipped_polygons : Array[PackedVector2Array] = []
+
 
 # Wire up signals at runtime
 func _ready():
@@ -478,6 +480,8 @@ func _apply_polygon_operations_on_clip_paths(polygon_points : PackedVector2Array
 
 func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, valid_clip_paths : Array[ScalableVectorShape2D]) -> void:
 	var clip_result := _apply_polygon_operations_on_clip_paths(polygon_points, valid_clip_paths)
+	cached_clipped_polygons = clip_result
+
 	var p_count = 0
 	var clipped_polygon_point_indices = []
 	var clipped_polygons : PackedVector2Array = []
@@ -504,6 +508,11 @@ func _update_assigned_nodes_with_clips(polygon_points : PackedVector2Array, vali
 				if polyline_index >= existing.size():
 					existing.append(_make_new_line_2d())
 				existing[polyline_index].points = clipped_polylines[polyline_index]
+				existing[polyline_index].width = line.width
+				existing[polyline_index].begin_cap_mode = line.begin_cap_mode
+				existing[polyline_index].end_cap_mode = line.end_cap_mode
+				existing[polyline_index].joint_mode = line.joint_mode
+				existing[polyline_index].default_color = line.default_color
 				existing[polyline_index].show()
 
 
@@ -556,11 +565,6 @@ func _make_new_line_2d() -> Line2D:
 	var ln := Line2D.new()
 	ln.name = "ExtraStroke"
 	line.add_child(ln, true)
-	ln.width = line.width
-	ln.begin_cap_mode = line.begin_cap_mode
-	ln.end_cap_mode = line.end_cap_mode
-	ln.joint_mode = line.joint_mode
-	ln.default_color = line.default_color
 	ln.closed = true
 	if line.owner:
 		ln.set_owner(line.owner)
@@ -599,12 +603,14 @@ func has_fine_point(global_pos : Vector2) -> bool:
 func clipped_polygon_has_point(global_pos : Vector2) -> bool:
 	if not has_point(global_pos) or not has_fine_point(global_pos):
 		return false
-	var clip_result := _apply_polygon_operations_on_clip_paths(
-		self.tessellate(), clip_paths
-			.filter(func(cp): return is_instance_valid(cp))
-			.filter(func(cp : Node2D): return cp.is_inside_tree())
-	)
-	for poly_points in clip_result:
+
+	if cached_clipped_polygons.is_empty():
+		cached_clipped_polygons = _apply_polygon_operations_on_clip_paths(
+			self.tessellate(), clip_paths
+				.filter(func(cp): return is_instance_valid(cp))
+				.filter(func(cp : Node2D): return cp.is_inside_tree())
+		)
+	for poly_points in cached_clipped_polygons:
 		if Geometry2D.is_point_in_polygon(to_local(global_pos), poly_points):
 			return true
 	return false

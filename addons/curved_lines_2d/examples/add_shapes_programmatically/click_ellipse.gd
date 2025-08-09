@@ -1,8 +1,17 @@
 extends Node2D
 
-@export var draw_collision := false
-@export var draw_strokes := true
+
+## Only drawing polygons is fastest
 @export var draw_fills := true
+
+## Drawing strokes with cutouts requires extra compute, but still ok
+@export var draw_strokes := true
+
+## Redrawing navigation is fast, but would slow down agents
+@export var draw_navigation := false
+
+## Redrawing collision polygons is heavy
+@export var draw_collision := false
 
 
 var foobar := false
@@ -60,5 +69,9 @@ func add_ellipse(at_pos: Vector2):
 		# assign a collision object to hold new collision polygons
 		ellipse.collision_object = StaticBody2D.new()
 		ellipse.add_child(ellipse.collision_object)
+
+	if draw_navigation:
+		ellipse.navigation_region = NavigationRegion2D.new()
+		ellipse.add_child(ellipse.navigation_region)
 
 	add_child(ellipse, true)
