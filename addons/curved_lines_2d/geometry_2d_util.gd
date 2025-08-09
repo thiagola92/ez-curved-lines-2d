@@ -81,27 +81,23 @@ static func slice_polygon_vertical(polygon : PackedVector2Array, slice_target : 
 	return result
 
 
-class ClipResult:
-	var outlines: Array[PackedVector2Array]
-	var polygons: Array[PackedVector2Array]
-	func _init(ol = [], p = []):
-		outlines = ol
-		polygons = p
-
-
-static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array], clips,
-			operation : Geometry2D.PolyBooleanOperation) -> ClipResult:
+## TODO: document
+static func apply_polygon_bool_operation_in_place(
+		current_polygons : Array[PackedVector2Array],
+		other_polygons : Array[PackedVector2Array],
+		operation : Geometry2D.PolyBooleanOperation) -> Array[PackedVector2Array]:
 	var holes : Array[PackedVector2Array] = []
-	var outlines : Array[PackedVector2Array] = []
-	for clip_poly in clips:
+	for other_poly in other_polygons:
 		var result_polygons : Array[PackedVector2Array] = []
 		for current_points : PackedVector2Array in current_polygons:
+			if other_poly == current_points:
+				continue
 			var result = (
-					Geometry2D.merge_polygons(current_points, clip_poly)
+					Geometry2D.merge_polygons(current_points, other_poly)
 						if operation == Geometry2D.PolyBooleanOperation.OPERATION_UNION else
-					Geometry2D.intersect_polygons(current_points, clip_poly)
+					Geometry2D.intersect_polygons(current_points, other_poly)
 						if operation == Geometry2D.PolyBooleanOperation.OPERATION_INTERSECTION else
-					Geometry2D.clip_polygons(current_points, clip_poly)
+					Geometry2D.clip_polygons(current_points, other_poly)
 			)
 			for poly_points in result:
 				if Geometry2D.is_polygon_clockwise(poly_points):
@@ -110,10 +106,16 @@ static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array],
 					result_polygons.append(poly_points)
 		current_polygons.clear()
 		current_polygons.append_array(result_polygons)
+	return holes
 
-	if not current_polygons.is_empty():
-		outlines = current_polygons.duplicate()
-
+## TODO: document
+static func apply_clips_to_polygon(
+			current_polygons : Array[PackedVector2Array],
+			clips : Array[PackedVector2Array],
+			operation : Geometry2D.PolyBooleanOperation) -> Array[PackedVector2Array]:
+	var holes := apply_polygon_bool_operation_in_place(
+		current_polygons, clips, operation
+	)
 	if not holes.is_empty():
 		var result_polygons : Array[PackedVector2Array] = []
 		for hole in holes:
@@ -129,5 +131,41 @@ static func apply_clips_to_polygon(current_polygons : Array[PackedVector2Array],
 			current_polygons.clear()
 			current_polygons.append_array(result_polygons)
 			result_polygons.clear()
-	outlines.append_array(holes)
-	return ClipResult.new(outlines, current_polygons)
+	return current_polygons
+
+
+static func calculate_outlines(result : Array[PackedVector2Array]) -> Array[PackedVector2Array]:
+	if result.size() <= 1:
+		return result
+	var succesful_merges := true
+	var guard = 0
+	var holes : Array[PackedVector2Array] = []
+	while succesful_merges and result.size() > 1 and guard < 1000:
+		succesful_merges = false
+		guard += 1
+		var indices_to_be_removed : Dictionary[int, bool] = {}
+		var merged_to_be_appended : Array[PackedVector2Array] = []
+
+		for current_poly_idx in result.size():
+			if current_poly_idx in indices_to_be_removed:
+				continue
+			for other_poly_idx in result.size():
+				if current_poly_idx == other_poly_idx or other_poly_idx in indices_to_be_removed:
+					continue
+				var merge_result := Geometry2D.merge_polygons(
+						result[current_poly_idx], result[other_poly_idx])
+				var regular := merge_result.filter(func(x): return not Geometry2D.is_polygon_clockwise(x))
+				var clockwise := merge_result.filter(Geometry2D.is_polygon_clockwise)
+				if regular.size() == 1:
+					succesful_merges = true
+					indices_to_be_removed[current_poly_idx] = true
+					indices_to_be_removed[other_poly_idx] = true
+					merged_to_be_appended.append(regular[0])
+					holes.append_array(clockwise)
+		var sorted_indices = indices_to_be_removed.keys()
+		sorted_indices.sort()
+		sorted_indices.reverse()
+		for idx in sorted_indices:
+			result.remove_at(idx)
+		result.append_array(merged_to_be_appended)
+	return result + holes
