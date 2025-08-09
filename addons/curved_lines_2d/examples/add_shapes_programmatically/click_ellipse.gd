@@ -37,9 +37,9 @@ func add_clip_to_ellipses(at_pos: Vector2):
 	rect.update_curve_at_runtime = true
 	rect.shape_type = ScalableVectorShape2D.ShapeType.RECT
 	rect.position = at_pos - ellipse.position
-	rect.size = Vector2(100, 20) if foobar else Vector2(20, 100)
-	rect.rx = 10
-	rect.ry = 10
+	rect.size = Vector2(200, 40) if foobar else Vector2(40, 200)
+	rect.rx = 20
+	rect.ry = 20
 	ellipse.add_child(rect, true)
 	ellipse.add_clip_path(rect)
 
