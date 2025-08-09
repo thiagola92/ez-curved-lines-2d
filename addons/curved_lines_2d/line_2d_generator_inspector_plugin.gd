@@ -37,7 +37,7 @@ func _parse_begin(object: Object) -> void:
 		button.text = "Export as baked scene*"
 		button.tooltip_text = "The export will only contain this node and its children,
 				assigned nodes outside this subtree will not be drawn.\n
-				Warning:
+				⚠️ Warning:
 				- AnimationPlayer will not be included.
 				- Cutouts are not yet supported for this feature. Alternatively,
 				  you can manually unlock any generated polygons and lines
@@ -171,7 +171,7 @@ func _export_png(svs : ScalableVectorShape2D, filename : String, dialog : Node) 
 
 func _export_baked_scene(svs : ScalableVectorShape2D, filepath : String, dialog : Node) -> void:
 	dialog.queue_free()
-	
+
 	# Let's temporarily modify the current branch so we can create the baked scene.
 	var svs_owner: Node = svs.owner
 	var svs_children: Array[Node] = svs.get_children()
@@ -180,47 +180,47 @@ func _export_baked_scene(svs : ScalableVectorShape2D, filepath : String, dialog 
 	var root := Node2D.new()
 	root.name = svs.name
 	replace_map[svs] = root
-	
+
 	# Collect all nodes to be replaced.
 	while svs_children.size() > 0:
 		var child: Node = svs_children.pop_back()
-		
+
 		if child is AnimationPlayer:
 			continue
-		
+
 		svs_children.append_array(child.get_children())
-		
+
 		# Store ownership so we can undo later.
 		if child.owner == svs_owner:
 			svs_ownership.append(child)
-		
+
 		if child is ScalableVectorShape2D:
 			var node := Node2D.new()
 			node.name = child.name
 			node.unique_name_in_owner = child.unique_name_in_owner
 			node.transform = child.transform
 			replace_map[child] = node
-	
+
 	# Do modifications and create scene.
 	for node in replace_map:
 		node.replace_by(replace_map[node], true)
-	
+
 	for child in svs_ownership:
 		if child in replace_map:
 			replace_map[child].owner = root
 		else:
 			child.owner = root
-	
+
 	var scene := PackedScene.new()
 	scene.pack(root)
 	ResourceSaver.save(scene, filepath, ResourceSaver.FLAG_NONE)
-	
+
 	# Undo modifications and clear temporary nodes.
 	for node in replace_map:
 		replace_map[node].replace_by(node, true)
 		replace_map[node].queue_free()
-	
+
 	for child in svs_ownership:
 		child.owner = svs_owner
-	
+
 	EditorInterface.open_scene_from_path(filepath)

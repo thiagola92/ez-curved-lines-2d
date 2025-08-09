@@ -49,6 +49,7 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 	- [Inspector Form](#inspector-form)
 		- [Convert to Path button](#convert-to-path-button)
 		- [Export as PNG button](#export-as-png-button)
+		- [Export as 'baked' scene button](#export-as-baked-scene-button)
 	- [The Fill inspector form](#the-fill-inspector-form)
 	- [The Stroke inspector form](#the-stroke-inspector-form)
 	- [The Collision inspector form](#the-collision-inspector-form)
@@ -323,6 +324,15 @@ With the `Export as PNG`-button you can save any `ScalableVectorShape2D` and its
 
 You _can_ however change the type of any `Node2D` to `ScalableVectorShape2D` temporarily in order to export group of shapes as a PNG file.
 
+### Export as 'baked' scene button
+
+With the `Export as baked scene` button you can generate a new scene (like `Save branch as scene`), with all the `ScalableVectorShape2D`-nodes converted to basic `Node2D`-nodes.
+
+Use this when you are done drawing entirely and do not want to update curves at runtime, or when you want to keep the shapes but drop the dependency of this plugin from your project.
+
+This button is not feature-complete yet[^7]
+
+[^7]: AnimationPlayer will not be included, cutouts are not yet supported for this feature. Alternatively, you can manually unlock any generated polygons and lines and copy+paste them into a new scene.
 
 ## The Fill inspector form
 
