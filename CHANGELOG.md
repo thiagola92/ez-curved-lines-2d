@@ -5,7 +5,7 @@
 
 ### Added
 - `Export as baked scene` button.
-- Flag `use_union_in_stead_of_clipping` to `ScalableVectorShape2D` which turns a cutout into
+- Flag `use_union_in_stead_of_clipping` to `ScalableVectorShape2D` which turns a cutout into a merged shape
 - Convenience method `clipped_polygon_has_point(global_pos : Vector2)` to detect clicks __on__ a shape without the click being in a hole
 - A bubbly cloud example to illustrate `use_union_in_stead_of_clipping`
 
