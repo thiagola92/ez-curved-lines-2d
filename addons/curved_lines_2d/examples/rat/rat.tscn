@@ -1,13 +1,15 @@
-[gd_scene load_steps=28 format=3 uid="uid://kbkwi2nx8ith"]
+[gd_scene load_steps=35 format=3 uid="uid://kbkwi2nx8ith"]
 
 [ext_resource type="Script" uid="uid://xhridu7hgcrc" path="res://addons/curved_lines_2d/examples/rat/rat.gd" id="1_7hgga"]
 [ext_resource type="Script" uid="uid://dlbv4pit17dnu" path="res://addons/curved_lines_2d/scalable_arc.gd" id="3_4sn87"]
 [ext_resource type="Script" uid="uid://dl1t88tthmwts" path="res://addons/curved_lines_2d/scalable_arc_list.gd" id="4_jqihn"]
 [ext_resource type="Script" uid="uid://de3jpss66xjfh" path="res://addons/curved_lines_2d/scalable_vector_shape_2d.gd" id="18_xsi10"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_12up7"]
-radius = 23.0
-height = 46.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_4sn87"]
+radius = 5.7795
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_jqihn"]
+radius = 1.26088
 
 [sub_resource type="Gradient" id="Gradient_ggbq8"]
 colors = PackedColorArray(0.462745, 0.462745, 0.364706, 1, 0.180392, 0.180392, 0.137255, 1)
@@ -41,6 +43,10 @@ height = 9
 fill = 1
 fill_from = Vector2(0.267746, 0.140616)
 fill_to = Vector2(-0.137976, 0.979422)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_4sn87"]
+a = Vector2(-0.263762, 0.0208244)
+b = Vector2(6.06653, -0.478956)
 
 [sub_resource type="Gradient" id="Gradient_i65be"]
 colors = PackedColorArray(1, 0.564706, 0.564706, 1, 0.423529, 0.239216, 0.239216, 1)
@@ -739,7 +745,7 @@ tracks/52/keys = {
 
 [sub_resource type="Animation" id="Animation_axc4l"]
 resource_name = "disappear"
-length = 0.5
+length = 3.0
 step = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -1403,15 +1409,46 @@ _data = {
 &"run": SubResource("Animation_10vlp")
 }
 
+[sub_resource type="LabelSettings" id="LabelSettings_4sn87"]
+font_color = Color(0.0156863, 1, 0, 1)
+outline_size = 3
+outline_color = Color(0, 0.313726, 0, 1)
+
+[sub_resource type="Curve2D" id="Curve2D_4sn87"]
+_data = {
+"points": PackedVector2Array(0, 0, 2.7615, 0, 110.194, -72.3523, 0, -2.7615, 0, 0, 115.194, -67.3523, 0, 0, 0, 2.7615, 115.194, 67.3523, 2.7615, 0, 0, 0, 110.194, 72.3523, 0, 0, -2.7615, 0, -110.194, 72.3523, 0, 2.7615, 0, 0, -115.194, 67.3523, 0, 0, 0, -2.7615, -115.194, -67.3523, -2.7615, 0, 0, 0, -110.194, -72.3523, 0, 0, 2.7615, 0, 110.194, -72.3523)
+}
+point_count = 9
+
+[sub_resource type="Resource" id="Resource_jqihn"]
+script = ExtResource("4_jqihn")
+arcs = Array[ExtResource("3_4sn87")]([])
+
+[sub_resource type="Curve2D" id="Curve2D_syjnd"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 26.6599, 113.877, 0, 62.8945, 0, -62.8945, 0, 0, 48.2708, 0, 26.6599, 0, -26.6599, -113.877, 0, -62.8945, 0, 62.8945, 0, 0, -48.2708, 0, -26.6599, 0, 0, 113.877, 0)
+}
+point_count = 5
+
+[sub_resource type="Resource" id="Resource_1ynft"]
+script = ExtResource("4_jqihn")
+arcs = Array[ExtResource("3_4sn87")]([])
+
 [node name="Rat" type="CharacterBody2D"]
 script = ExtResource("1_7hgga")
 metadata/_edit_horizontal_guides_ = [24.0]
 metadata/movie_file = "test.avi"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-3, 0)
-rotation = -1.57079
-shape = SubResource("CapsuleShape2D_12up7")
+[node name="BackPaws" type="CollisionShape2D" parent="."]
+position = Vector2(-3.44659, 10.0668)
+rotation = 0.218366
+shape = SubResource("CircleShape2D_4sn87")
+
+[node name="FrontPaws" type="CollisionShape2D" parent="."]
+position = Vector2(49.2714, -12.5918)
+rotation = 0.051752
+scale = Vector2(3.77953, 3.77953)
+shape = SubResource("CircleShape2D_jqihn")
 
 [node name="Pivot" type="Node2D" parent="."]
 position = Vector2(1, -13)
@@ -1548,6 +1585,9 @@ scale = Vector2(3.77953, 3.77953)
 color = Color(1, 0.564706, 0.564706, 1)
 polygon = PackedVector2Array(-0.879219, 0.814774, -0.902945, 0.791176, -0.930038, 0.770413, -0.960271, 0.752393, -0.993416, 0.737022, -1.02925, 0.724209, -1.06754, 0.713862, -1.15059, 0.700194, -1.24074, 0.695282, -1.33619, 0.698386, -1.5357, 0.725693, -1.73458, 0.776212, -1.91829, 0.844038, -1.99992, 0.882596, -2.0723, 0.923267, -2.13363, 0.965313, -2.15957, 0.986621, -2.18208, 1.008, -2.20442, 0.991163, -2.22506, 0.971059, -2.24405, 0.947895, -2.26147, 0.921881, -2.27739, 0.893227, -2.29187, 0.862144, -2.31679, 0.79353, -2.35238, 0.636398, -2.37261, 0.463944, -2.38738, -0.109955, -2.23432, -0.310011, -1.98864, -0.581144, -1.83377, -0.717688, -1.65898, -0.841189, -1.56446, -0.894838, -1.46536, -0.941376, -1.36182, -0.979518, -1.25397, -1.00798, -0.936955, -0.868431, -0.631919, -0.758969, -0.339309, -0.677068, -0.0595682, -0.620203, 0.206861, -0.585849, 0.459536, -0.571482, 0.921852, -0.592606, 1.20414, -0.558625, 1.44575, -0.507829, 1.65287, -0.445276, 1.83167, -0.376022, 2.26001, -0.178631, 2.38738, -0.133148, 1.99688, 0.013819, 1.83784, 0.0844559, 1.71447, 0.154326, 1.66884, 0.189239, 1.65052, 0.206737, 1.63537, 0.224279, 1.62353, 0.241879, 1.61889, 0.250706, 1.61513, 0.259551, 1.61226, 0.268418, 1.61031, 0.277308, 1.60928, 0.286222, 1.6092, 0.295162, 1.61007, 0.30413, 1.61193, 0.313128, 1.61478, 0.322157, 1.61865, 0.331218, 1.62354, 0.340314, 1.62948, 0.349446, 1.64457, 0.367825, 1.66404, 0.386368, 1.68803, 0.405089, 1.75011, 0.443115, 0.640417, 0.376006, 0.232119, 0.398079, -0.0963295, 0.448873, -0.358316, 0.522115, -0.567228, 0.611531, -0.736453, 0.71085)
 
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Pivot/Body_fill/Leg_back_far_fill/Paw_fill"]
+remote_path = NodePath("../../../../../BackPaws")
+
 [node name="Fill" type="Polygon2D" parent="Pivot/Body_fill"]
 show_behind_parent = true
 scale = Vector2(3.77953, 3.77953)
@@ -1643,6 +1683,12 @@ scale = Vector2(3.77953, 3.77953)
 texture = SubResource("GradientTexture2D_yvsbv")
 texture_offset = Vector2(6.48761, 4.48774)
 polygon = PackedVector2Array(-5.1235, 3.5421, -5.32184, 3.22654, -5.51257, 2.86892, -5.86152, 2.05666, -6.15101, 1.16372, -6.36169, 0.24848, -6.47421, -0.630679, -6.48761, -1.03848, -6.46922, -1.41537, -6.4166, -1.75405, -6.37671, -1.90678, -6.32736, -2.04721, -6.26824, -2.17445, -6.19906, -2.28757, -6.16059, -2.33855, -6.1195, -2.38566, -6.07575, -2.42879, -6.02928, -2.46782, -5.82858, -2.68304, -5.58203, -2.89492, -4.97444, -3.30111, -4.25261, -3.67122, -3.46265, -3.9901, -2.65068, -4.24258, -1.86282, -4.41352, -1.14516, -4.48774, -0.827069, -4.48384, -0.543823, -4.45009, 0.400548, -3.90231, 1.24231, -3.31108, 3.26865, -1.53729, 3.99883, -0.620914, 4.34269, -0.265416, 4.69365, 0.0479463, 6.48762, 1.2749, 6.33494, 1.59174, 6.13961, 1.89128, 5.90455, 2.17366, 5.63265, 2.43903, 5.32684, 2.68753, 4.99001, 2.9193, 4.23495, 3.33324, 3.39074, 3.68198, 2.48067, 3.96666, 0.555983, 4.34845, -1.35294, 4.48775, -2.24332, 4.46932, -3.05995, 4.39369, -3.77955, 4.26201, -4.09569, 4.17551, -4.37885, 4.07543, -4.62613, 3.9619, -4.8346, 3.83507, -4.92337, 3.76672, -5.00136, 3.69509, -5.06819, 3.62021)
+
+[node name="WallDetector" type="Area2D" parent="Pivot/Body_fill/Head_fill/Fill"]
+position = Vector2(2.28603, -0.938115)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pivot/Body_fill/Head_fill/Fill/WallDetector"]
+shape = SubResource("SegmentShape2D_4sn87")
 
 [node name="Fill2" type="Polygon2D" parent="Pivot/Body_fill/Head_fill"]
 show_behind_parent = true
@@ -1807,6 +1853,9 @@ scale = Vector2(3.77953, 3.77953)
 color = Color(1, 0.564706, 0.564706, 1)
 polygon = PackedVector2Array(-0.968987, 0.921936, -0.989036, 0.895144, -1.01283, 0.870667, -1.04012, 0.848448, -1.07069, 0.828428, -1.10428, 0.810548, -1.14066, 0.79475, -1.22085, 0.769169, -1.30934, 0.751218, -1.40423, 0.74043, -1.60559, 0.73848, -1.8097, 0.759586, -2.00131, 0.800018, -2.08767, 0.826315, -2.1652, 0.856045, -2.23198, 0.88874, -2.26074, 0.906054, -2.28611, 0.923935, -2.30578, 0.904035, -2.32328, 0.881147, -2.33871, 0.85547, -2.35217, 0.827201, -2.36375, 0.79654, -2.37356, 0.763683, -2.38826, 0.692177, -2.40066, 0.531542, -2.39564, 0.357976, -2.32691, -0.21199, -2.14642, -0.387704, -1.86398, -0.620296, -1.69092, -0.732908, -1.50005, -0.829724, -1.39874, -0.869081, -1.29393, -0.900737, -1.18595, -0.923442, -1.07512, -0.935944, -0.781719, -0.751847, -0.495807, -0.599258, -0.218188, -0.475743, 0.0503333, -0.378868, 0.308952, -0.306198, 0.556864, -0.255299, 1.01735, -0.209076, 1.29171, -0.134464, 1.52339, -0.0491247, 1.71923, 0.0428379, 1.88608, 0.137318, 2.28123, 0.394805, 2.40065, 0.458298, 1.99294, 0.547014, 1.82533, 0.593813, 1.69312, 0.64503, 1.64291, 0.67295, 1.62224, 0.687602, 1.60471, 0.702759, 1.59043, 0.718454, 1.58456, 0.726513, 1.57956, 0.734719, 1.57543, 0.743076, 1.57221, 0.751587, 1.5699, 0.760258, 1.56852, 0.769092, 1.56808, 0.778093, 1.56861, 0.787265, 1.57013, 0.796612, 1.57263, 0.806139, 1.57615, 0.815849, 1.58071, 0.825747, 1.59296, 0.846122, 1.60954, 0.867297, 1.63055, 0.889303, 1.68646, 0.935944, 0.598265, 0.708425, 0.191089, 0.670981, -0.141254, 0.673548, -0.411097, 0.707976, -0.630777, 0.766118, -0.812628, 0.839824)
 
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="Pivot/Body_fill/Leg_front_near_fill/Paw_fill/Fill"]
+remote_path = NodePath("../../../../../../FrontPaws")
+
 [node name="Leg_back_near_stroke" type="Node2D" parent="Pivot/Body_fill"]
 show_behind_parent = true
 light_mask = 2
@@ -1871,11 +1920,75 @@ libraries = {
 &"": SubResource("AnimationLibrary_k146a")
 }
 
-[node name="Camera2D" type="Camera2D" parent="."]
-offset = Vector2(10, -50)
-enabled = false
-zoom = Vector2(2, 2)
-
 [node name="Camera2D2" type="Camera2D" parent="."]
 
+[node name="Label" type="Label" parent="."]
+z_index = 1
+offset_left = 101.0
+offset_top = -39.0
+offset_right = 141.0
+offset_bottom = -16.0
+text = "Right click on block: cut hole"
+label_settings = SubResource("LabelSettings_4sn87")
+
+[node name="Label2" type="Label" parent="."]
+z_index = 1
+offset_left = -240.0
+offset_top = -35.0
+offset_right = -63.0
+offset_bottom = -12.0
+text = "Left click: place block"
+label_settings = SubResource("LabelSettings_4sn87")
+
+[node name="Label3" type="Label" parent="."]
+z_index = 1
+offset_left = -69.0
+offset_top = -148.0
+offset_right = 120.0
+offset_bottom = -125.0
+text = "Mousewheel: pick shape"
+label_settings = SubResource("LabelSettings_4sn87")
+
+[node name="ShapeHintRectangle" type="Node2D" parent="." node_paths=PackedStringArray("line")]
+z_index = 1
+position = Vector2(-8, 104)
+script = ExtResource("18_xsi10")
+line = NodePath("Stroke")
+curve = SubResource("Curve2D_4sn87")
+arc_list = SubResource("Resource_jqihn")
+shape_type = 1
+size = Vector2(230.389, 144.705)
+rx = 5.0
+ry = 5.0
+metadata/_select_hint_ = true
+
+[node name="Stroke" type="Line2D" parent="ShapeHintRectangle"]
+points = PackedVector2Array(110.194, -72.3523, 110.706, -72.3265, 111.202, -72.2507, 111.681, -72.1275, 112.141, -71.9594, 112.578, -71.7488, 112.99, -71.4984, 113.375, -71.2105, 113.73, -70.8878, 114.053, -70.5328, 114.34, -70.1479, 114.591, -69.7356, 114.801, -69.2985, 114.969, -68.8392, 115.093, -68.36, 115.168, -67.8635, 115.194, -67.3523, 115.194, 67.3523, 115.168, 67.8635, 115.093, 68.36, 114.969, 68.8391, 114.801, 69.2985, 114.591, 69.7356, 114.34, 70.1479, 114.053, 70.5328, 113.73, 70.8878, 113.375, 71.2105, 112.99, 71.4984, 112.578, 71.7488, 112.141, 71.9594, 111.681, 72.1275, 111.202, 72.2507, 110.706, 72.3265, 110.194, 72.3523, -110.194, 72.3523, -110.706, 72.3265, -111.202, 72.2507, -111.681, 72.1275, -112.141, 71.9594, -112.578, 71.7488, -112.99, 71.4984, -113.375, 71.2105, -113.73, 70.8878, -114.053, 70.5328, -114.34, 70.1479, -114.591, 69.7356, -114.801, 69.2985, -114.969, 68.8392, -115.093, 68.36, -115.168, 67.8635, -115.194, 67.3523, -115.194, -67.3523, -115.168, -67.8635, -115.093, -68.36, -114.969, -68.8391, -114.801, -69.2985, -114.591, -69.7356, -114.34, -70.1479, -114.053, -70.5328, -113.73, -70.8878, -113.375, -71.2105, -112.99, -71.4984, -112.578, -71.7488, -112.141, -71.9594, -111.681, -72.1275, -111.202, -72.2507, -110.706, -72.3265, -110.194, -72.3523)
+closed = true
+width = 2.0
+default_color = Color(0.382813, 1, 0, 1)
+sharp_limit = 90.0
+metadata/_edit_lock_ = true
+
+[node name="ShapeHintEllipse" type="Node2D" parent="." node_paths=PackedStringArray("line")]
+z_index = 1
+position = Vector2(-8, 104)
+script = ExtResource("18_xsi10")
+line = NodePath("Stroke")
+curve = SubResource("Curve2D_syjnd")
+arc_list = SubResource("Resource_1ynft")
+shape_type = 2
+size = Vector2(227.755, 96.5415)
+rx = 113.877
+ry = 48.2708
+
+[node name="Stroke" type="Line2D" parent="ShapeHintEllipse"]
+points = PackedVector2Array(113.877, 0, 113.729, 2.48407, 113.289, 4.93553, 112.565, 7.35133, 111.564, 9.72845, 110.292, 12.0639, 108.758, 14.3545, 106.968, 16.5974, 104.929, 18.7895, 100.133, 23.009, 94.4294, 26.989, 87.8739, 30.705, 80.5241, 34.1329, 63.6707, 40.0271, 44.327, 44.4775, 22.9508, 47.2901, 0, 48.2708, -22.9508, 47.2901, -44.327, 44.4775, -63.6707, 40.0271, -80.5241, 34.1329, -87.8739, 30.705, -94.4294, 26.989, -100.133, 23.009, -104.929, 18.7895, -106.968, 16.5974, -108.758, 14.3545, -110.292, 12.0639, -111.564, 9.72845, -112.565, 7.35133, -113.289, 4.93553, -113.729, 2.48407, -113.877, 0, -113.729, -2.48407, -113.289, -4.93553, -112.565, -7.35133, -111.564, -9.72845, -110.292, -12.0639, -108.758, -14.3545, -106.968, -16.5974, -104.929, -18.7895, -100.133, -23.009, -94.4294, -26.989, -87.8739, -30.705, -80.5241, -34.1329, -63.6707, -40.0271, -44.327, -44.4775, -22.9508, -47.2901, 0, -48.2708, 22.9508, -47.2901, 44.327, -44.4775, 63.6707, -40.0271, 80.5241, -34.1329, 87.8739, -30.705, 94.4294, -26.989, 100.133, -23.009, 104.929, -18.7895, 106.968, -16.5974, 108.758, -14.3545, 110.292, -12.0639, 111.564, -9.72845, 112.565, -7.35133, 113.289, -4.93553, 113.729, -2.48407)
+closed = true
+width = 2.0
+default_color = Color(0.382813, 1, 0, 1)
+sharp_limit = 90.0
+metadata/_edit_lock_ = true
+
+[connection signal="body_entered" from="Pivot/Body_fill/Head_fill/Fill/WallDetector" to="." method="_on_wall_detector_body_entered"]
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
