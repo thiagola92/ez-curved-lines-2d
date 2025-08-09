@@ -398,9 +398,11 @@ The curve settings inspector form provides the following options
 
 These properties are used for clipping this shape and cutting out of this shape.
 
-- The `clip_paths` property: an array of assigned `ScalableVectorShape2D`-nodes, which describe the shape to cut out of this shape
+- The `clip_paths` property: an array of assigned `ScalableVectorShape2D`-nodes, which describe the shapes to cut out of this shape
 - When the `use_interect_when_clipping` property is checked on and this `ScalableVectorShape2D` is used in another's clip_paths array, the `Geometry2D.intersect_polygons(...)` operation is used in stead of the `Geometry2D.clip_polygons(...) operation`
+- When the `use_union_in_stead_of_clipping` property is check on and this `ScalableVectorShape2D` is used in another's clip_paths array, the `Geometry2D.merge_polygons(...)` operation is used in stead of the `Geometry2D.clip_polygons(...) operation`[^8]
 
+[^8]: see also: the [cloud example](./addons/curved_lines_2d/examples/cloud.tscn)
 
 ## The Shape type inspector form
 
