@@ -69,6 +69,7 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
 - [FAQ's](#faqs)
   - [Can I draw shapes programmatically?](#can-i-draw-shapes-programmatically)
   - [Should I draw shapes programmatically?](#should-i-draw-shapes-programmatically)
+  - [When should I draw shapes programmatically?](#when-should-i-draw-shapes-programmatically)
   - [Can I change shapes in the 2D editor while running the game?](#can-i-change-shapes-in-the-2d-editor-while-running-the-game)
 - [Attributions](#attributions)
   - [Lots of thanks go out to those who helped me out getting started:](#lots-of-thanks-go-out-to-those-who-helped-me-out-getting-started)
@@ -508,6 +509,17 @@ This depends on the complexity of what you want to achieve.
 In many  cases just drawing something in the editor and saving it as a scene to import elsewhere (or `instantiate()` via preloading) is a better option, adhering to the _Keep it Simple_ principle.
 
 But that's just my personal opinion.
+
+## When should I draw shapes programmatically?
+
+There are very many situations left where you might want to do exactly this, but that is up to your own creativity.
+
+One powerful feature I can think of is 'mining': use `ScalableVectorShape2D`-nodes to manage collision shapes and navigation areas.
+
+Using the [click ellipse](./examples/add_shapes_programmatically/click_ellipse.gd) example you can get a small hint of how this might work[^6]
+
+
+[^6]: I'm hoping to record an explainer for this if I can find the time/focus/energy
 
 ## Can I change shapes in the 2D editor while running the game?
 
