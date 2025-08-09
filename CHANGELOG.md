@@ -1,5 +1,18 @@
 # Changelog
 
+
+## 2.11.1 - 2025-09-08
+
+### Added
+- `Export as baked scene` button.
+- Flag `use_union_in_stead_of_clipping` to `ScalableVectorShape2D` which turns a cutout into
+- Convenience method `clipped_polygon_has_point(global_pos : Vector2)` to detect clicks __on__ a shape without the click being in a hole
+- A bubbly cloud example to illustrate `use_union_in_stead_of_clipping`
+
+### Changed
+- Separates out the calculation of outlines and fixes most issues with it (holes within holes not working yet)
+- Can now cut holes in ellipses using right click in the add shapes programatically example.
+
 ## 2.11.0 - 2025-06-08
 
 ### Added
