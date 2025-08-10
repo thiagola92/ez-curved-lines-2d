@@ -56,6 +56,12 @@ const SHAPE_NAME_MAP := {
 	ScalableVectorShape2D.ShapeType.ELLIPSE: "a circle",
 	ScalableVectorShape2D.ShapeType.PATH: "an empty shape"
 }
+const OPERATION_NAME_MAP := {
+	Geometry2D.OPERATION_DIFFERENCE: { "verb": "cut out", "noun": "cutout" },
+	Geometry2D.OPERATION_INTERSECTION: { "verb": "clip off", "noun": "clip" },
+	Geometry2D.OPERATION_UNION: { "verb": "merge with", "noun": "merged shape" }
+}
+
 var plugin : Line2DGeneratorInspectorPlugin
 var scalable_vector_shapes_2d_dock
 var select_mode_button : Button
@@ -64,6 +70,7 @@ var in_undo_redo_transaction := false
 var shape_preview : Curve2D = null
 var selection_candidate : Node = null
 var current_cutout_shape := ScalableVectorShape2D.ShapeType.RECT
+var current_clip_operation := Geometry2D.OPERATION_DIFFERENCE
 
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
@@ -157,7 +164,7 @@ func _on_shape_created(curve : Curve2D, scene_root : Node, node_name : String) -
 	_create_shape(new_shape, scene_root, node_name)
 
 
-func _create_shape(new_shape : Node2D, scene_root : Node, node_name : String, is_cutout_for : ScalableVectorShape2D = null) -> void:
+func _create_shape(new_shape : ScalableVectorShape2D, scene_root : Node, node_name : String, is_cutout_for : ScalableVectorShape2D = null) -> void:
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
 	var parent = current_selection if current_selection is Node else scene_root
 	new_shape.name = node_name
@@ -170,6 +177,14 @@ func _create_shape(new_shape : Node2D, scene_root : Node, node_name : String, is
 	undo_redo.add_undo_method(parent, 'remove_child', new_shape)
 	if is_instance_valid(is_cutout_for):
 		var new_clip_paths := is_cutout_for.clip_paths.duplicate()
+		match current_clip_operation:
+			Geometry2D.OPERATION_UNION:
+				new_shape.use_union_in_stead_of_clipping = true
+			Geometry2D.OPERATION_INTERSECTION:
+				new_shape.use_interect_when_clipping = true
+			Geometry2D.OPERATION_DIFFERENCE:
+				new_shape.use_interect_when_clipping = false
+				new_shape.use_union_in_stead_of_clipping  = false
 		new_clip_paths.append(new_shape)
 		undo_redo.add_do_property(is_cutout_for, 'clip_paths', new_clip_paths)
 		undo_redo.add_undo_property(is_cutout_for, 'clip_paths', is_cutout_for.clip_paths)
@@ -648,11 +663,24 @@ func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2
 	if _is_ctrl_or_cmd_pressed() and Input.is_key_pressed(KEY_SHIFT):
 		if svs.has_fine_point(mouse_pos):
 			_draw_crosshair(viewport_control, p)
-			_draw_hint(viewport_control, "- Click to cut out %s here (Ctrl+Shift held)\n" % SHAPE_NAME_MAP[current_cutout_shape] +
-					"- Use mousewheel to to change the shape of your cutout (Ctrl+Shift held)")
+			_draw_hint(viewport_control,
+					"- Click to %s %s here (Ctrl+Shift held)\n" %
+							[OPERATION_NAME_MAP[current_clip_operation]["verb"], SHAPE_NAME_MAP[current_cutout_shape]] +
+					"- Use mousewheel to to change the shape of your %s (Ctrl+Shift held)\n" %
+							OPERATION_NAME_MAP[current_clip_operation]["noun"] +
+					"- Use right click to change the clipping operation (Ctrl+Shift held)"
+			)
 		else:
-			_draw_hint(viewport_control, "- Cut out %s while hovering over selected shape (Ctrl+Shift held)\n" % SHAPE_NAME_MAP[current_cutout_shape] +
-					"- Use mousewheel to to change the shape of your cutout (Ctrl+Shift held)")
+			_draw_hint(viewport_control,
+					"- Hover over the selected shape to %s %s  (Ctrl+Shift held)\n" %
+							[
+								OPERATION_NAME_MAP[current_clip_operation]["verb"],
+								SHAPE_NAME_MAP[current_cutout_shape]
+							] +
+					"- Use mousewheel to to change the shape of your %s (Ctrl+Shift held)\n" %
+							OPERATION_NAME_MAP[current_clip_operation]["noun"] +
+					"- Use right click to change the clipping operation (Ctrl+Shift held)"
+			)
 	elif _is_ctrl_or_cmd_pressed() and not only_cutout_hints:
 		_draw_crosshair(viewport_control, p)
 		_draw_hint(viewport_control, "- Click to add point here (Ctrl held)")
@@ -664,7 +692,10 @@ func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2
 		if only_cutout_hints:
 			hint = "- Hold Shift to resize shape with mouswheel"
 		if svs.has_fine_point(mouse_pos):
-			hint += "\n- Hold Ctrl+Shift to cut out %s here here (or Cmd+Shift for mac)" % SHAPE_NAME_MAP[current_cutout_shape]
+			hint += "\n- Hold Ctrl+Shift to %s %s here (or Cmd+Shift for mac)\n" % [
+					OPERATION_NAME_MAP[current_clip_operation]["verb"],
+					SHAPE_NAME_MAP[current_cutout_shape]
+			]
 		_draw_hint(viewport_control, hint)
 
 
@@ -1308,6 +1339,12 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		return false
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
+		if _is_svs_valid(current_selection) and _is_ctrl_or_cmd_pressed() and Input.is_key_pressed(KEY_SHIFT):
+			if not event.is_pressed():
+				current_clip_operation += 1
+				current_clip_operation = 2 if current_clip_operation < 0 else current_clip_operation
+				current_clip_operation = 0 if current_clip_operation > 2 else current_clip_operation
+			return true
 		if _is_svs_valid(current_selection) and _handle_has_hover(current_selection):
 			if not Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 				if current_selection.has_meta(META_NAME_HOVER_POINT_IDX) and current_selection.shape_type == ScalableVectorShape2D.ShapeType.PATH:
@@ -1332,7 +1369,6 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 					_remove_arc(current_selection, cp_md.before_segment - 1)
 				else:
 					_create_arc(current_selection, cp_md.before_segment - 1)
-
 			return true
 
 	if (event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT) and
