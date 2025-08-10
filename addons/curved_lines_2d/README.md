@@ -35,7 +35,8 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
   - [Closing the loop and breaking the loop](#closing-the-loop-and-breaking-the-loop)
   - [Deleting points and control points](#deleting-points-and-control-points)
   - [Setting the global position of a point / curve handle manually](#setting-the-global-position-of-a-point--curve-handle-manually)
-  - [Create a cutout shape (a hole)](#create-a-cutout-shape-a-hole)
+  - [Create a cutout/clip/merge shape (a hole, a clipped frame, ...)](#create-a-cutoutclipmerge-shape-a-hole-a-clipped-frame-)
+    - [Cutting out an empty shape](#cutting-out-an-empty-shape)
   - [Converting a line segment into an arc-segment](#converting-a-line-segment-into-an-arc-segment)
   - [Editing arc properties](#editing-arc-properties)
   - [Setting the pivot of your shape](#setting-the-pivot-of-your-shape)
@@ -71,6 +72,7 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
   - [Can I draw shapes programmatically?](#can-i-draw-shapes-programmatically)
   - [Should I draw shapes programmatically?](#should-i-draw-shapes-programmatically)
   - [When should I draw shapes programmatically?](#when-should-i-draw-shapes-programmatically)
+- [Experimental API doc](#experimental-api-doc)
   - [Can I change shapes in the 2D editor while running the game?](#can-i-change-shapes-in-the-2d-editor-while-running-the-game)
 - [Attributions](#attributions)
   - [Lots of thanks go out to those who helped me out getting started:](#lots-of-thanks-go-out-to-those-who-helped-me-out-getting-started)
@@ -194,13 +196,18 @@ Using `Alt+Click` you can now open a form to set the global position of a point 
 
 ![global position popup dialog](./screenshots/global_position_popup.png)
 
-## Create a cutout shape (a hole)
+## Create a cutout/clip/merge shape (a hole, a clipped frame, ...)
 
-Using `Ctrl+Shift+Click`[^5] __on__ your selected shape will create _and_ select a new `ScalableVectorShape2D` which will act as a cutout (a hole / scissors if you will):
+While holding `Ctrl+Shift`[^5] on a selected shape you can start adding cutouts to your selected shape:
+- Use `mousewheel` to change shapes (rectangle, ellipse, or empty path)
+- Use `right click` to change operation (cut out, clip, or merge)
+- Use `left click` __on__ your selected shape to create _and_ select the new `ScalableVectorShape2D` which acta as a cutout, a frame clipping, or merged shape:
 
 ![add a hole](./screenshots/add_a_hole.png)
 
-The created cutout will have only _one_ point, so to see the effect you'd need to add more points to using regular `Ctrl+Click`[^5]:
+### Cutting out an empty shape
+
+When cutting out an empty shapem, the created cutout will have only _one_ point, so to see the effect you'd need to add more points to using regular `Ctrl+Click`[^5]:
 
 ![a hole was added](./screenshots/hole_added.png)
 
@@ -404,7 +411,6 @@ These properties are used for clipping this shape and cutting out of this shape.
 
 [^8]: see also: the [cloud example](./examples/cloud.tscn)
 
-
 ## The Shape type inspector form
 
 This form allows manipulation of the properties of primitive shape types (rectangle, ellipsis):
@@ -527,12 +533,20 @@ But that's just my personal opinion.
 
 There are very many situations left where you might want to do exactly this, but that is up to your own creativity.
 
-One powerful feature I can think of is 'mining': use `ScalableVectorShape2D`-nodes to manage collision shapes and navigation areas.
+One powerful feature I can think of is 'mining': use `ScalableVectorShape2D`-nodes to make cuts in collision shapes and navigation areas.
 
-Using the [click ellipse](./examples/add_shapes_programmatically/click_ellipse.gd) example you can get a small hint of how this might work[^6]
+Playing [Rat's Return](./examples/rat/rats_return.tscn) will give a first impression how this might work
 
+`ScalableVectorShape2D` already ships quite some convenience methods like:
+- `clipped_polygon_has_point(global_pos : Vector2) -> bool` and
+- `add_clip_path(other_shape : ScalableVectorShape2D)`
 
-[^6]: I'm hoping to record an explainer for this if I can find the time/focus/energy
+But I have not come around to documenting yet.
+
+# Experimental API doc
+
+Let's see if this godot doctool output adds some value:
+[the rst docs](./docs/class_scalablevectorshape2d.rst)
 
 ## Can I change shapes in the 2D editor while running the game?
 
