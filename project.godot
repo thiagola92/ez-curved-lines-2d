@@ -34,6 +34,12 @@ run/main_scene="uid://buueak60wkgnf"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="uid://b5yxa1e62b0hb"
 
+[display]
+
+window/size/viewport_width=1080
+window/size/viewport_height=1080
+window/size/borderless=true
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/curved_lines_2d/plugin.cfg", "res://addons/godot-plugin-refresher/plugin.cfg")

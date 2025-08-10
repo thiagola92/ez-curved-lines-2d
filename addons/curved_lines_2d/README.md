@@ -534,7 +534,10 @@ There are very many situations left where you might want to do exactly this, but
 
 One powerful feature I can think of is 'mining': use `ScalableVectorShape2D`-nodes to make cuts in collision shapes and navigation areas.
 
-Playing [Rat's Return](./examples/rat/rats_return.tscn) will give a first impression how this might work
+Playing [Rat's Return](./examples/rat/rats_return.tscn) will give a first impression how this might work:
+
+![Rat's return](./screenshots/rats-return.png)
+
 
 `ScalableVectorShape2D` already ships quite some convenience methods like:
 - `clipped_polygon_has_point(global_pos : Vector2) -> bool` and
