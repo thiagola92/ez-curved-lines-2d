@@ -51,6 +51,11 @@ const PAINT_ORDER_MAP := {
 	PaintOrder.STROKE_MARKERS_FILL: ['_add_stroke_to_created_shape', '_add_collision_to_created_shape', '_add_fill_to_created_shape'],
 	PaintOrder.MARKERS_STROKE_FILL: ['_add_collision_to_created_shape', '_add_stroke_to_created_shape', '_add_fill_to_created_shape']
 }
+const SHAPE_NAME_MAP := {
+	ScalableVectorShape2D.ShapeType.RECT: "a rectangle",
+	ScalableVectorShape2D.ShapeType.ELLIPSE: "a circle",
+	ScalableVectorShape2D.ShapeType.PATH: "an empty shape"
+}
 var plugin : Line2DGeneratorInspectorPlugin
 var scalable_vector_shapes_2d_dock
 var select_mode_button : Button
@@ -58,6 +63,7 @@ var undo_redo : EditorUndoRedoManager
 var in_undo_redo_transaction := false
 var shape_preview : Curve2D = null
 var selection_candidate : Node = null
+var current_cutout_shape := ScalableVectorShape2D.ShapeType.RECT
 
 var undo_redo_transaction : Dictionary = {
 	UndoRedoEntry.NAME: "",
@@ -69,6 +75,10 @@ var undo_redo_transaction : Dictionary = {
 
 var set_global_position_popup_panel : PopupPanel
 var arc_settings_popup_panel : PopupPanel
+
+var _vp_horizontal_scrollbar_locked_value := 0.0
+var _locking_vp_horizontal_scrollbar := false
+
 
 func _enter_tree():
 	scalable_vector_shapes_2d_dock = preload("res://addons/curved_lines_2d/scalable_vector_shapes_2d_dock.tscn").instantiate()
@@ -632,16 +642,18 @@ func _draw_crosshair(viewport_control : Control, p : Vector2, orbit := 2.0, oute
 	viewport_control.draw_line(p - line_len * Vector2.LEFT, p - orbit * Vector2.LEFT, color, width)
 
 
-func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
+func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2D, only_cutout_hints : bool) -> void:
 	var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
 	var p := _vp_transform(mouse_pos)
 	if _is_ctrl_or_cmd_pressed() and Input.is_key_pressed(KEY_SHIFT):
 		if svs.has_fine_point(mouse_pos):
 			_draw_crosshair(viewport_control, p)
-			_draw_hint(viewport_control, "- Click to start a cutout shape here (Ctrl+Shift held)")
+			_draw_hint(viewport_control, "- Click to cut out %s here (Ctrl+Shift held)\n" % SHAPE_NAME_MAP[current_cutout_shape] +
+					"- Use mousewheel to to change the shape of your cutout (Ctrl+Shift held)")
 		else:
-			_draw_hint(viewport_control, "- Start a cutout shape while hovering over selected shape (Ctrl+Shift held)")
-	elif _is_ctrl_or_cmd_pressed():
+			_draw_hint(viewport_control, "- Cut out %s while hovering over selected shape (Ctrl+Shift held)\n" % SHAPE_NAME_MAP[current_cutout_shape] +
+					"- Use mousewheel to to change the shape of your cutout (Ctrl+Shift held)")
+	elif _is_ctrl_or_cmd_pressed() and not only_cutout_hints:
 		_draw_crosshair(viewport_control, p)
 		_draw_hint(viewport_control, "- Click to add point here (Ctrl held)")
 	elif Input.is_key_pressed(KEY_SHIFT):
@@ -649,14 +661,16 @@ func _draw_add_point_hint(viewport_control : Control, svs : ScalableVectorShape2
 	elif not svs.has_meta(META_NAME_HOVER_CLOSEST_POINT_ON_GRADIENT_LINE):
 		var hint := "- Hold Ctrl to add points to selected shape (or Cmd for mac)
 				- Hold Shift to resize shape with mouswheel"
+		if only_cutout_hints:
+			hint = "- Hold Shift to resize shape with mouswheel"
 		if svs.has_fine_point(mouse_pos):
-			hint += "\n- Hold Ctrl+Shift to start a cutout shape here (or Cmd+Shift for mac)"
+			hint += "\n- Hold Ctrl+Shift to cut out %s here here (or Cmd+Shift for mac)" % SHAPE_NAME_MAP[current_cutout_shape]
 		_draw_hint(viewport_control, hint)
 
 
 func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVectorShape2D) -> void:
 	if _is_ctrl_or_cmd_pressed() or Input.is_key_pressed(KEY_SHIFT):
-		_draw_add_point_hint(viewport_control, svs)
+		_draw_add_point_hint(viewport_control, svs, false)
 		return
 
 	if svs.has_meta(META_NAME_HOVER_CLOSEST_POINT):
@@ -683,7 +697,7 @@ func _draw_closest_point_on_curve(viewport_control : Control, svs : ScalableVect
 						hint += "\n- Drag to change curve"
 						hint += "\n- Right click to convert line segment to arc"
 				else:
-					_draw_add_point_hint(viewport_control, svs)
+					_draw_add_point_hint(viewport_control, svs, false)
 		if not hint.is_empty():
 			_draw_hint(viewport_control, hint)
 
@@ -701,11 +715,15 @@ func _forward_canvas_draw_over_viewport(viewport_control: Control) -> void:
 					VIEWPORT_ORANGE, 2.0)
 			_draw_curve(viewport_control, result)
 			_draw_handles(viewport_control, result)
-			if not _handle_has_hover(result) and result.shape_type == ScalableVectorShape2D.ShapeType.PATH:
-				if result.has_meta(META_NAME_HOVER_CLOSEST_POINT):
-					_draw_closest_point_on_curve(viewport_control, result)
+			if not _handle_has_hover(result):
+				if result.shape_type == ScalableVectorShape2D.ShapeType.PATH:
+					if result.has_meta(META_NAME_HOVER_CLOSEST_POINT):
+						_draw_closest_point_on_curve(viewport_control, result)
+					else:
+						_draw_add_point_hint(viewport_control, result, false)
 				else:
-					_draw_add_point_hint(viewport_control, result)
+						_draw_add_point_hint(viewport_control, result, true)
+
 
 		elif result.has_meta(META_NAME_SELECT_HINT):
 			viewport_control.draw_polyline(result.get_bounding_box().map(_vp_transform),
@@ -1126,8 +1144,9 @@ func _add_point_on_position(svs : ScalableVectorShape2D, pos : Vector2) -> void:
 func _start_cutout_shape(svs : ScalableVectorShape2D, pos : Vector2) -> void:
 	var new_shape = ScalableVectorShape2D.new()
 	new_shape.curve = Curve2D.new()
-	new_shape.curve.add_point(Vector2.ZERO)
 	new_shape.position = svs.to_local(EditorInterface.get_editor_viewport_2d().get_mouse_position())
+	new_shape.shape_type = current_cutout_shape
+	new_shape.curve.add_point(Vector2.ZERO)
 
 	_create_shape(new_shape, EditorInterface.get_edited_scene_root(), "CutoutOf%s" % svs.name, svs)
 
@@ -1193,6 +1212,13 @@ func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 			_add_point_to_curve(svs, svs.curve.get_point_position(0))
 
 
+func _get_vp_h_scroll_bar() -> HScrollBar:
+	var editor_vp := EditorInterface.get_editor_viewport_2d().find_parent("*CanvasItemEditor*")
+	if editor_vp == null:
+		return null
+	return editor_vp.find_child("*HScrollBar*", true, false)
+
+
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if (in_undo_redo_transaction and event is InputEventMouseButton
 			and event.button_index == MOUSE_BUTTON_LEFT
@@ -1209,6 +1235,17 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return false
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+
+	if _is_svs_valid(current_selection) and _is_ctrl_or_cmd_pressed() and Input.is_key_pressed(KEY_SHIFT):
+		var vp_horiz_scrollbar := _get_vp_h_scroll_bar()
+		if vp_horiz_scrollbar is HScrollBar:
+			if not _locking_vp_horizontal_scrollbar:
+				_vp_horizontal_scrollbar_locked_value = vp_horiz_scrollbar.value
+				_locking_vp_horizontal_scrollbar = true
+			vp_horiz_scrollbar.value = _vp_horizontal_scrollbar_locked_value
+	else:
+		_locking_vp_horizontal_scrollbar = false
+
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
@@ -1301,11 +1338,18 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if (event is InputEventMouseButton and Input.is_key_pressed(KEY_SHIFT) and
 			event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]):
 		if _is_svs_valid(current_selection):
+			if _is_ctrl_or_cmd_pressed():
+				if not event.is_pressed():
+					current_cutout_shape += 1 if event.button_index == MOUSE_BUTTON_WHEEL_DOWN else -1
+					current_cutout_shape = 2 if current_cutout_shape < 0 else current_cutout_shape
+					current_cutout_shape = 0 if current_cutout_shape > 2 else current_cutout_shape
+				return true
 			if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 				_resize_shape(current_selection, 0.99)
 			else:
 				_resize_shape(current_selection, 1.01)
 			return true
+
 
 	if event is InputEventMouseMotion:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
