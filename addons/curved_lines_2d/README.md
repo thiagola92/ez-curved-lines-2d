@@ -72,7 +72,6 @@ In this 10 minute video I explain how to use all the features of Scalable Vector
   - [Can I draw shapes programmatically?](#can-i-draw-shapes-programmatically)
   - [Should I draw shapes programmatically?](#should-i-draw-shapes-programmatically)
   - [When should I draw shapes programmatically?](#when-should-i-draw-shapes-programmatically)
-- [Experimental API doc](#experimental-api-doc)
   - [Can I change shapes in the 2D editor while running the game?](#can-i-change-shapes-in-the-2d-editor-while-running-the-game)
 - [Attributions](#attributions)
   - [Lots of thanks go out to those who helped me out getting started:](#lots-of-thanks-go-out-to-those-who-helped-me-out-getting-started)
@@ -542,11 +541,6 @@ Playing [Rat's Return](./examples/rat/rats_return.tscn) will give a first impres
 - `add_clip_path(other_shape : ScalableVectorShape2D)`
 
 But I have not come around to documenting yet.
-
-# Experimental API doc
-
-Let's see if this godot doctool output adds some value:
-[the rst docs](./docs/class_scalablevectorshape2d.rst)
 
 ## Can I change shapes in the 2D editor while running the game?
 
