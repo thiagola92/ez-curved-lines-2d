@@ -76,6 +76,10 @@ var undo_redo_transaction : Dictionary = {
 var set_global_position_popup_panel : PopupPanel
 var arc_settings_popup_panel : PopupPanel
 
+var _vp_horizontal_scrollbar_locked_value := 0.0
+var _locking_vp_horizontal_scrollbar := false
+
+
 func _enter_tree():
 	scalable_vector_shapes_2d_dock = preload("res://addons/curved_lines_2d/scalable_vector_shapes_2d_dock.tscn").instantiate()
 	plugin = preload("res://addons/curved_lines_2d/line_2d_generator_inspector_plugin.gd").new()
@@ -1208,6 +1212,13 @@ func _toggle_loop_if_applies(svs : ScalableVectorShape2D, idx : int) -> void:
 			_add_point_to_curve(svs, svs.curve.get_point_position(0))
 
 
+func _get_vp_h_scroll_bar() -> HScrollBar:
+	var editor_vp := EditorInterface.get_editor_viewport_2d().find_parent("*CanvasItemEditor*")
+	if editor_vp == null:
+		return null
+	return editor_vp.find_child("*HScrollBar*", true, false)
+
+
 func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if (in_undo_redo_transaction and event is InputEventMouseButton
 			and event.button_index == MOUSE_BUTTON_LEFT
@@ -1224,6 +1235,17 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 	if not is_instance_valid(EditorInterface.get_edited_scene_root()):
 		return false
 	var current_selection := EditorInterface.get_selection().get_selected_nodes().pop_back()
+
+	if _is_svs_valid(current_selection) and _is_ctrl_or_cmd_pressed() and Input.is_key_pressed(KEY_SHIFT):
+		var vp_horiz_scrollbar := _get_vp_h_scroll_bar()
+		if vp_horiz_scrollbar is HScrollBar:
+			if not _locking_vp_horizontal_scrollbar:
+				_vp_horizontal_scrollbar_locked_value = vp_horiz_scrollbar.value
+				_locking_vp_horizontal_scrollbar = true
+			vp_horiz_scrollbar.value = _vp_horizontal_scrollbar_locked_value
+	else:
+		_locking_vp_horizontal_scrollbar = false
+
 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos := EditorInterface.get_editor_viewport_2d().get_mouse_position()
